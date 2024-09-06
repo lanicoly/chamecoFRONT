@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+*{
+    min-width:0;
+}
+
+body{
+    font-family: "Montserrat";
+    background-image: url('./assets/image 1 (1).svg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0px;
+}
+
+
+div .container{
+    box-shadow:10px 10px 5px rgba(0, 0, 0, 0.5);
+}
+
+h1{
+    text-shadow: 0px 2px 0px rgba(2, 10, 76, 0.25);
+}
+
