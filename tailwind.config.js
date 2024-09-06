@@ -8,6 +8,9 @@ export default {
     extend: {
       fontFamily: {
         sans: 'Montserrat',
+      },
+      backgroundImage: {
+        'tijolos': "url('/public/fundo_tijolos.svg')",
       }
     },
   },
