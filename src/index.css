@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body{
+    font-family: "Montserrat";
+    background-image: url('src/assets/image1.svg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0px;
+}
