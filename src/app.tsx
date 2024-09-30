@@ -1,10 +1,4 @@
-import {
-  ChevronLeft,
-  CirclePlus,
-  LayoutDashboard,
-  X,
-  Plus,
-} from "lucide-react";
+import { ChevronLeft, CirclePlus, LayoutDashboard, X, Plus } from "lucide-react";
 import { useState } from "react";
 
 export function App() {
@@ -26,16 +20,17 @@ export function App() {
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0">
       {/* Adicionando container */}
-      <div className="container w-3/5 p-4 h-5/6 rounded-[25px] bg-white min-w-[600px]">
+      <div className="container w-full tablet:w-3/5 p-4 rounded-[25px] bg-white min-w-[300px] tablet:min-w-[600px] h-auto">
         {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
-        <div className="flex justify-between">
-          <div className="flex items-center gap-2 mb-[15px] text-custom-blue font-medium">
+        <div className="flex flex-col tablet:flex-row justify-between tablet:items-start">
+          <div className="flex items-center gap-2 mb-[15px] text-[#02006C] font-medium tablet:mb-0">
+            {/* Adicionando botão de Menu */}
             <button>
-              <ChevronLeft className="w-[35px] h-[35px]" />
+              <ChevronLeft className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
             </button>
             <span>MENU</span>
           </div>
-          <h1 className="text-2xl font-semibold mx-auto p-3 w-48 text-custom-blue shadow-gray-800 ml-56">
+          <h1 className="text-2xl font-semibold mx-auto p-3 w-36 text-[#02006C] shadow-gray-800 tablet:ml-56">
             BLOCOS
           </h1>
         </div>
@@ -45,10 +40,11 @@ export function App() {
           <div className="justify-end w-full h-[60px] flex p-5">
             <button
               onClick={openBlocoModal}
-              className="flex w-[190px] h-[33px] text-[12px] justify-center items-center gap-[5px] mt-[-20px] font-medium border-2 border-custom-plus bg-custom-green text-custom-white hover:bg-[#56ab71]"
+              className="flex w-[190px] h-[33px] text-[12px] justify-center items-center gap-[5px] mt-[-20px] font-medium border-2 border-[#B8BCE0] bg-[#18C64F] text-[#FFF] hover:bg-[#56ab71]"
             >
               <CirclePlus className="w-4" /> ADICIONAR BLOCO
             </button>
+
             {/* Adicionando pop up de adicionar blocos */}
             {isBlocoModalOpen && (
               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50">
@@ -66,6 +62,7 @@ export function App() {
                     </button>
                   </div>
 
+                  {/* Adicionando o primeiro input de adicionar blocos */}
                   <div className="justify-center items-center ml-[40px]">
                     <p className="text-[#192160] text-base font-medium mb-1">
                       Digite o nome do bloco
@@ -113,6 +110,7 @@ export function App() {
                     </div>
                   </div>
 
+                  {/* Adicionando o segundo input de adicionar blocos */}
                   <div className="justify-center items-center ml-[40px]">
                     <p className="text-[#192160] text-base font-medium mb-1">
                       Descreva os detalhes sobre o bloco
@@ -124,13 +122,13 @@ export function App() {
                       onChange={(e) => setDescricao(e.target.value)}
                       required
                     />
-
                   </div>
 
+                  {/* Adicionando botão de criar novo bloco */}
                   <div className="justify-center items-center mt-[10px] ml-[100px]">
                     <button
                       type="submit"
-                      className="px-2 py-1 border-[3px] rounded-xl w-[190px] h-[40px] font-semibold  text-[11px] flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                      className="px-2 py-1 border-[3px] rounded-xl w-[190px] h-[40px] font-semibold  text-[11px] flex gap-[4px] justify-center items-center border-[#B8BCE0] bg-[#16C34D] text-[#FFF]"
                     >
                       <Plus className="h-10px" /> CRIAR NOVO BLOCO
                     </button>
@@ -141,63 +139,60 @@ export function App() {
           </div>
         </div>
 
-        {/* Adicionando blocos de A-E */}
-        <div className="flex flex-col items-center min-w-[50px]">
-          <div className="flex space-x-2 gap-[66px] h-[140px]">
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-custom-bloco rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+        {/* Adicionando div que irá conter os blocos*/}
+        <div className="flex flex-wrap justify-center items-center w-full overflow-y-auto ">
+          {/* Adicionando blocos de A-J */}
+          <div className="flex flex-wrap justify-center gap-[75px] h-[330px] gap-y-[10px] ">
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco A
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-custom-bloco rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco B
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-custom-bloco rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco C
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-custom-bloco rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco D
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-custom-bloco rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco E
             </button>
-          </div>
-
-          {/* Adicionando blocos de F-J*/}
-          <div className="flex space-x-2  gap-[66px] h-[190px]">
-            <button className="text-custom-bloco text-[12px] font-semibold ">
-              <LayoutDashboard className="w-[70px] h-[70px] text-custom-bloco p-[16px] rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px] text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco F
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-custom-bloco p-[16px] rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco G
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-custom-bloco p-[16px] rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco H
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-custom-bloco p-[16px] rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco I
             </button>
-            <button className="text-custom-bloco text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-custom-bloco p-[16px] rounded-[15px] bg-custom-gray mb-2 hover:bg-[#d5d8f1]" />
+            <button className="text-[#646999] text-[12px] font-semibold">
+              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
               Bloco J
             </button>
           </div>
         </div>
 
         {/* Adicionando logo CHAMECO */}
-        <div className="flex justify-start p-[10px] ">
+        <div className="flex justify-start p-[10px] mb-[20px] ">
           <img width={130} src="\public\logo_lateral.png" alt="logo chameco" />
         </div>
 
         {/* Adicionando passador de página */}
-        <div className="mt-[-90px] flex justify-end items-center p-[5px] ">
+        <div className="mt-[-90px] flex justify-end items-center p-[10px]">
           <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
             <svg
               xmlns="http://www.w3.org/2000/svg"
