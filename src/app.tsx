@@ -15,14 +15,14 @@ export function App() {
         </div>
         {/*logo-spacer*/}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-          <img src="src/assets/logo_lateral.png" alt="Logo CHAMECO" className="w-[280px] h-[110px] grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 desktop:grid-cols-4" />
+          <img src="src/assets/logo_lateral.png" alt="Logo CHAMECO" className="w-16 h-auto tablet:w-24 laptop:w-32 desktop:w-40" />
         </div>
       </div>
 
-      {/*Main-container */}
+      {/*main-container */}
       <div className="flex flex-1 items-center justify-center w-full max-w-[1200px] box-border">
         {/*menu*/}
-        <div className="bg-white rounded-[15px] p-[40px] grid grid-cols-1 md:grid-cols-2 gap-[30px] my-[50px] shadow-[rgba(0,0,0,0.3)_-6px_6px_15px]">
+        <div className="bg-white rounded-[15px] p-[40px] grid grid-cols-1 md:grid-cols-2 gap-[30px] my-[36px] shadow-[rgba(0,0,0,0.3)_-6px_6px_15px]">
           {/*Menu-item*/}
           <div className="menu-item bg-white border-2 border-[#646999] rounded-[10px] flex justify-center items-center w-full md:w-[270px] h-[150px] cursor-pointer transition-all duration-200 hover:bg-[#e0e0e0] hover:transform hover:-translate-y-1">
             {/*Content*/}
