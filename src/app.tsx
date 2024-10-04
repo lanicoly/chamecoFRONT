@@ -1,7 +1,68 @@
-import { ChevronLeft, CirclePlus, LayoutDashboard, X, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  CirclePlus,
+  LayoutDashboard,
+  X,
+  Plus,
+} from "lucide-react";
 import { useState } from "react";
 
+export interface Blocos {
+  id: number;
+  nome: string;
+  descricao: string;
+}
+
 export function App() {
+  // Adicionando funcionalidade ao button adicionar bloco
+  const [blocos, setBlocos] = useState([
+    {nome: "Bloco A", id:1},
+    {nome: "Bloco B", id:2},
+    {nome: "Bloco C", id:3},
+    {nome: "Bloco D", id:4},
+    {nome: "Bloco E", id:5},
+    {nome: "Bloco F", id:6},
+    {nome: "Bloco G", id:7},
+    {nome: "Bloco H", id:8},
+    {nome: "Bloco I", id:9},
+    {nome: "Bloco J", id:10},
+  ]);
+  const [nextId, setNextId] = useState(1);
+
+  function addBlocos(e: React.FormEvent) {
+    e.preventDefault();
+    const novoBloco: Blocos = {
+      id: nextId,
+      nome,
+      descricao,
+    };
+    setBlocos([...blocos, novoBloco]);
+    setNextId(nextId + 1);
+    setNome("");
+    setDescricao("");
+    closeBlocoModal();
+  }
+
+  // Adicionando funcionalidade ao botão de paginação
+  const itensPorPagina = 10;
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const totalPaginas = Math.max(1, Math.ceil(blocos.length/ itensPorPagina));
+  const indexInicio = (paginaAtual - 1) * itensPorPagina;
+  const indexFim = indexInicio + itensPorPagina;
+  const itensAtuais = blocos.slice(indexInicio, indexFim);
+
+  function avancarPagina() {
+    if (paginaAtual < totalPaginas) {
+      setPaginaAtual(paginaAtual + 1);
+    }
+  }
+
+  function voltarPagina() {
+    if (paginaAtual > 1) {
+      setPaginaAtual(paginaAtual - 1);
+    }
+  }
+
   // Adicionando função de abrir e fechar pop up
   const [isBlocoModalOpen, setIsBlocoModalOpen] = useState(false);
   const [nome, setNome] = useState("");
@@ -48,7 +109,10 @@ export function App() {
             {/* Adicionando pop up de adicionar blocos */}
             {isBlocoModalOpen && (
               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50">
-                <form className="container flex flex-col gap-2 w-[400px] p-[10px] h-[300px] rounded-[15px] bg-white ">
+                <form
+                  onSubmit={addBlocos}
+                  className="container flex flex-col gap-2 w-[400px] p-[10px] h-[300px] rounded-[15px] bg-white "
+                >
                   <div className="flex justify-between mx-auto">
                     <p className="text-[#192160] text-center text-[20px] font-semibold p-[10px] ml-[10px] ">
                       ADICIONAR BLOCO
@@ -142,49 +206,15 @@ export function App() {
         {/* Adicionando div que irá conter os blocos*/}
         <div className="flex flex-wrap justify-center items-center w-full overflow-y-auto ">
           {/* Adicionando blocos de A-J */}
-          <div className="flex flex-wrap justify-center gap-[75px] h-[330px] gap-y-[10px] ">
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco A
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco B
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco C
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco D
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] p-[16px]  text-[#646999] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco E
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px] text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco F
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco G
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco H
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco I
-            </button>
-            <button className="text-[#646999] text-[12px] font-semibold">
-              <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-              Bloco J
-            </button>
-          </div>
+          <div className="flex flex-wrap justify-center gap-[75px] h-[330px] gap-y-[10px]">
+              {itensAtuais.map((blocos) => (
+                <button className="text-[#646999] text-[12px] font-semibold" key={blocos.id}>
+                 <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" /> {blocos.nome}
+                  </button>
+              ))}
         </div>
+        </div>
+  
 
         {/* Adicionando logo CHAMECO */}
         <div className="flex justify-start p-[10px] mb-[20px] ">
@@ -193,7 +223,11 @@ export function App() {
 
         {/* Adicionando passador de página */}
         <div className="mt-[-90px] flex justify-end items-center p-[10px]">
-          <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
+          <button
+            onClick={voltarPagina}
+            disabled={paginaAtual === 1}
+            className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -211,14 +245,18 @@ export function App() {
 
           <div className="w-24 gap-1.5 px-2 py-1 flex items-center justify-center">
             <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
-              1
+              {paginaAtual}
             </div>
             <div className="text-base text-sky-800 font-semibold">
-              de <strong className="font-bold">1</strong>
+              de <strong className="font-bold"> {totalPaginas} </strong>
             </div>
           </div>
 
-          <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
+          <button
+            onClick={avancarPagina}
+            disabled={paginaAtual === totalPaginas}
+            className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
