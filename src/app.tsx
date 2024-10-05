@@ -127,18 +127,37 @@ function voltarPagina(){
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
 
-    {/* parte informativa tela salas */}
-    <div className="relative bg-white w-full max-w-[800px] rounded-3xl px-6 py-6 m-24 h-[90%]">
-
-      {/* cabeçalho tela salas */}
-       <div className="flex w-full gap-2">
+      {/* menu topo */}
+      <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
         <a href="#" className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#082f49" className="bi bi-chevron-left" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
           </svg>
           VOLTAR
         </a>
-        <h1 className="flex flex-1 justify-center text-sky-900 text-2xl font-semibold pr-[10%]">BLOCO X</h1>
+
+        {/* logo chameco lateral */}
+        <div className="sm:flex hidden justify-start bottom-4">
+          <img className="w-[150px]" src="\public\logo_lateral.png" alt="logo chameco" />
+        </div>
+        {/* fim logo chameco lateral */}
+
+        <div className="flex">
+          <span className="text-[#565D8F] font-medium text-base bg-[#B8C1FF] rounded-l-md p-2 h-max">Usuário</span>
+          <span className="text-white font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max">Sair</span>
+        </div>
+
+
+      </nav>
+      {/* menu topo */}
+
+    {/* parte informativa tela salas */}
+    <div className="relative bg-white w-full max-w-[800px] rounded-3xl px-6 py-6 m-24 h-auto">
+
+      {/* cabeçalho tela salas */}
+       <div className="flex w-full gap-2">
+
+        <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">BLOCO X</h1>
        </div>
         {/* fim cabeçalho tela salas */}
 
@@ -147,13 +166,13 @@ function voltarPagina(){
        <div className="flex flex-col px-8 py-4 w-auto justify-center gap-2">
 
           {/* adicionar sala + pesquisa */}
-          <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-3 flex-1 mobile:justify-between">
+          <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-3 flex-1 sm:justify-between">
 
 
 
 
             {/* input de pesquisa */}
-            <div className="h-fit items-center w-full mobile:w-auto">
+            <div className="h-fit items-center w-full sm:w-auto">
               <div className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
                 <input
                   type="text"
@@ -163,7 +182,7 @@ function voltarPagina(){
                     setIsSearching(e.target.value.trim().length > 0);
                   }}
                   placeholder="Pesquisar..."
-                  className="placeholder-sky-900 text-xs font-medium outline-none "
+                  className="placeholder-sky-900 text-sm font-medium outline-none "
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
@@ -172,7 +191,7 @@ function voltarPagina(){
 
             </div>
             {/* fim input de pesquisa */}
-            <button onClick={openSalaModal} className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full mobile:w-auto">
+            <button onClick={openSalaModal} className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full sm:w-auto">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" className="bi bi-plus-circle" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
               <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
@@ -182,7 +201,7 @@ function voltarPagina(){
 
             {/* Adicionando pop up de adicionar salas */}
             {isSalaModalOpen && (
-              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50">
+              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                 <form onSubmit={addSala} className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
                     <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
@@ -257,7 +276,7 @@ function voltarPagina(){
             </button>
             {/* Adicionando pop up de editar sala */}
             {isEditModalOpen && (
-              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50">
+              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                 <form onSubmit={editaSala} className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
                     <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
@@ -323,12 +342,12 @@ function voltarPagina(){
             {/* fim botões editar e excluir */}
 
             {/* tabela com todas as salas */}
-            <div>
+            <div >
             <table className="w-full border-separate border-spacing-y-2">
               <thead>
                 <tr>
-                  <th className="text-left text-[10px] font-medium text-sky-900 min-w-1/4 max-w-24  ">Nome da sala</th>
-                  <th className="text-left text-[10px] font-medium text-sky-900 mobile:flex-1 mobile:w-[70%] w-[60%]">Descrição da sala</th>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-24  ">Nome da sala</th>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">Descrição da sala</th>
                 </tr>
               </thead>
               <tbody>
@@ -338,10 +357,10 @@ function voltarPagina(){
                     className={`hover:bg-[#d5d8f1] cursor-pointer ${salaSelecionada === sala.id ? "bg-gray-200" : ""}`} 
                     onClick={() => statusSala(sala.id)}
                   >
-                    <td className="px-2 py-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] text-center">
+                    <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words">
                       {sala.nome}
                     </td>
-                    <td className="px-2 py-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] text-center ">
+                    <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  break-words">
                       {sala.descricao}
                     </td>
                   </tr>
@@ -352,7 +371,7 @@ function voltarPagina(){
             {/* fim tabela com todas as salas */}
 
             {/* passador de página */}
-            <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 mobile:right-10">
+            <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
 
             <button onClick={voltarPagina} className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-left" viewBox="0 0 16 16">
@@ -379,12 +398,11 @@ function voltarPagina(){
        </div>
         {/* fim conteudo central tela salas */}
 
-        {/* logo chameco lateral */}
-          <div className="flex absolute justify-start bottom-4">
-            <img className="mobile:w-[200px] w-32" src="\public\logo_lateral.png" alt="logo chameco" />
+       {/* logo chameco lateral */}
+       <div className="flex justify-start bottom-4 sm:hidden">
+            <img className="sm:w-[200px] w-32" src="\public\logo_lateral.png" alt="logo chameco" />
           </div>
         {/* fim logo chameco lateral */}
-
      </div>
    {/* fim parte informativa tela salas */}
     </div>
