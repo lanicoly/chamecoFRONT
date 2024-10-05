@@ -1,7 +1,8 @@
+import { Salas } from "./componentes/salas";
 
 export function App() {
   return (
-    <h1>Hello World!</h1>
+    <Salas/>
   )
 }
 
