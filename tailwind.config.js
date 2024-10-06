@@ -13,7 +13,11 @@ export default {
         'tijolos': "url('/public/fundo_tijolos.svg')",
       },
       screens: {
-        'mobile': '700px',
+        'mobile': '480px',
+        'tablet': '640px',  
+        'laptop': '1024px', 
+        'desktop': '1280px',
+        
       },
     },
   },
