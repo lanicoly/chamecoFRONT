@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Menu } from "./componentes/menu";
 import { Blocos } from "./componentes/blocos";
 import { Salas } from "./componentes/salas";
+import { Usuarios } from "./componentes/usuarios";
 
 export function App() {
   const [tela, setTela] = useState<number>(1);
@@ -35,6 +36,7 @@ export function App() {
 
   return (
     //aqui irá renderizar o estado atual da variável, a qual será modificada conforme tela escolhida
-     <div>{telaAtual}</div>
+    //  <div>{telaAtual}</div>
+    <div><Usuarios mudarTela={mudarTela}/></div>
   );
 }
