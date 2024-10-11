@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Menu } from "./componentes/menu";
 import { Blocos } from "./componentes/blocos";
 import { Salas } from "./componentes/salas";
+import { Login } from "./componentes/login"
 import {Chaves} from "./componentes/chaves";
 
 export function App() {
@@ -19,9 +20,9 @@ export function App() {
 
   let telaAtual: React.ReactNode;
   switch (tela) {
-    // case 0:
-    //   telaAtual = <Login />;
-    //   break;
+    case 0:
+      telaAtual = <Login mudarTela={mudarTela}/>;
+      break;
     case 1:
       telaAtual = <Menu mudarTela={mudarTela} />;
       break;
@@ -48,4 +49,3 @@ export function App() {
 
 
 }
-

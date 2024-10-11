@@ -11,8 +11,8 @@ export default {
       },
 
       backgroundImage: {
-        'tijolos': "url('/fundo_tijolos.svg')",
-        'chaves': "url('/fundo_chaves.svg')",
+        'tijolos': "url('/public/fundo_tijolos.svg')",
+        'login-fundo': "url('/public/back-login.svg')"
       },
       
       screens: {
@@ -20,9 +20,7 @@ export default {
         'tablet': '640px',  
         'laptop': '1024px', 
         'desktop': '1280px',
-        
       },
     },
-  },
   plugins: [],
-}
+}}
