@@ -11,6 +11,7 @@ export default {
       },
       backgroundImage: {
         'tijolos': "url('/public/fundo_tijolos.svg')",
+        'login-fundo': "url('/public/back-login.svg')"
       },
       screens: {
         'mobile': '480px',
