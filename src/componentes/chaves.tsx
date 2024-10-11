@@ -1,6 +1,4 @@
-import {
-    ChevronLeft
-}from "lucide-react";
+import {ChevronLeft,ChevronRight}from "lucide-react";
 
   //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
 
@@ -12,16 +10,18 @@ import {
   
   export function Chaves({ mudarTela}:ChavesProps) {
     return(
-        <div className="bg-cover flex flex-col items-center justify-center font-montserrat bg-chaves">
+        <div className="items-center justify-center  h-screen flex-shrink-0 bg-chaves">
             <div className="w-full h-[140px] flex-shrink-0 p-5 bg-white flex justify-between items-center relative shadow-md">
                 {/*header*/}
                 <div className="w-full h-[140px] flex-shrink-0 p-5 flex justify-between items-center relative ">
                     <div className="flex items-center gap-2 mb-[15px] text-[#02006C] font-medium tablet:mb-0">
                     {/* Adicionando botão de Menu */}
-                    <button onClick={() => mudarTela(1)}>
-                        <ChevronLeft className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
-                    </button>
-                    <span>MENU</span>
+                        <div onClick={() => mudarTela(1)} className="justify-center flex items-center cursor-pointer">
+                            <button>
+                                <ChevronLeft className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
+                            </button>
+                            <span className="font-semibold text-[20px]">MENU</span>
+                        </div>
                     </div>
                     {/* logo-spacer */}
                     <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
@@ -46,6 +46,80 @@ import {
                     </div>
                 </div>
             </div>
+            <main className="flex justify-center items-center pt-8 px-12 ">
+                <div className="bg-white p-6 rounded-2xl shadow-lg inline-flex  flex-col  gap-8">
+                    <div className=" mb-6 flex justify-end items-center content-center self-stretch flex-wrap">
+                        <div className=" flex-col flex w-[534px] h-[59px] px-[173px] pb-[5px] justify-center items-center">
+                            <h2 className="text-3xl font-bold text-blue-800">CHAVES</h2>
+                        </div>    
+                        {/*Adicionando botao de status */}
+                        <div className="flex items-center gap-2 mb-[15px] text-[#02006C] font-medium tablet:mb-0">
+                            <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
+                            <button>
+                                <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Filtros de busca */}
+                    <div className="flex space-x-4 mb-6">
+                        <input
+                        type="text"
+                        placeholder="Pesquisar..."
+                        className="w-1/3 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600"
+                        />
+                        <input
+                        type="text"
+                        placeholder="Filtrar..."
+                        className="w-1/3 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600"
+                        />
+                        <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                        + ADICIONAR CHAVE
+                        </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                    <div className="min-w-full shadow-md">
+                        <div className="flex justify-between text-left text-sm leading-normal text-gray-800 uppercase py-3 px-4">
+                        <div className="w-1/4 border-t border-custom-gray">Sala</div>
+                        <div className="w-1/4 border-t border-custom-gray">Bloco</div>
+                        <div className="w-1/4 border-t border-custom-gray">Quantidade de Chaves</div>
+                        <div className="w-1/4 border-t border-custom-gray">Lista de Pessoas Autorizadas</div>
+                        <div className="w-[10%] "></div>
+                        </div>
+                        
+                        {/* Exemplo de linha */}
+                        <div className="border-t py-4 px-4t ransition duration-300 ease-in-out flex justify-between items-center text-sm text-gray-700">
+                        <div className="w-1/4 border-t border-custom-gray">Sala A01</div>
+                        <div className="w-1/4 border-t border-custom-gray">Bloco A</div>
+                        <div className="w-1/4 border-t border-custom-gray">01 Chaves</div>
+                        <div className="w-1/4 border-t border-custom-gray">
+                            <button className="bg-blue-500 text-white py-1 px-4 rounded">
+                            Pessoas autorizadas
+                            </button>
+                        </div>
+                        <div className="w-[10%]">
+                            <button className="text-blue-600 hover:underline">Ver mais</button>
+                        </div>
+                        </div>
+
+                        {/* Adicione mais linhas conforme necessário */}
+                    </div>
+                    </div>
+
+
+                    {/* Paginação */}
+                    <div className="flex justify-between items-center mt-4">
+                        <p className="text-sm text-gray-600">Mostrando 1-5 de 25</p>
+                        <div className="flex space-x-2">
+                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded hover:bg-gray-400">1</button>
+                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded hover:bg-gray-400">2</button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
         </div>
         
     );
