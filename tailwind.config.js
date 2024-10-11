@@ -11,8 +11,10 @@ export default {
       },
 
       backgroundImage: {
-        'tijolos': "url('/public/fundo_tijolos.svg')",
+        'tijolos': "url('/fundo_tijolos.svg')",
+        'chaves': "url('/fundo_chaves.svg')",
       },
+      
       screens: {
         'mobile': '480px',
         'tablet': '640px',  
