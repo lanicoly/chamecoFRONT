@@ -9,6 +9,7 @@ interface MenuProps {
 export function Menu({ mudarTela}:MenuProps) {
     return (
       <div className="bg-cover flex flex-col items-center justify-center font-montserrat bg-tijolos">
+      <div className="bg-cover flex flex-col items-center  h-screen justify-center font-montserrat bg-tijolos">
         <div className="w-full h-[140px] flex-shrink-0 p-5 bg-white flex justify-between items-center relative shadow-md">
           {/*header*/}
           <div className="w-full h-[140px] flex-shrink-0 p-5 flex justify-between items-center relative ">
