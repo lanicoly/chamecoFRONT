@@ -17,7 +17,7 @@ export function Menu({ mudarTela}:MenuProps) {
           <div className="w-full h-[140px] flex-shrink-0 p-5 flex justify-between items-center relative ">
             {/* logo-spacer */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-              <img className="w-16 sm:w-16 md:w-24 h-auto" src="src/assets/logo_lateral.png" alt="logo chameco" />
+              <img className="w-24 h-auto tablet:w-32 laptop:w-56 desktop:w-64" src="src/assets/logo_lateral.png" alt="logo chameco" />
             </div>
             {/* User/Exit */}
             <div className="flex ml-auto">
@@ -40,7 +40,7 @@ export function Menu({ mudarTela}:MenuProps) {
         </div>
           
         {/*main-container */}
-        <div className="flex flex-1 items-center justify-center w-full max-w-full box-border">
+        <div className="flex flex-1 items-center justify-center  box-border">
           {/*menu*/}
           <div className="bg-white rounded-[15px] p-6 sm:p-6 md:p-[40px] grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-6 md:gap-[30px] my-4 sm:my-6 md:my-[36px] shadow-[rgba(0,0,0,0.3)_-6px_6px_15px]">
             {/*Menu-item*/}
