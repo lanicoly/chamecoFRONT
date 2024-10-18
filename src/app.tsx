@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { Menu } from "./componentes/menu";
 import { Blocos } from "./componentes/blocos";
 import { Salas } from "./componentes/salas";
-import {Chaves} from "./componentes/chaves";
+import { Chaves } from "./componentes/chaves";
 import { Login } from "./componentes/login";
+import { Usuarios } from "./componentes/usuarios";
 
 
 export function App() {
@@ -36,6 +37,9 @@ export function App() {
     case 4:
       telaAtual = <Chaves mudarTela={mudarTela} />;
       break;
+    case 5:
+      telaAtual = <Usuarios mudarTela={mudarTela}/>;
+      break
     default:
       telaAtual = <Menu mudarTela={mudarTela} />;
   }
@@ -43,12 +47,10 @@ export function App() {
   return (
     //aqui irá renderizar o estado atual da variável, a qual será modificada conforme tela escolhida
     //  <div>{telaAtual}</div>
-    <div>{telaAtual}</div>
+    <div><Login mudarTela={mudarTela}/></div>
   );
 
 
 
 
 }
-
-

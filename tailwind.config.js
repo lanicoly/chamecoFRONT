@@ -10,10 +10,12 @@ export default {
         sans: 'Montserrat',
       },
 
+
       backgroundImage: {
         'tijolos': "url('/fundo_tijolos.svg')",
         'chaves': "url('/fundo_chaves.svg')",
       },
+      
       
       screens: {
         'mobile': '480px',
