@@ -9,10 +9,13 @@ export default {
       fontFamily: {
         sans: 'Montserrat',
       },
+
       backgroundImage: {
         'tijolos': "url('/public/fundo_tijolos.svg')",
+        'chaves': "url('/fundo_chaves.svg')",
         'login-fundo': "url('/public/back-login.svg')"
       },
+      
       screens: {
         'mobile': '480px',
         'tablet': '640px',  
