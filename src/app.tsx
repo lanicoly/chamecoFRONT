@@ -34,18 +34,17 @@ export function App() {
     case 4:
       telaAtual = <Chaves mudarTela={mudarTela} />;
       break;
-    default:
-      telaAtual = <Menu mudarTela={mudarTela} />;
+      default:
+        telaAtual = <Menu mudarTela={mudarTela} />;
+    }
+  
+    return (
+      //aqui irá renderizar o estado atual da variável, a qual será modificada conforme tela escolhida
+       <div>{telaAtual}</div>
+    );
+  
+  
+  
+  
   }
-
-  return (
-    //aqui irá renderizar o estado atual da variável, a qual será modificada conforme tela escolhida
-    //  <div>{telaAtual}</div>
-    <div><Usuarios mudarTela={mudarTela}/></div>
-  );
-
-
-
-
-}
 
