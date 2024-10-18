@@ -1,29 +1,46 @@
+import { useState } from "react";
+
 interface LoginProps {
   mudarTela: (index: number) => void;
 }
 
 export function Login({ mudarTela }: LoginProps) {
+
+// Adicionando validação de usuário e senha
+const [usuario, setUsuario] = useState<string>('');
+const [senha, setSenha] = useState<string>('');
+const [error, setError] = useState<string>('');
+
+function handleSubmit(event: React.FormEvent){
+  event.preventDefault();
+  if (!usuario || !senha) {
+    setError('Por favor, preencha todos os campos!');
+    return
+  }
+  setError('');
+}
+
   return (
-    <div className="flex items-center justify-center w-auto h-screen bg-login-fundo ml-[-55px] ">
+    <div className="flex items-center justify-center w-auto h-screen bg-login-fundo  flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
-      <div className="container w-[650px] p-4 rounded-[10px] h-[390px] bg-white">
+      <div className="container max-w-[650px] w-full p-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row">
 
         {/* Adicionando logo */}
-        <div className="absolute w-[250px] mt-[60px] ml-[30px]">
-          <img src="logo.login.png" alt="" className="" />
+        <div className="flex justify-center  mt-10 sm:mt-[60px] sm:ml-[30px]">
+          <img src="logo.login.png" alt="" className="w-[350px] h-auto hidden sm:block" />
         </div>
 
         {/* Adicionando div do formulário */}
-        <div className="items-center ml-[320px] pt-[30px]">
+        <div className="flex flex-col items-center pt-[30px]">
           <h1 className="text-[#16C34D] items-center font-semibold text-[40px] text-center">
             Boas Vindas!
           </h1>
-          <p className="text-[#192160] items-center text-[15px] font-medium text-center mt-[10px]">
+          <p className="text-[#192160] items-center text-[15px] tablet:m-[5px] tablet:text-[17px] font-medium text-center mt-[10px]">
             Insira seus dados para continuar
           </p>
 
           {/* Adicionando formulário */}
-          <div className="ml-[30px] mt-[20px]">
+          <form className="ml-[30px] mt-[20px]" onSubmit={handleSubmit}>
             {/* Div com o primeiro input - login */}
             <div className="relative ">
               <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
@@ -63,6 +80,8 @@ export function Login({ mudarTela }: LoginProps) {
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
                 placeholder="Usuário"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
               />
             </div>
 
@@ -89,18 +108,21 @@ export function Login({ mudarTela }: LoginProps) {
                 type="password"
                 placeholder="Senha"
                 className="w-[250px] p-[4px] pl-[30px] rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
               />
+               {error && <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[17px] font-medium text-center">{error}</div>}
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[30px] text-center items-center ml-[70px]">
-                <button onClick={() => mudarTela(1)} className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]">
+                <button type="submit" onClick={() => mudarTela(1)} className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]" >
                   ENTRAR
                 </button>
               </div>
 
               
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
