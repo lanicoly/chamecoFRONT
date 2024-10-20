@@ -40,8 +40,7 @@ export function App() {
 
   return (
     //aqui irá renderizar o estado atual da variável, a qual será modificada conforme tela escolhida
-    //  <div>{telaAtual}</div>
-    <div><Usuarios mudarTela={mudarTela}/></div>
+     <div>{telaAtual}</div>
   );
 
 
