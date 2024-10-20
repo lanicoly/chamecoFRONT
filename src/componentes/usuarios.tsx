@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Check, Plus, TriangleAlert, X } from "lucide-react";
 import { useState } from "react"
 
 export interface Usuario {
@@ -27,15 +27,20 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
 
     const [pesquisa, setPesquisa] = useState('');
     const [isSearching, setIsSearching] = useState(false);
-    const [filtro, setFiltro] = useState('');
-    
+    const [filtro, setFiltro] = useState('todos');
+
+    const filtrarUsuario = filtro !== "todos" ?
+    listaUsers.filter(usuario =>
+        usuario.tipo.toLowerCase() === filtro.toLowerCase()
+    )
+    : listaUsers
+
     const usuariosFiltrados = isSearching || filtro
-        ? listaUsers.filter(usuario =>
+        ? filtrarUsuario.filter(usuario =>
             usuario.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-            usuario.email.toLowerCase().includes(pesquisa.toLowerCase()) ||
-            usuario.tipo.toLowerCase() == filtro.toLowerCase()
+            usuario.email.toLowerCase().includes(pesquisa.toLowerCase())
         )
-        : listaUsers
+        : filtrarUsuario
 
     
 
@@ -47,6 +52,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
 
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userSelecionado, setUserSelecionado] = useState<number | null>(null);
 
     function openUserModal() {
@@ -60,14 +66,29 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
         setIsUserModalOpen(false);
     }
 
+    
     function openEditModal() {
-        if (userSelecionado) {
+        const usuario = listaUsers.find(user => user.id === userSelecionado);
+        if (usuario) {
+            setNome(usuario.nome);
+            setEmail(usuario.email);
+            setTipo(usuario.tipo);
             setIsEditModalOpen(true);
         }
     }
 
     function closeEditModal() {
         setIsEditModalOpen(false);
+    }
+
+    function openDeleteModal() {
+        if (userSelecionado !== null) {
+            setIsDeleteModalOpen(true);
+        }
+    }
+
+    function closeDeleteModal() {
+        setIsDeleteModalOpen(false);
     }
 
     function addUser(e: React.FormEvent) {
@@ -88,11 +109,11 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
     }
 
 
-    function removeUser() {
-        if (userSelecionado !== null) {
-            setListaUsers(listaUsers.filter(usuario => usuario.id !== userSelecionado));
-            setUserSelecionado(null);
-        }
+    function removeUser(e: React.FormEvent) {
+        e.preventDefault();
+        setListaUsers(listaUsers.filter(usuario => usuario.id !== userSelecionado));
+        setUserSelecionado(null);
+        closeDeleteModal();
     };
 
 
@@ -241,7 +262,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                             setFiltro(e.target.value);
                                         }}
                                     className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-sky-900 text-sm font-medium h-fit">
-                                        <option value="">Todos</option>
+                                        <option value="todos">Todos</option>
                                         <option value="administrativo">Administrativo</option>
                                         <option value="codis">CODIS</option>
                                         <option value="guarita">Guarita</option>
@@ -252,7 +273,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                 </div>
                             {/* fim input de filtro */}
                         </div>
-                        <button onClick={openUserModal} className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto">
+                        <button onClick={openUserModal} className="min-w-60 px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" className="bi bi-plus-circle" viewBox="0 0 16 16">
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
@@ -260,7 +281,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                             ADICIONAR USUÁRIO
                         </button>
 
-                        {/* Adicionando pop up de adicionar salas */}
+                        {/* Adicionando pop up de adicionar usuarios */}
                         {isUserModalOpen && (
                             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                 <form onSubmit={addUser} className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
@@ -284,18 +305,18 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                             Digite o nome do usuário
                                         </p>
 
-
+                                        
                                         <input
-                                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                                            type="text"
-                                            placeholder="Nome do usuário"
-                                            value={nome}
-                                            onChange={(e) => setNome(e.target.value)}
-                                            required
-                                            />
-                                            </div>
+                                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                                        type="text"
+                                        placeholder="Nome do usuário"
+                                        value={nome}
+                                        onChange={(e) => setNome(e.target.value)}
+                                        required
+                                        />
+                                        </div>
+                                        
                                         <div>
-
                                         <p className="text-[#192160] text-sm font-medium mb-1">
                                             Digite o e-mail do usuário
                                         </p>
@@ -338,10 +359,10 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                             </div>
                         )}
 
-                        {/* Fim adicionando pop up de adicionar salas */}
+                        {/* Fim adicionando pop up de adicionar usuarios */}
 
                     </div>
-                    {/* fim adicionar sala + pesquisa */}
+                    {/* fim adicionar usuario + pesquisa */}
 
 
                     {/* conteudo central tabela*/}
@@ -355,7 +376,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                 </svg>
                                 Editar
                             </button>
-                            {/* Adicionando pop up de editar sala */}
+                            {/* Adicionando pop up de editar usuario */}
                             {isEditModalOpen && (
                                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                <form onSubmit={editaUser} className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
@@ -376,13 +397,13 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                        <p className="text-[#192160] text-sm font-medium mb-1">
                                            Digite o novo nome do usuário
                                        </p>
-
+                                       
 
                                        <input
+                                            value={nome}
                                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
                                            type="text"
                                            placeholder="Nome do usuário"
-                                           value={nome}
                                            onChange={(e) => setNome(e.target.value)}
                                            required
                                        />
@@ -424,25 +445,67 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                            type="submit"
                                            className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
                                        >
-                                           <Plus className="h-10px" /> SALVAR ALTERAÇÕES
+                                            SALVAR ALTERAÇÕES <Check className="size-5" />
                                        </button>
                                    </div>
                                </form>
                            </div>
                             )}
 
-                            {/* Fim adicionando pop up de editar sala */}
+                            {/* Fim adicionando pop up de editar usuario */}
 
-                            <button onClick={removeUser} className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline">
+                            <button onClick={openDeleteModal} className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#e11d48" className="bi bi-x-lg" viewBox="0 0 16 16">
                                     <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
                                 </svg>
                                 Excluir
                             </button>
+
+                            {/* Adicionando pop up de deletar usuario */}
+                            {isDeleteModalOpen && (
+                               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                               <form onSubmit={removeUser} className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center">
+                                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                       <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                                           EXCLUIR USUÁRIO
+                                       </p>
+                                       <button
+                                            onClick={closeDeleteModal}
+                                            type="button"
+                                            className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                        >
+                                            <X className=" text-[#192160]" />
+                                        </button>
+                                   </div>
+                               <TriangleAlert className="size-16 text-red-700"/>
+
+                                   <p className="text-center px-2">
+                                    Essa ação é <strong className="font-semibold ">definitiva</strong> e não pode ser desfeita. <strong className="font-semibold">Tem certeza disso?</strong>
+                                   </p>
+                                   <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                                       <button onClick={closeDeleteModal}
+                                           type="button"
+                                           className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                                       >
+                                           CANCELAR
+                                       </button>
+                                       <button
+                                           type="submit"
+                                           className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                                       >
+                                           EXCLUIR
+                                       </button>
+                                   </div>
+                               </form>
+                           </div>
+                            )}
+
+                            {/* Fim adicionando pop up de deletar usuario */}
+
                         </div>
                         {/* fim botões editar e excluir */}
 
-                        {/* tabela com todas as salas */}
+                        {/* tabela com todos os usuarios */}
                         <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
                             <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
                                 <thead className="bg-white sticky top-0 z-10">
@@ -473,7 +536,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                                 </tbody>
                             </table>
                         </div>
-                        {/* fim tabela com todas as salas */}
+                        {/* fim tabela com todos os usuarios */}
 
                         {/* passador de página */}
                         <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
@@ -501,7 +564,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                     </div>
                     {/* fim conteudo central tabela*/}
                 </div>
-                {/* fim conteudo central tela salas */}
+                {/* fim conteudo central tela usuarios */}
 
                 {/* logo chameco lateral */}
                 <div className="flex justify-start bottom-4 absolute sm:hidden">
@@ -509,7 +572,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
                 </div>
                 {/* fim logo chameco lateral */}
             </div>
-            {/* fim parte informativa tela salas */}
+            {/* fim parte informativa tela usuarios */}
         </div>
 
     )
