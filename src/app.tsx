@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { Menu } from "./componentes/menu";
 import { Blocos } from "./componentes/blocos";
 import { Salas } from "./componentes/salas";
-import { Login } from "./componentes/login"
-import {Chaves} from "./componentes/chaves";
+import { Chaves } from "./componentes/chaves";
+import { Login } from "./componentes/login";
+import { Usuarios } from "./componentes/usuarios";
+
 
 export function App() {
   const [tela, setTela] = useState<number>(1);
@@ -35,6 +37,9 @@ export function App() {
     case 4:
       telaAtual = <Chaves mudarTela={mudarTela} />;
       break;
+    case 5:
+      telaAtual = <Usuarios mudarTela={mudarTela}/>;
+      break
     default:
       telaAtual = <Menu mudarTela={mudarTela} />;
   }

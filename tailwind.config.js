@@ -10,10 +10,13 @@ export default {
         sans: 'Montserrat',
       },
 
+
       backgroundImage: {
         'tijolos': "url('/public/fundo_tijolos.svg')",
-        'login-fundo': "url('/public/back-login.svg')"
+        'login-fundo': "url('/public/back-login.svg')",
+        'chaves': "url('/fundo_chaves.svg')",
       },
+      
       
       screens: {
         'mobile': '480px',
