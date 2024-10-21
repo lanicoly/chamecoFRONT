@@ -28,7 +28,7 @@ export function Menu({ mudarTela}:MenuProps) {
                 </svg>
                   Usuário
               </button>
-              <button className="text-white flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 w-max font-medium text-xs mobile:text-sm tablet:text-base bg-[#565D8F] rounded-r-md p-1 mobile:p-1.5 tablet:p-2 h-max">
+              <button onClick={() => mudarTela(0)} className="text-white flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 w-max font-medium text-xs mobile:text-sm tablet:text-base bg-[#565D8F] rounded-r-md p-1 mobile:p-1.5 tablet:p-2 h-max">
                 Sair
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="bi bi-box-arrow-right w-3 h-3 mobile:w-4 mobile:h-4 tablet:w-6 tablet:h-6" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
@@ -52,7 +52,7 @@ export function Menu({ mudarTela}:MenuProps) {
                 <span className="text-[#646999] text-center font-montserrat text-[16px] sm:text-[18px] md:text-[20px] font-bold leading-normal">CHAVES</span>
               </div>
             </div>
-            <div className="menu-item bg-white border-4 border-[#646999] rounded-[10px] flex justify-center items-center w-full h-[100px] sm:h-[120px] md:h-[150px] cursor-pointer transition-all duration-200 hover:bg-[#e0e0e0] hover:transform hover:-translate-y-1">
+            <div onClick={() => mudarTela(5)} className="menu-item bg-white border-4 border-[#646999] rounded-[10px] flex justify-center items-center w-full h-[100px] sm:h-[120px] md:h-[150px] cursor-pointer transition-all duration-200 hover:bg-[#e0e0e0] hover:transform hover:-translate-y-1">
               <div className="content flex flex-col items-center">
                 <img src="/01 align center.svg" alt="Usuários" className="w-[40px] sm:w-[50px] md:w-[60px] h-[40px] sm:h-[50px] md:h-[60px] icon" />
                 <span className="text-[#646999] text-center font-montserrat text-[16px] sm:text-[18px] md:text-[20px] font-bold leading-normal">USUÁRIOS</span>

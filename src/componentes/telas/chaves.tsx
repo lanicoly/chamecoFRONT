@@ -52,7 +52,7 @@ import {ChevronLeft,ChevronRight}from "lucide-react";
               </svg>
               Usuário
             </button>
-            <button className="text-white flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 w-max font-medium text-xs mobile:text-sm tablet:text-base bg-[#565D8F] rounded-r-md p-1 mobile:p-1.5 tablet:p-2 h-max">
+            <button onClick={()=> mudarTela(0)} className="text-white flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 w-max font-medium text-xs mobile:text-sm tablet:text-base bg-[#565D8F] rounded-r-md p-1 mobile:p-1.5 tablet:p-2 h-max">
               Sair
               <svg
                 xmlns="http://www.w3.org/2000/svg"

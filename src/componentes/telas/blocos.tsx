@@ -152,7 +152,7 @@ export function Blocos({ mudarTela }: BlocosProps) {
       {/* Adicionando barra de navegação */}
       <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
         <button
-          onClick={() => mudarTela(2)}
+          onClick={() => mudarTela(1)}
           className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto"
         >
           <svg
@@ -199,7 +199,7 @@ export function Blocos({ mudarTela }: BlocosProps) {
             </svg>
             Usuário
           </button>
-          <button className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max">
+          <button onClick={() => mudarTela(0)} className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max">
             Sair
             <svg
               xmlns="http://www.w3.org/2000/svg"

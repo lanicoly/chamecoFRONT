@@ -18,6 +18,7 @@ function handleSubmit(event: React.FormEvent){
     return
   }
   setError('');
+  mudarTela(1)
 }
 
   return (
@@ -115,7 +116,7 @@ function handleSubmit(event: React.FormEvent){
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[30px] text-center items-center ml-[70px]">
-                <button type="submit" onClick={() => mudarTela(1)} className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]" >
+                <button type="submit" className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]" >
                   ENTRAR
                 </button>
               </div>
