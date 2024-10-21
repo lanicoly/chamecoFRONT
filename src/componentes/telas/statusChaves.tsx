@@ -26,7 +26,7 @@ interface StatusChavesProps {
 export function StatusChaves({ mudarTela }: StatusChavesProps) {
 
     const [listaChaves, setListaChaves] = useState<Chave[]>([
-        { id: 1, sala: "E04", bloco: "Bloco E", descricao: "Descrição da chave lala", qtdReservada: 1, qtdDisponível: 2, qtdEmprestada: 0 },
+        { id: 1, sala: "E04", bloco: "Bloco E", descricao: "Descrição da chave 1", qtdReservada: 1, qtdDisponível: 2, qtdEmprestada: 0 },
         { id: 2, sala: "E05", bloco: "Bloco E", descricao: "Descrição da chave 2", qtdReservada: 0, qtdDisponível: 1, qtdEmprestada: 1 },
     ]);
     const itensPorPagina = 5;
@@ -50,23 +50,32 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
     const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
 
     const [isChaveModalOpen, setIsChaveModalOpen] = useState(false);
-    // const [ChaveSelecionada, setChaveSelecionada] = useState<number | null>(null);
+    const [isAutorizaModalOpen, setIsAutorizaModalOpen] = useState(false);
+    const [ChaveSelecionada, setChaveSelecionada] = useState<number | null>(null);
 
-    function openChaveModal() {
+    function openChaveModal(id: number) {
         setIsChaveModalOpen(true);
+        seleciona(id);
     }
 
     function closeChaveModal() {
         setIsChaveModalOpen(false);
     }
+    function openAutorizaModal() {
+        setIsAutorizaModalOpen(true);
+    }
 
-    // function seleciona(id: number) {
-    //     setChaveSelecionada(id);
-    // };
+    function closeAutorizaModal() {
+        setIsAutorizaModalOpen(false);
+    }
 
-    // function desseleciona() {
-    //     setChaveSelecionada(null)
-    // }
+    function seleciona(id: number) {
+        setChaveSelecionada(id);
+    };
+
+    function desseleciona() {
+        setChaveSelecionada(null)
+    }
 
     function avancarPagina() {
         if (paginaAtual < totalPaginas) {
@@ -172,47 +181,74 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                                             </td>
                                             <td className="flex justify-center items-center">
 
-                                            <button className="bg-sky-900 text-sm text-white font-semibold px-4 py-1 rounded-md mx-2">
-                                                AUTORIZAR
-                                            </button>
+                                                <button onClick={openAutorizaModal} className="bg-sky-900 text-sm text-white font-semibold px-4 py-1 rounded-md mx-2">
+                                                    AUTORIZAR
+                                                </button>
                                             </td>
 
-                                            <td>
-                                                
-                                            <button onClick={openChaveModal} className="flex gap-1 justify-start items-center font-medium text-sm text-[#646999] underline">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#646999" className="bi bi-pen" viewBox="0 0 16 16">
-                                                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                                                </svg>
-                                                Editar
-                                            </button>
-                                            </td>
-
-                                            {/* Adicionando pop up de descricao da chave */}
-                                            {isChaveModalOpen && (
-                                                
+                                            {isAutorizaModalOpen &&  (
                                                 <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                                     <form className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
-                                                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                                        <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                                            Descrição da chave
-                                                        </p>
-                                                        <button
-                                                            onClick={closeChaveModal}
-                                                            type="button"
-                                                            className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                                        >
-                                                            <X className=" mb-[5px] text-[#192160]" />
-                                                        </button>
-                                                    </div>
+                                                        <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                                                Autorizar
+                                                            </p>
+                                                            <button
+                                                                onClick={closeAutorizaModal}
+                                                                type="button"
+                                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                                            >
+                                                                <X className=" mb-[5px] text-[#192160]" />
+                                                            </button>
+                                                        </div>
 
-                                                    <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-                                                        <p className="text-[#192160] text-sm font-medium mb-1">
-                                                            {chave.descricao}
-                                                        </p>
+                                                        <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
 
-                                                    </div>
+                                                            <p className="text-[#192160] text-sm font-medium mb-1">
+                                                                teste
+                                                            </p>
 
-                                                </form>
+                                                        </div>
+
+                                                    </form>
+                                                </div>
+                                            )}
+
+                                            <td>
+
+                                                <button onClick={() => openChaveModal(chave.id)} className="flex gap-1 justify-start items-center font-medium text-sm text-[#646999] underline">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#646999" className="bi bi-pen" viewBox="0 0 16 16">
+                                                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                                    </svg>
+                                                    Descrição
+                                                </button>
+                                            </td>
+                                            {/* Adicionando pop up de descricao da chave */}
+                                            {(isChaveModalOpen && chave.id === ChaveSelecionada) &&  (
+                                                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                                    <form className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
+                                                        <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                                                Descrição da chave
+                                                            </p>
+                                                            <button
+                                                                onClick={closeChaveModal}
+                                                                type="button"
+                                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                                            >
+                                                                <X className=" mb-[5px] text-[#192160]" />
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
+
+                                                            <p className="text-[#192160] text-sm font-medium mb-1">
+                                                                {chave.descricao}
+                                                            </p>
+
+                                                        </div>
+
+                                                    </form>
                                                 </div>
                                             )}
                                             {/* Fim adicionando pop up de descricao da chave */}
