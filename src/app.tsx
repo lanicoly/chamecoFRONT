@@ -7,6 +7,7 @@ import { Salas } from "./componentes/telas/salas";
 import { Chaves } from "./componentes/telas/chaves";
 import { Login } from "./componentes/telas/login";
 import { Usuarios } from "./componentes/telas/usuarios";
+import { StatusChaves } from "./componentes/telas/statusChaves";
 
 export function App() {
   const [tela, setTela] = useState<number>(0);
@@ -36,6 +37,9 @@ export function App() {
       break;
     case 5:
       telaAtual = <Usuarios mudarTela={mudarTela}/>;
+      break
+    case 6:
+      telaAtual = <StatusChaves mudarTela={mudarTela}/>;
       break
     default:
       telaAtual = <Login mudarTela={mudarTela} />;

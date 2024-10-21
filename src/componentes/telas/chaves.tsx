@@ -82,7 +82,7 @@ import {ChevronLeft,ChevronRight}from "lucide-react";
             CHAVES
           </h1>
           {/*Adicionando botao de status */}
-          <div className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium tablet:mb-0">
+          <div onClick={() => mudarTela(6)} className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium tablet:mb-0">
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
             <button>
               <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
