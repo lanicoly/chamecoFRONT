@@ -9,6 +9,8 @@ export interface Chaves {
   salas:string;
   qntd: number | string;
   descricao: string;
+  pessoas:string;
+  blocos:string;
 }
 
   //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -25,24 +27,16 @@ export interface Chaves {
     const [chaves, setChaves] = useState<Chaves[]>([]);
     const [nextId, setNextId] = useState(1);
     const [descricao, setDescricao] = useState("");
+    const [blocos, setBlocos] = useState("");
+    const [pessoas, setPessoas] = useState("");
     {/*adicionando a função de adicionar chaves*/}
     const [selectedSala, setSelectedSala] = useState("");
     {/*aceitando apenas numeros na variavel qntd */}
     const [qntd, setQntd] = useState<number | string>(""); 
-    const [error, setError] = useState<string>(""); 
 
-    {/*garantir que qntd seja um número */}
-    function handleQntdChange(e: React.ChangeEvent<HTMLInputElement>) {
-      const value = e.target.value;
-  
-      {/* Verifica se o valor é um número*/}
-      if (!/^\d*$/.test(value)) {
-        setError("Por favor, insira apenas números.");
-      } else { 
-        setError(""); 
-        setQntd(Number(value)); 
-      }
-    }
+    // Adicionando função de abrir e fechar pop up
+    const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+    
 
 
     const salas = [
@@ -53,15 +47,36 @@ export interface Chaves {
       "Sala F05",
     ];
 
-    const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedSala(event.target.value);
-    };
+
     {/*adiocionando lista chaves */}
     const [chaveSelecionada, setChaveSelecionada] = useState<number | null>(null);
-    const itensAtuais = [
-      { id: 1, salas: "Sala E09", blocos: "Bloco A", qntd: 5 },
-      { id: 2, salas: "Sala E08", blocos: "Bloco B", qntd: 3 },
-    ];
+    const [itensAtuais, setItensAtuais] = useState<Chaves[]>([
+      { id: 1, salas: "Sala E09", blocos:"Bloco J", qntd: 5, pessoas: "Professores", descricao: "Chave entregue para Vanessa" },
+      { id: 2, salas: "Sala E08", blocos:"Bloco E", qntd: 3, pessoas:"Administrativo", descricao: "Chave entregue para Vanessa" },
+      
+    ]);
+    
+    function addChaves(e: React.FormEvent) {
+      e.preventDefault();
+      const novaChave: Chaves = {
+        id: nextId,
+        salas: selectedSala,
+        qntd,
+        descricao,
+        blocos,
+        pessoas,
+      };
+      setChaves([...chaves, novaChave]);
+      setItensAtuais([...itensAtuais, novaChave]);  
+      setNextId(nextId + 1);
+      setQntd(0);
+      setDescricao("");
+      setSelectedSala("");
+      setPessoas("");
+      setBlocos("");
+      closeChavesModal();
+    }
+    
     
 
     function statusSelecao(id: number) {
@@ -69,24 +84,7 @@ export interface Chaves {
     }
 
 
-    function addChaves(e: React.FormEvent) {
-      e.preventDefault();
-      const novaChave: Chaves = {
-        id: nextId,
-        salas:selectedSala,
-        qntd: qntd,
-        descricao:descricao,
-      };
-      setChaves([...chaves, novaChave]);
-      setNextId(nextId + 1);
-      setQntd(0);
-      setDescricao("");
-      setSelectedSala("");
-      closeChavesModal();
-    }
 
-      // Adicionando função de abrir e fechar pop up
-      const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
     
     
       function openChavesModal() {
@@ -97,6 +95,8 @@ export interface Chaves {
         setQntd(0);
         setDescricao("");
         setSelectedSala("");
+        setBlocos("");
+        setPessoas("");
         setIsChavesModalOpen(false);
       }
 
@@ -201,7 +201,7 @@ export interface Chaves {
                 {/* Adicionando pop up de adicionar chaves */}
                 {isChavesModalOpen && (
                   <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                    <form
+                    <form 
                       onSubmit={addChaves}
                       className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
                     >
@@ -221,21 +221,61 @@ export interface Chaves {
                       <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                           Selecione uma sala</p>
-                              <select
-                                className="w-full p-2 rounded-[10px] cursor-pointer border  border-[#646999] focus:outline-none text-[#777DAA]   appearance-none "
+                          <select
+                            className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
+                            value={selectedSala}
+                            onChange={(e) => setSelectedSala(e.target.value)}
+                            required 
+                          >
+                            <option className="text-[#777DAA] text-xs font-medium" value="" disabled>Selecione uma sala</option> 
+                            {salas.map((sala, index) => (
+                              <option key={index} value={sala} className="text-center bg-[#B8BCE0]">
+                                {sala}
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                                className="w-full p-2 rounded-[10px] cursor-pointer border  border-[#646999] focus:outline-none text-[#777DAA] appearance-none"
                                 value={selectedSala}
-                                onChange={handleSelect}
+                                onChange={(e) => setSelectedSala(e.target.value)}
+                                required  // Adicionado aqui
                               >
-                                <option value="" disabled>
-
-                                </option>
-                                  {salas.map((sala, index) => (
-                                    <option key={index} value={sala} className="text-center bg-[#B8BCE0] ">
-                                      {sala}
-                                    </option>
+                                {salas.map((sala, index) => (
+                                  <option key={index} value={sala} className="text-center bg-[#B8BCE0]">
+                                    {sala}
+                                  </option>
                                 ))}
-                                
                               </select>
+                      </div>
+                              <div className="justify-center items-center ml-[40px] mr-8">
+                              <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
+                                Digite o bloco
+                              </p>
+                              <input
+                              type="text"
+                              className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                                placeholder="Bloco"
+                                value={blocos}
+                                onChange={(e) => setBlocos(e.target.value)}
+                                required
+                              />
+                              
+                           </div>
+                            <div className="justify-center items-center ml-[40px] mr-8">
+                              <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
+                                Pessoas Autorizadas
+                              </p>
+                              <input
+                              type="text"
+                              className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                              placeholder="Descrição de pessoas autorizadas"
+                                value={pessoas}
+                                onChange={(e) => setPessoas(e.target.value)}
+                                required
+                              />
+                              
+                            </div>
+                        <div className="justify-center items-center ml-[40px] mr-8">
                         <p className="text-[#192160] text-sm font-medium mb-1">
                           Informe a quantidade de chaves
                         </p>
@@ -247,13 +287,12 @@ export interface Chaves {
                           value={qntd}
                           min="0"   
                           step="1"  
-                          onChange={handleQntdChange}
+                          onChange={(e) => setQntd(e.target.value)}
                           required
                         />
-                        {/* Exibe a mensagem de erro se houver um erro */}
-                        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-
                        </div>
+
+                       
 
                       <div className="justify-center items-center ml-[40px] mr-8">
                         <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
@@ -268,7 +307,7 @@ export interface Chaves {
                         />
                         
                       </div>
-
+                      
                       <div className="flex justify-center items-center mt-[10px] w-full">
                         <button
                           type="submit"
@@ -291,7 +330,9 @@ export interface Chaves {
                                     <tr>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[45%]">Salas</th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">Blocos</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 ">Quantidade de chaves</th>                                   
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">Quantidade de chaves</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">Pessoas autorizadas</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 ">Descrição</th>                                   
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -302,14 +343,48 @@ export interface Chaves {
                                         onClick={() => statusSelecao(chaves.id)}
                                       >
                                       
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%]">
-                                                {chaves.salas}
+                                            <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%] h-12">
+                                                <div className="flex justify-center items-center ">
+                                                  
+                                                <svg className="size-6 ml-2 mr-2  " xmlns="http://www.w3.org/2000/svg" width="30" height="29" viewBox="0 0 30 29" fill="none">
+                                                  <g clip-path="url(#clip0_1757_570)">
+                                                    <path d="M27.0832 -0.000473685H24.4587C23.9824 -0.00183001 23.5107 0.0913538 23.0707 0.273676C22.6308 0.455998 22.2314 0.723832 21.8958 1.06165L11.7929 11.1633C9.85869 10.6643 7.81403 10.815 5.9739 11.5923C4.13376 12.3695 2.60021 13.7302 1.60948 15.4648C0.618743 17.1994 0.225778 19.2116 0.491112 21.1914C0.756446 23.1713 1.66536 25.009 3.07785 26.4215C4.49035 27.834 6.32806 28.7429 8.30792 29.0082C10.2878 29.2736 12.3 28.8806 14.0345 27.8899C15.7691 26.8991 17.1298 25.3656 17.9071 23.5254C18.6844 21.6853 18.8351 19.6407 18.336 17.7064L19.8332 16.2093V13.2912H23.4582V9.66619H26.3751L28.4377 7.60357C28.7754 7.26757 29.0431 6.86796 29.2254 6.42785C29.4077 5.98774 29.501 5.51586 29.4998 5.03948V2.41619C29.4998 1.77525 29.2452 1.16056 28.792 0.707352C28.3388 0.254139 27.7241 -0.000473685 27.0832 -0.000473685ZM27.0832 5.03948C27.0833 5.19836 27.0521 5.35569 26.9913 5.50249C26.9306 5.64929 26.8415 5.78266 26.7291 5.89498L25.3746 7.24953H21.0415V10.8745H17.4165V15.2064L15.5496 17.0733C15.9748 17.9686 16.1995 18.9459 16.2082 19.937C16.2082 21.2514 15.8184 22.5363 15.0881 23.6292C14.3579 24.7222 13.3199 25.574 12.1056 26.077C10.8912 26.58 9.55495 26.7116 8.26579 26.4552C6.97662 26.1987 5.79245 25.5658 4.86301 24.6363C3.93357 23.7069 3.30062 22.5227 3.04419 21.2336C2.78776 19.9444 2.91937 18.6081 3.42237 17.3938C3.92538 16.1794 4.77719 15.1415 5.87009 14.4112C6.963 13.681 8.2479 13.2912 9.56232 13.2912C10.5602 13.226 11.5554 13.4545 12.4249 13.9485L23.6044 2.77023C23.8316 2.54462 24.1384 2.41744 24.4587 2.41619H27.0832V5.03948ZM6.54149 21.7495C6.54149 21.9885 6.61236 22.2221 6.74513 22.4208C6.8779 22.6195 7.06662 22.7744 7.28741 22.8659C7.50821 22.9573 7.75116 22.9813 7.98556 22.9346C8.21995 22.888 8.43526 22.7729 8.60424 22.6039C8.77323 22.435 8.88831 22.2197 8.93494 21.9853C8.98156 21.7509 8.95763 21.5079 8.86618 21.2871C8.77472 21.0663 8.61985 20.8776 8.42114 20.7448C8.22243 20.6121 7.98881 20.5412 7.74982 20.5412C7.42935 20.5412 7.12201 20.6685 6.8954 20.8951C6.6688 21.1217 6.54149 21.4291 6.54149 21.7495Z" fill="#565D8F"/>
+                                                  </g>
+                                                  <defs>
+                                                    <clipPath id="clip0_1757_570">
+                                                      <rect width="29" height="29" fill="white" transform="translate(0.5)"/>
+                                                    </clipPath>
+                                                  </defs>
+                                                </svg>
+                                                  <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                                                    {chaves.salas}
+                                                  </p>
+                                                  
+                                                  
+                                              </div>
+                                                
                                             </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[30%] break-words flex-1">
-                                                {chaves.blocos}
+                                            <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words h-12">
+                                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
+                                                    {chaves.blocos}
+                                                  </p>
                                             </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                                                {chaves.qntd}
+                                            <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words h-12">
+                                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
+                                                    {chaves.qntd}
+                                                  </p>
+                                              
+                                            </td>
+                                            <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words h-12">
+                                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
+                                                    {chaves.pessoas}
+                                                  </p>
+                                              
+                                            </td>
+                                            <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words h-12">
+                                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
+                                                    {chaves.descricao}
+                                                  </p>
                                             </td>
                                           </tr>
                                     ))}
