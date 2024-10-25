@@ -112,7 +112,7 @@ function handleSubmit(event: React.FormEvent){
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
-               {error && <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[17px] font-medium text-center">{error}</div>}
+               {error && <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">{error}</div>}
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[30px] text-center items-center ml-[70px]">
