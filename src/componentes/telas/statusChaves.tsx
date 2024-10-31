@@ -10,7 +10,6 @@ export interface Chave {
     sala: string;
     bloco: string;
     descricao: string;
-    qtdReservada: number;
     qtdEmprestada: number;
     qtdDisponível: number;
 }
@@ -26,8 +25,8 @@ interface StatusChavesProps {
 export function StatusChaves({ mudarTela }: StatusChavesProps) {
 
     const [listaChaves, setListaChaves] = useState<Chave[]>([
-        { id: 1, sala: "E04", bloco: "Bloco E", descricao: "Descrição da chave 1", qtdReservada: 1, qtdDisponível: 2, qtdEmprestada: 0 },
-        { id: 2, sala: "E05", bloco: "Bloco E", descricao: "Descrição da chave 2", qtdReservada: 0, qtdDisponível: 1, qtdEmprestada: 1 },
+        { id: 1, sala: "Laboratório X", bloco: "E", descricao: "Nenhuma chave em uso no momento", qtdDisponível: 2, qtdEmprestada: 0 },
+        { id: 2, sala: "Laboratório Y", bloco: "E", descricao: "Chave em uso pela prof. Aryane", qtdDisponível: 1, qtdEmprestada: 1 },
     ]);
     const itensPorPagina = 5;
     const [paginaAtual, setPaginaAtual] = useState(1);
@@ -42,15 +41,14 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
     const chavesFiltradas = isSearching
         ? listaChaves.filter(chave =>
             chave.sala.toLowerCase().includes(pesquisa.toLowerCase()) ||
-            chave.bloco.toLowerCase().includes(pesquisa.toLowerCase()) ||
-            chave.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+            chave.bloco.toLowerCase().includes(pesquisa.toLowerCase())
         )
         : listaChaves
 
     const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
 
     const [isChaveModalOpen, setIsChaveModalOpen] = useState(false);
-    const [isAutorizaModalOpen, setIsAutorizaModalOpen] = useState(false);
+    // const [isAutorizaModalOpen, setIsAutorizaModalOpen] = useState(false);
     const [ChaveSelecionada, setChaveSelecionada] = useState<number | null>(null);
 
     function openChaveModal(id: number) {
@@ -61,21 +59,21 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
     function closeChaveModal() {
         setIsChaveModalOpen(false);
     }
-    function openAutorizaModal() {
-        setIsAutorizaModalOpen(true);
-    }
+    // function openAutorizaModal() {
+    //     setIsAutorizaModalOpen(true);
+    // }
 
-    function closeAutorizaModal() {
-        setIsAutorizaModalOpen(false);
-    }
+    // function closeAutorizaModal() {
+    //     setIsAutorizaModalOpen(false);
+    // }
 
     function seleciona(id: number) {
         setChaveSelecionada(id);
     };
 
-    function desseleciona() {
-        setChaveSelecionada(null)
-    }
+    // function desseleciona() {
+    //     setChaveSelecionada(null)
+    // }
 
     function avancarPagina() {
         if (paginaAtual < totalPaginas) {
@@ -95,7 +93,7 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
             <MenuTopo mudarTela={mudarTela} />
 
             {/* parte informativa tela status chaves */}
-            <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
+            <div className="relative bg-white w-full max-w-[800px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-10 desktop:top-6 tablet:h-[480px] h-[90%]">
 
                 {/* cabeçalho tela status chaves */}
                 <div className="flex w-full gap-2">
@@ -105,7 +103,7 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                 {/* fim cabeçalho tela status chaves */}
 
                 {/* conteudo central tela status chaves */}
-                <div className="flex flex-col mobile:px-8 px-4 py-3 w-auto justify-center gap-3">
+                <div className="flex flex-col px-4 py-3 w-auto justify-center gap-3">
 
                     {/* pesquisa + filtro */}
                     <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
@@ -120,22 +118,6 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                             />
                             {/* fim input de pesquisa */}
 
-                            {/* input de filtro */}
-                            <div >
-
-                                <select
-                                    name="filtrar_status"
-                                    id="filtrar_status"
-                                    // value={filtro}
-                                    // onChange={(e) => {
-                                    //     setFiltro(e.target.value);
-                                    // }}
-                                    className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-sky-900 text-sm font-medium h-fit">
-                                    <option value="todos">Todos</option>
-                                </select>
-
-                            </div>
-                            {/* fim input de filtro */}
                         </div>
 
                     </div>
@@ -150,13 +132,11 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                             <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
                                 <thead className="bg-white sticky top-0 z-10">
                                     <tr>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[25%]">Nome da sala</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[25%]">Nome do bloco</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-16 ">Qtd. em Uso</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-16">Qtd. Res.</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-16">Qtd. Disp.</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1">Conceder autorização</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 ">Ações</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[55%]">Sala</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-20">Bloco</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-20">Qtd. Disp.</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-20 ">Qtd. Uso</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -164,72 +144,32 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                                         <tr
                                             key={chave.id}
                                         >
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words max-w-[25%]">
+                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[55%]">
                                                 {chave.sala}
                                             </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[25%] break-words flex-1">
+                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-20 break-words flex-1">
                                                 {chave.bloco}
                                             </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-16">
-                                                {chave.qtdEmprestada}
-                                            </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-16">
-                                                {chave.qtdReservada}
-                                            </td>
-                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  break-words w-16">
+                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  break-words min-w-8 w-20">
                                                 {chave.qtdDisponível}
                                             </td>
-                                            <td className="flex justify-center items-center">
-
-                                                <button onClick={openAutorizaModal} className="bg-sky-900 text-sm text-white font-semibold px-4 py-1 rounded-md mx-2">
-                                                    AUTORIZAR
-                                                </button>
+                                            <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words min-w-8 w-20">
+                                                {chave.qtdEmprestada}
                                             </td>
 
-                                            {isAutorizaModalOpen &&  (
-                                                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                                    <form className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
-                                                        <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                                                Autorizar
-                                                            </p>
-                                                            <button
-                                                                onClick={closeAutorizaModal}
-                                                                type="button"
-                                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                                            >
-                                                                <X className=" mb-[5px] text-[#192160]" />
-                                                            </button>
-                                                        </div>
+                                            <td className="pl-2">
 
-                                                        <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-
-                                                            <p className="text-[#192160] text-sm font-medium mb-1">
-                                                                teste
-                                                            </p>
-
-                                                        </div>
-
-                                                    </form>
-                                                </div>
-                                            )}
-
-                                            <td>
-
-                                                <button onClick={() => openChaveModal(chave.id)} className="flex gap-1 justify-start items-center font-medium text-sm text-[#646999] underline">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#646999" className="bi bi-pen" viewBox="0 0 16 16">
-                                                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                                                    </svg>
-                                                    Descrição
+                                                <button onClick={() => openChaveModal(chave.id)} className="flex gap-1 justify-start items-center font-medium text-[#646999] underline mobile:text-sm text-xs">
+                                                    Ver mais
                                                 </button>
                                             </td>
                                             {/* Adicionando pop up de descricao da chave */}
                                             {(isChaveModalOpen && chave.id === ChaveSelecionada) &&  (
                                                 <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                                    <form className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
+                                                    <form className="container flex flex-col gap-2 w-full px-1 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
                                                         <div className="flex justify-center mx-auto w-full max-w-[90%]">
                                                             <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                                                Descrição da chave
+                                                                Chaves
                                                             </p>
                                                             <button
                                                                 onClick={closeChaveModal}
@@ -240,7 +180,9 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
                                                             </button>
                                                         </div>
 
-                                                        <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
+                                                        <div className="space-y-1 justify-center items-center ml-[40px] mr-8">
+
+                                                            <h2 className="text-[#192160] font-semibold">{chave.sala}:</h2>
 
                                                             <p className="text-[#192160] text-sm font-medium mb-1">
                                                                 {chave.descricao}
