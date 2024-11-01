@@ -1,4 +1,4 @@
-import {ChevronRight,Plus,X}from "lucide-react";
+import {ChevronRight,Plus,X,Check}from "lucide-react";
 import { useState } from "react";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
@@ -26,6 +26,11 @@ export interface Chaves {
     // Adicionando funcionalidade ao button adicionar bloco
     const [chaves, setChaves] = useState<Chaves[]>([]);
     const [nextId, setNextId] = useState(1);
+    const [pesquisaModal, setPesquisaModal] = useState<string>("");
+    const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+   
+
     {/*adicionando a função de adicionar chaves*/}
     const [selectedSala, setSelectedSala] = useState("");
     const [selectedBloco, setSelectedBloco] = useState("");
@@ -35,10 +40,12 @@ export interface Chaves {
 
     // Adicionando função de abrir e fechar pop up
     const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+    const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
+
     
     const [isPessoasModalOpen, setIsPessoasModalOpen] = useState(false);
-
-    const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
+    const [novaPessoa, setNovaPessoa] = useState("");
+     const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
 
     const blocos = [
       "Bloco C",
@@ -56,20 +63,7 @@ export interface Chaves {
 
 
     {/*adiocionando lista chaves */}
-    const [listaChaves, setItensAtuais] = useState<Chaves[]>([
-      {id:1, salas:"Sala A01", blocos: "Bloco A", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"], descricao:"Entregue para o professor Rangel"},
-      {id:2, salas:"Sala B02", blocos: "Bloco B", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"],descricao:"Entregue para a professora Vanessa"},
-      {id:3, salas:"Sala C03", blocos: "Bloco C", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"], descricao:"Entregue para o professor Ronaldo"},
-      {id:4, salas:"Sala A01", blocos: "Bloco A", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"], descricao:"Entregue para o professor Rangel"},
-      {id:5, salas:"Sala B02", blocos: "Bloco B", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"],descricao:"Entregue para a professora Vanessa"},
-      {id:6, salas:"Sala C03", blocos: "Bloco C", qntd:2,
-        pessoasAutorizadas: ["João", "Maria", "Pedro"], descricao:"Entregue para o professor Ronaldo"},
-    ]);
+    const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
     
     function addChaves(e: React.FormEvent) {
       e.preventDefault();
@@ -93,6 +87,7 @@ export interface Chaves {
       closePessoasModal();
     }
     
+   
     
 
     function statusSelecao(id: number) {
@@ -100,14 +95,52 @@ export interface Chaves {
       setChaveSelecionada(chave );
     }
 
+ 
 
+    
 
     
     
       function openChavesModal() {
         setIsChavesModalOpen(true);
       }
+      function openDescricaoModal() {
+        setIsDescricaoModalOpen(true);
+      }
+      function closeDescricaoModal() {
+        setDescricao("");
+        setIsDescricaoModalOpen(false);
+      }
+      function openEditModal() {
+        const chave = listaChaves.find(chave => chave.id === chaveSelecionada?.id);
+        if (chave) {
+            setSelectedSala(chave.salas);
+            setSelectedBloco(chave.blocos);
+            setQntd(chave.qntd);
+            setDescricao(chave.descricao);
+            setIsEditModalOpen(true);
+        }
+    }
     
+    function closeEditModal() {
+        setIsEditModalOpen(false);
+    }
+    function adicionarPessoa(chaveId: number, novaPessoa: string) {
+      setItensAtuais((prevLista) => {
+        return prevLista.map((chave) => {
+          if (chave.id === chaveId) {
+            return {
+              ...chave,
+              pessoasAutorizadas: [...chave.pessoasAutorizadas, novaPessoa],
+            };
+          }
+          return chave;
+        });
+      });
+    }
+  
+
+  
 
       function openPessoasModal(chave: Chaves) {
         setChaveSelecionada(chave);
@@ -408,7 +441,7 @@ export interface Chaves {
                                             {isPessoasModalOpen && chaveSelecionada &&(
                                             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                               <div
-                                                className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                                                className="container flex flex-col gap-2 w-[90%] max-w-[450px] p-[10px] h-auto max-h-[80vh] overflow-y-auto rounded-[15px] bg-white relative"
                                               >
                                                 
                                                 <div className="flex justify-center mx-auto w-full max-w-[90%]">
@@ -429,29 +462,88 @@ export interface Chaves {
                                                   
                                                   </div>
                                                   <div>
-                                                  <div className="flex w-[72px] h-[20px] justify-center items-start gap-[5px] flex-shrink-0">
+                                                  
+                                                  <div className="flex justify-center items-center gap-4 self-stretch ml-[200px]">
                                                   
 
-                                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                                    <g clip-path="url(#clip0_1803_1599)">
-                                                      <path d="M17.1398 0.860965C16.6299 0.351863 15.9388 0.065918 15.2183 0.065918C14.4977 0.065918 13.8066 0.351863 13.2968 0.860965L1.09876 13.059C0.74945 13.4063 0.472483 13.8195 0.283885 14.2746C0.0952868 14.7296 -0.00119848 15.2176 1.12359e-05 15.7102V17.25C1.12359e-05 17.4489 0.0790289 17.6396 0.219681 17.7803C0.360333 17.9209 0.551099 18 0.750011 18H2.28976C2.78233 18.0014 3.27029 17.905 3.72538 17.7166C4.18047 17.5281 4.59365 17.2512 4.94101 16.902L17.1398 4.70321C17.6486 4.19336 17.9344 3.50244 17.9344 2.78209C17.9344 2.06174 17.6486 1.37082 17.1398 0.860965ZM3.88051 15.8415C3.45751 16.2617 2.88598 16.4982 2.28976 16.5H1.50001V15.7102C1.49925 15.4146 1.55713 15.1219 1.67029 14.8488C1.78345 14.5757 1.94965 14.3279 2.15926 14.1195L11.4165 4.86221L13.1415 6.58721L3.88051 15.8415ZM16.0785 3.64271L14.199 5.52296L12.474 3.80171L14.3543 1.92147C14.4675 1.80845 14.6019 1.71884 14.7498 1.65777C14.8977 1.5967 15.0562 1.56536 15.2162 1.56553C15.3762 1.56571 15.5346 1.59739 15.6824 1.65879C15.8301 1.72018 15.9644 1.81007 16.0774 1.92334C16.1904 2.03661 16.28 2.17102 16.3411 2.31892C16.4022 2.46681 16.4335 2.62528 16.4333 2.78529C16.4331 2.9453 16.4015 3.1037 16.3401 3.25146C16.2787 3.39922 16.1888 3.53345 16.0755 3.64647L16.0785 3.64271Z" fill="#646999"/>
-                                                    </g>
-                                                    <defs>
-                                                      <clipPath id="clip0_1803_1599">
-                                                        <rect width="18" height="18" fill="white"/>
-                                                      </clipPath>
-                                                    </defs>
-                                                  </svg>
-                                                  <span className="text-[#646999] font-montserrat text-[16px] font-medium leading-normal underline">
+                                                  <button onClick={openEditModal} className="flex gap-1 justify-center items-center font-medium text-sm md:text-base text-[#646999] underline">
+                                                  <img src="fi-rr-pencil (1).svg" alt="" />
                                                   Editar
-                                                </span>
-                                                  
+                                                </button>
+                                                {/*modal de editar pessoas */}
+                                                {isEditModalOpen && (
+                                                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                                    <form 
+                                                      onSubmit={(e) => {
+                                                        e.preventDefault();
+                                                        if (chaveSelecionada) {
+                                                          adicionarPessoa(chaveSelecionada.id, novaPessoa);
+                                                          setNovaPessoa("");
+                                                          closeEditModal();
+                                                        }
+                                                      }}
+                                                      className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                                                    >
+                                                      <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                                        <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                                          ALTERAR PESSOAS AUTORIZADAS
+                                                        </p>
+                                                        <button
+                                                          onClick={closeEditModal}
+                                                          type="button"
+                                                          className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                                        >
+                                                          <X className=" mb-[5px] text-[#192160]" />
+                                                        </button>
+                                                      </div>
+                                                      
+                                                            
+                                                      <div className="justify-center items-center ml-[40px] mr-8">
+                                                      
+                                                        <p className="text-[#192160] text-sm font-medium mb-1">
+                                                        Pessoas Autorizadas
+                                                        </p>
+                                                        {/* Campo de entrada para nova pessoa */}
+                                                        
+                                                        <input
+                                                          type="text"
+                                                          className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                                                          placeholder="Nome da nova pessoa"
+                                                          value={novaPessoa}
+                                                          onChange={(e) => setNovaPessoa(e.target.value)}
+                                                          required
+                                                        />
+                                                    
+                                                      </div>
+                                                      
+
+                                                      
+                                                      
+                                                      <div className="flex justify-center items-center mt-[10px] w-full">
+                                                      <button
+                                                      type="submit"
+                                                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                                                  >
+                                                      SALVAR ALTERAÇÕES <Check className="size-5" />
+                                                  </button>
+                                                      </div>
+                                                    </form>
+                                                  </div>
+                                                )}
+
                                                   <div className="flex justify-end items-center  px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
                                                     <input
                                                       type="text"
                                                       placeholder="Pesquisar..."
                                                       className="placeholder-sky-900 text-sm font-medium outline-none w-20 mr-2"
+                                                      value={pesquisaModal}
+                                                      onChange={(e) => {
+                                                        const inputValue = e.target.value;
+                                                        setPesquisaModal(inputValue);
+                                                        setIsSearchingModal(inputValue.trim().length > 0);
+                                                      }}
                                                     />
+                    
                                                     <svg
                                                       xmlns="http://www.w3.org/2000/svg"
                                                       width="12"
@@ -468,12 +560,20 @@ export interface Chaves {
 
                                                   <div className=" rounded-[10px] bg-[#B8BCE0] p-4">
                                                   <ul className=" color-[#192160] list-disc pl-5">
-                                                  {chaveSelecionada.pessoasAutorizadas.map((pessoa, index) => (
+                                                  {chaveSelecionada.pessoasAutorizadas
+                                                  .filter((pessoa) =>
+                                                    isSearchingModal
+                                                      ? pessoa.toLowerCase().includes(pesquisaModal.toLowerCase())
+                                                      : true
+                                                  )
+                                                  .map((pessoa, index) => (
                                                   
                                                    <li className="text-[#192160]  text-[15px] font-semibold leading-normal  text-left  " key={index}>
                                                     {pessoa}</li>
+                                                     
                                                     ))}
                                                   </ul>
+                                                  
                                                 </div>
                                                 
                                                 
@@ -497,11 +597,15 @@ export interface Chaves {
                                               </clipPath>
                                             </defs>
                                           </svg>
-                                          <p className="text-[#646999] font-montserrat text-[11px] font-medium underline">Ver mais</p>
+                                          <p onClick={openDescricaoModal} className="text-[#646999] font-montserrat text-[11px] font-medium underline">Ver mais</p>
+                                          
                                             </div>
                                             </td>
                                           </tr>
                                     ))}
+                                  
+                      
+                      
                                 </tbody>
                             </table>
                             {/* passador de página */}
@@ -512,7 +616,54 @@ export interface Chaves {
                                 paginaAtual={paginaAtual}
                             />
                         {/* fim passador de página */}
+                        
                         </div>
+                        {isDescricaoModalOpen && (
+                                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                    <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                                              >
+                                    
+                                                  
+                                                  
+                                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                                  <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                                    Descrição sobre chaves
+                                                  </p>
+                                                  <button
+                                                    onClick={closeDescricaoModal}
+                                                    type="button"
+                                                    className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                                  >
+                                                    <X className=" mb-[5px] text-[#192160]" />
+                                                  </button>
+                                                  
+                                                </div>
+                                                <div className=" rounded-[10px] bg-[#B8BCE0] p-4">
+                                                {chaves.map((chave) => ( // Aqui você deve usar 'chave' em vez de 'descricao'
+                                                  <div key={chave.id} className="rounded-[10px] bg-[#B8BCE0] p-4">
+                                                    <p className="text-[#192160] text-center text-[20px] font-semibold ml-[10px] w-[85%]">
+                                                      {chave.descricao} {/* Aqui você deve acessar a descrição da chave */}
+                                                    </p>
+                                                  </div>
+                                                ))}
+                                              
+                                                   
+                                                </div>
+                            
+                                                  
+                                                  
+                                                  
+                                              
+                                                  </div>
+                                                 
+
+                                                  
+                                                
+                                                
+                                          </div>
+                                            
+
+                                            )}
           </main>
         </div>
       </div>
