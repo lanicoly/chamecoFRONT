@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, X, Check } from "lucide-react";
+import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
@@ -25,9 +25,9 @@ export function Chaves({ mudarTela }: ChavesProps) {
   // Adicionando funcionalidade ao button adicionar bloco
   const [chaves, setChaves] = useState<Chaves[]>([]);
   const [nextId, setNextId] = useState(1);
-  const [pesquisaModal, setPesquisaModal] = useState<string>("");
-  const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [pesquisaModal, setPesquisaModal] = useState<string>("");
+  // const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   {
     /*adicionando a função de adicionar chaves*/
@@ -44,8 +44,8 @@ export function Chaves({ mudarTela }: ChavesProps) {
   const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
   const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
 
-  const [isPessoasModalOpen, setIsPessoasModalOpen] = useState(false);
-  const [novaPessoa, setNovaPessoa] = useState("");
+  // const [isPessoasModalOpen, setIsPessoasModalOpen] = useState(false);
+  // const [novaPessoa, setNovaPessoa] = useState("");
   const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
 
   const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
@@ -74,7 +74,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
     setSelectedBloco("");
     setDescricao("");
     closeChavesModal();
-    closePessoasModal();
+    // closePessoasModal();
   }
 
   function statusSelecao(id: number) {
@@ -85,6 +85,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
   function openChavesModal() {
     setIsChavesModalOpen(true);
   }
+
   function openDescricaoModal() {
     setIsDescricaoModalOpen(true);
   }
@@ -92,45 +93,46 @@ export function Chaves({ mudarTela }: ChavesProps) {
     setDescricao("");
     setIsDescricaoModalOpen(false);
   }
-  function openEditModal() {
-    const chave = listaChaves.find(
-      (chave) => chave.id === chaveSelecionada?.id
-    );
-    if (chave) {
-      setSelectedSala(chave.salas);
-      setSelectedBloco(chave.blocos);
-      setQntd(chave.qntd);
-      setDescricao(chave.descricao);
-      setIsEditModalOpen(true);
-    }
-  }
 
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
-  function adicionarPessoa(chaveId: number, novaPessoa: string) {
-    setItensAtuais((prevLista) => {
-      return prevLista.map((chave) => {
-        if (chave.id === chaveId) {
-          return {
-            ...chave,
-            pessoasAutorizadas: [...chave.pessoasAutorizadas, novaPessoa],
-          };
-        }
-        return chave;
-      });
-    });
-  }
+  // function openEditModal() {
+  //   const chave = listaChaves.find(
+  //     (chave) => chave.id === chaveSelecionada?.id
+  //   );
+  //   if (chave) {
+  //     setSelectedSala(chave.salas);
+  //     setSelectedBloco(chave.blocos);
+  //     setQntd(chave.qntd);
+  //     setDescricao(chave.descricao);
+  //     setIsEditModalOpen(true);
+  //   }
+  // }
 
-  function openPessoasModal(chave: Chaves) {
-    setChaveSelecionada(chave);
-    setIsPessoasModalOpen(true);
-  }
+  // function closeEditModal() {
+  //   setIsEditModalOpen(false);
+  // }
+  // function adicionarPessoa(chaveId: number, novaPessoa: string) {
+  //   setItensAtuais((prevLista) => {
+  //     return prevLista.map((chave) => {
+  //       if (chave.id === chaveId) {
+  //         return {
+  //           ...chave,
+  //           pessoasAutorizadas: [...chave.pessoasAutorizadas, novaPessoa],
+  //         };
+  //       }
+  //       return chave;
+  //     });
+  //   });
+  // }
 
-  function closePessoasModal() {
-    setIsPessoasModalOpen(false);
-    setChaveSelecionada(null);
-  }
+  // function openPessoasModal(chave: Chaves) {
+  //   setChaveSelecionada(chave);
+  //   setIsPessoasModalOpen(true);
+  // }
+
+  // function closePessoasModal() {
+  //   setIsPessoasModalOpen(false);
+  //   setChaveSelecionada(null);
+  // }
 
   function closeChavesModal() {
     setQntd(0);
@@ -174,23 +176,46 @@ export function Chaves({ mudarTela }: ChavesProps) {
     }
   }
   const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
-  const [error, setError] = useState<string>("");
-  {
-    /*garantir que qntd seja um número */
-  }
-  function handleQntdChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
 
-    {
-      /* Verifica se o valor é um número*/
-    }
-    if (!/^\d*$/.test(value)) {
-      setError("Por favor, insira apenas números.");
-    } else {
-      setError("");
-      setQntd(Number(value));
+  // adicionando modal de excluir chave
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  function openDeleteModal() {
+    if (chaveSelecionada !== null) {
+      setIsDeleteModalOpen(true);
     }
   }
+
+  function closeDeleteModal() {
+    setIsDeleteModalOpen(false);
+  }
+
+  // adicionando função de excluir chave
+  function removeUser(e: React.FormEvent) {
+    e.preventDefault();
+    setItensAtuais(
+      listaChaves.filter((chave) => chave.id !== chaveSelecionada?.id)
+    );
+    setChaveSelecionada(null);
+    closeDeleteModal();
+  }
+
+  // const [error, setError] = useState<string>("");
+  // {
+  //   /*garantir que qntd seja um número */
+  // }
+  // function handleQntdChange(e: React.ChangeEvent<HTMLInputElement>) {
+  //   const value = e.target.value;
+
+  //   {
+  //     /* Verifica se o valor é um número*/
+  //   }
+  //   if (!/^\d*$/.test(value)) {
+  //     setError("Por favor, insira apenas números.");
+  //   } else {
+  //     setError("");
+  //     setQntd(Number(value));
+  //   }
+  // }
 
   return (
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
@@ -228,7 +253,71 @@ export function Chaves({ mudarTela }: ChavesProps) {
             </div>
 
             {/* botão de + chaves */}
-            <div className="flex items-center w-full tablet:w-auto">
+            <div className="flex items-center w-full gap-10 tablet:w-auto">
+              <button
+                onClick={openDeleteModal}
+                className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  fill="#e11d48"
+                  className="bi bi-x-lg"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+                Excluir
+              </button>
+              {isDeleteModalOpen && (
+                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                  <form
+                    onSubmit={removeUser}
+                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                  >
+                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                        EXCLUIR USUÁRIO
+                      </p>
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                      >
+                        <X className=" text-[#192160]" />
+                      </button>
+                    </div>
+                    <TriangleAlert className="size-16 text-red-700" />
+
+                    <p className="text-center px-2">
+                      Essa ação é{" "}
+                      <strong className="font-semibold ">definitiva</strong> e
+                      não pode ser desfeita.{" "}
+                      <strong className="font-semibold">
+                        Tem certeza disso?
+                      </strong>
+                    </p>
+                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                      >
+                        EXCLUIR
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+              {/* Fim adicionando pop up de deletar usuario */}
+
               <button
                 onClick={openChavesModal}
                 className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
@@ -246,6 +335,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
                 </svg>
                 ADICIONAR CHAVE
               </button>
+
               {/* Adicionando pop up de adicionar chaves */}
               {isChavesModalOpen && (
                 <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
@@ -324,7 +414,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
                       </select>
                     </div>
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
+                    {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Informe a quantidade de chaves
                       </p>
@@ -340,10 +430,10 @@ export function Chaves({ mudarTela }: ChavesProps) {
                         required
                       />
                       {/* Exibe a mensagem de erro se houver um erro */}
-                      {error && (
+                    {/* {error && (
                         <p className="text-red-500 text-xs mt-1">{error}</p>
                       )}
-                    </div>
+                    </div> */}
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
@@ -370,12 +460,13 @@ export function Chaves({ mudarTela }: ChavesProps) {
               )}
             </div>
           </div>
+
           {/*lista de chaves */}
           <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
             <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
               <thead className="bg-white sticky top-0 z-10">
                 <tr>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[20%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[50%]">
                     Salas
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
@@ -384,9 +475,9 @@ export function Chaves({ mudarTela }: ChavesProps) {
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
                     Quantidade de chaves
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
+                  {/* <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
                     Lista de pessoas autorizadas
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody>
@@ -445,11 +536,11 @@ export function Chaves({ mudarTela }: ChavesProps) {
                           </defs>
                         </svg>
                         <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
-                          {chaves.qntd}
+                          1
                         </p>
                       </div>
                     </td>
-                    <div
+                    {/* <div
                       onClick={() => openPessoasModal(chaves)}
                       className="border-2 border-[#B8BCE0] border-solid bg-[#565D8F]"
                     >
@@ -483,13 +574,13 @@ export function Chaves({ mudarTela }: ChavesProps) {
                           </p>
                         </div>
                       </td>
-                    </div>
-                    {isPessoasModalOpen && chaveSelecionada && (
+                    </div> */}
+                    {/* {isPessoasModalOpen && chaveSelecionada && (
                       <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                         <div className="container flex flex-col gap-2 w-[90%] max-w-[450px] p-4 h-auto max-h-[80vh] overflow-y-auto rounded-[15px] bg-white relative">
                           <div className="flex justify-between items-center w-full">
                             {/* input de pesquisa */}
-                            <p className="text-[#192160] text-left text-[20px] font-semibold ml-2 w-[85%]">
+                    {/* <p className="text-[#192160] text-left text-[20px] font-semibold ml-2 w-[85%]">
                               Pessoas autorizadas - {chaveSelecionada.salas}
                             </p>
                             <button
@@ -499,22 +590,22 @@ export function Chaves({ mudarTela }: ChavesProps) {
                             >
                               <X className="mb-[5px] text-[#192160]" />
                             </button>
-                          </div>
+                          </div> */}
 
-                          <div className="flex justify-end gap-4 items-center mb-2">
+                    {/* <div className="flex justify-end gap-4 items-center mb-2">
                             <button
                               onClick={openEditModal}
                               className="flex gap-1 items-center font-medium text-sm md:text-base text-[#646999] underline"
-                            >
-                              <img
+                            > */}
+                    {/* <img
                                 src="fi-rr-pencil (1).svg"
                                 alt=""
                                 className="h-5 w-5"
                               />
                               Editar
-                            </button>
-                            {/*modal de editar pessoas */}
-                            {isEditModalOpen && (
+                            </button> */}
+                    {/*modal de editar pessoas */}
+                    {/* {isEditModalOpen && (
                               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                 <form
                                   onSubmit={(e) => {
@@ -528,8 +619,8 @@ export function Chaves({ mudarTela }: ChavesProps) {
                                       closeEditModal();
                                     }
                                   }}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                                >
+                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]" */}
+                    {/* >
                                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
                                     <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
                                       ALTERAR PESSOAS AUTORIZADAS
@@ -546,10 +637,10 @@ export function Chaves({ mudarTela }: ChavesProps) {
                                   <div className="justify-center items-center ml-[40px] mr-8">
                                     <p className="text-[#192160] text-sm font-medium mb-1">
                                       Pessoas Autorizadas
-                                    </p>
-                                    {/* Campo de entrada para nova pessoa */}
+                                    </p> */}
+                    {/* Campo de entrada para nova pessoa */}
 
-                                    <input
+                    {/* <input
                                       type="text"
                                       className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
                                       placeholder="Nome da nova pessoa"
@@ -559,9 +650,9 @@ export function Chaves({ mudarTela }: ChavesProps) {
                                       }
                                       required
                                     />
-                                  </div>
+                                  </div> */}
 
-                                  <div className="flex justify-center items-center mt-[10px] w-full">
+                    {/* <div className="flex justify-center items-center mt-[10px] w-full">
                                     <button
                                       type="submit"
                                       className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
@@ -571,10 +662,10 @@ export function Chaves({ mudarTela }: ChavesProps) {
                                     </button>
                                   </div>
                                 </form>
-                              </div>
-                            )}
+                              </div> */}
+                    {/* )} */}
 
-                            <div className="flex items-center border border-slate-500 rounded-md p-1">
+                    {/* <div className="flex items-center border border-slate-500 rounded-md p-1">
                               <input
                                 type="text"
                                 placeholder="Pesquisar..."
@@ -587,8 +678,8 @@ export function Chaves({ mudarTela }: ChavesProps) {
                                     inputValue.trim().length > 0
                                   );
                                 }}
-                              />
-                              <svg
+                              /> */}
+                    {/* <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="12"
                                 height="12"
@@ -623,7 +714,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
                           </div>
                         </div>
                       </div>
-                    )}
+                    )} */}
 
                     <td className="align-center p-0.5 tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                       <div className="flex w-[96px] h-[20px] pr-[2px] justify-center items-start gap-[2px] flex-shrink-0">
@@ -673,7 +764,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
               </tbody>
             </table>
           </div>
-          {isDescricaoModalOpen && (
+          {isDescricaoModalOpen && chaveSelecionada && (
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
                 <div className="flex justify-center mx-auto w-full max-w-[90%]">
@@ -689,21 +780,15 @@ export function Chaves({ mudarTela }: ChavesProps) {
                   </button>
                 </div>
                 <div className=" rounded-[10px] bg-[#B8BCE0] p-4">
-                  {chaves.map(
-                    (
-                      chave // Aqui você deve usar 'chave' em vez de 'descricao'
-                    ) => (
-                      <div
-                        key={chave.id}
-                        className="rounded-[10px] bg-[#B8BCE0] p-4"
-                      >
-                        <p className="text-[#192160] text-center text-[20px] font-semibold ml-[10px] w-[85%]">
-                          {chave.descricao}{" "}
-                          {/* Aqui você deve acessar a descrição da chave */}
-                        </p>
-                      </div>
-                    )
-                  )}
+                  <div
+                    key={chaveSelecionada.id}
+                    className="rounded-[10px] bg-[#B8BCE0] p-4"
+                  >
+                    <p className="text-[#192160] text-center text-[20px] font-semibold ml-[10px] w-[85%]">
+                      {chaveSelecionada.descricao}{" "}
+                      {/* Aqui você deve acessar a descrição da chave */}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
