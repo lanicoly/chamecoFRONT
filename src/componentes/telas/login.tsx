@@ -33,7 +33,7 @@ export function Login({ mudarTela }: LoginProps) {
   return (
     <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
-      <div className="container relative max-w-[650px] w-full p-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
+      <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
         {/* Adicionando logo */}
         <div className="flex items-center justify-center w-full px-[15px] py-[20px] sm:w-[300px] sm:py-[90px]">
           <img
@@ -44,7 +44,7 @@ export function Login({ mudarTela }: LoginProps) {
         </div>
 
         {/* Adicionando div do formulário */}
-        <div className="flex flex-col items-center pt-[20px] pl-[10px] sm:order-2">
+        <div className="flex flex-col items-center pt-[12px] ml-[10px] ">
           <h1 className="text-[#16C34D] items-center font-semibold text-[40px] text-center">
             Boas Vindas!
           </h1>
@@ -141,7 +141,7 @@ export function Login({ mudarTela }: LoginProps) {
               )}
 
               {/* Adicionando botão de entrar */}
-              <div className="mt-[20px] text-center items-center ml-[50px]">
+              <div className="mt-[15px] text-center items-center ml-[60px]">
                 <button
                   type="submit"
                   className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
