@@ -176,7 +176,7 @@ export function Usuarios({ mudarTela }: UsuariosProps) {
             <MenuTopo mudarTela={mudarTela}/>
 
             {/* parte informativa tela usuarios */}
-            <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
+            <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-10 desktop:top-6 tablet:h-[480px] h-[90%]">
 
                 {/* cabeçalho tela usuarios */}
                 <div className="flex w-full gap-2">
