@@ -1,5 +1,6 @@
 import { CirclePlus, LayoutDashboard, X, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 export interface Blocos {
   id: number;
@@ -11,14 +12,12 @@ export interface Blocos {
 
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
-interface BlocosProps {
-  mudarTela: (index: number) => void;
-}
-
 const url =
   "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/blocos/";
 
-export function Blocos({ mudarTela }: BlocosProps) {
+export function Blocos() {
+  const navigate = useNavigate();
+
   // Adicionando funcionalidade ao button adicionar bloco
   const [blocos, setBlocos] = useState<Blocos[]>([]);
   const [nextId, setNextId] = useState(11);
@@ -179,7 +178,7 @@ export function Blocos({ mudarTela }: BlocosProps) {
       {/* Adicionando barra de navegação */}
       <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
         <button
-          onClick={() => mudarTela(1)}
+          onClick={() => navigate("/menu")}
           className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto"
         >
           <svg
@@ -227,7 +226,7 @@ export function Blocos({ mudarTela }: BlocosProps) {
             Usuário
           </button>
           <button
-            onClick={() => mudarTela(0)}
+            onClick={() => navigate("/login")}
             className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
           >
             Sair
@@ -398,7 +397,7 @@ export function Blocos({ mudarTela }: BlocosProps) {
                   <div className="flex justify-between pt-[20px] px-[10px]">
                     <button
                       className="flex w-[48%] h-[35px] text-[12px] justify-center items-center gap-[5px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#56ab71]"
-                      onClick={() => mudarTela(3)}
+                      onClick={() => navigate("/salas")}
                     >
                       VER SALAS
                     </button>

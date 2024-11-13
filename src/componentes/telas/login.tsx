@@ -1,19 +1,18 @@
 import axios from "axios";
 import IMask from "imask";
-
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-interface LoginProps {
-  mudarTela: (index: number) => void;
-}
+export function Login() {
+  const navigate = useNavigate();
 
-export function Login({ mudarTela }: LoginProps) {
   const url =
     "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
   const [error, setError] = useState<string>("");
+
   useEffect(() => {
     const cpfInput = document.getElementById("cpf");
     if (cpfInput) {
@@ -53,7 +52,7 @@ export function Login({ mudarTela }: LoginProps) {
 
       if (statusResponse === 200) {
         if ("usuario" in data) {
-          mudarTela(1);
+          navigate("/menu");
         } else {
           setError("Usuário não registrado no sistema!");
           return;
