@@ -12,6 +12,7 @@ export function Login() {
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const cpfInput = document.getElementById("cpf");
@@ -39,6 +40,7 @@ export function Login() {
       return;
     }
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await axios.post(url, body, {
@@ -79,6 +81,8 @@ export function Login() {
           return;
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -86,6 +90,11 @@ export function Login() {
     <div className="flex items-center justify-center w-auto h-screen bg-login-fundo  flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
       <div className="container max-w-[650px] w-full p-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row">
+        {isLoading && (
+          <div className="loading-spinner flex items-center justify-center absolute top-0 left-0 w-full h-full bg-opacity-50 bg-gray-300">
+            <div className="spinner-border text-primary"></div>
+          </div>
+        )}
         {/* Adicionando logo */}
         <div className="flex justify-center  mt-10 sm:mt-[60px] sm:ml-[30px]">
           <img
@@ -183,12 +192,13 @@ export function Login() {
               )}
 
               {/* Adicionando botão de entrar */}
-              <div className="mt-[30px] text-center items-center ml-[70px]">
+              <div className="mt-[30px] text-center items-center ml-[50px]">
                 <button
                   type="submit"
-                  className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
+                  disabled={isLoading}
+                  className="px-2 py-1 w-[140px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
                 >
-                  ENTRAR
+                  {isLoading ? "CARREGANDO" : "ENTRAR"}
                 </button>
               </div>
             </div>
