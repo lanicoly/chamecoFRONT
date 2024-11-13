@@ -1,6 +1,7 @@
 import axios from "axios";
+import IMask from "imask";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface LoginProps {
   mudarTela: (index: number) => void;
@@ -13,12 +14,24 @@ export function Login({ mudarTela }: LoginProps) {
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
   const [error, setError] = useState<string>("");
+  useEffect(() => {
+    const cpfInput = document.getElementById("cpf");
+    if (cpfInput) {
+      IMask(cpfInput, {
+        mask: "000.000.000-00",
+      });
+    }
+  }, []);
+
+  function limparCPF(cpf: string) {
+    return cpf.replace(/\D/g, "");
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     const body = {
-      cpf: usuario,
+      cpf: limparCPF(usuario),
       password: senha,
     };
 
@@ -58,6 +71,10 @@ export function Login({ mudarTela }: LoginProps) {
           setError("Usuário ou senha incorretos!");
           return;
         }
+        if (statusResponse === 403) {
+          setError("Usuário não autorizado no sistema!");
+          return;
+        }
         if (statusResponse === 500) {
           setError("Erro interno do servidor! Contate o suporte.");
           return;
@@ -93,7 +110,7 @@ export function Login({ mudarTela }: LoginProps) {
             {/* Div com o primeiro input - login */}
             <div className="relative ">
               <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
-                Digite seu usuário
+                Digite seu CPF
               </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -128,9 +145,10 @@ export function Login({ mudarTela }: LoginProps) {
               <input
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
-                placeholder="Usuário"
+                placeholder="CPF"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
+                id="cpf"
               />
             </div>
 

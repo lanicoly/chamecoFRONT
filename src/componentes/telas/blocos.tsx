@@ -1,6 +1,6 @@
 import { CirclePlus, LayoutDashboard, X, Plus } from "lucide-react";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 export interface Blocos {
   id: number;
   nome: string;
@@ -15,21 +15,48 @@ interface BlocosProps {
   mudarTela: (index: number) => void;
 }
 
+const url =
+  "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/blocos/";
+
 export function Blocos({ mudarTela }: BlocosProps) {
   // Adicionando funcionalidade ao button adicionar bloco
-  const [blocos, setBlocos] = useState<Blocos[]>([
-    { nome: "Bloco A", id: 1, descricao: "Descrição do bloco A" },
-    { nome: "Bloco B", id: 2, descricao: "Descrição do bloco B" },
-    { nome: "Bloco C", id: 3, descricao: "Descrição do bloco C" },
-    { nome: "Bloco D", id: 4, descricao: "Descrição do bloco D" },
-    { nome: "Bloco E", id: 5, descricao: "Descrição do bloco E" },
-    { nome: "Bloco F", id: 6, descricao: "Descrição do bloco F" },
-    { nome: "Bloco G", id: 7, descricao: "Descrição do bloco G" },
-    { nome: "Bloco H", id: 8, descricao: "Descrição do bloco H" },
-    { nome: "Bloco I", id: 9, descricao: "Descrição do bloco I" },
-    { nome: "Bloco J", id: 10, descricao: "Descrição do bloco J" },
-  ]);
+  const [blocos, setBlocos] = useState<Blocos[]>([]);
   const [nextId, setNextId] = useState(11);
+
+  useEffect(() => {
+    obterBlocos();
+  }, []);
+
+  async function obterBlocos() {
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const statusResponse = response.status;
+      const data = response.data;
+
+      if (statusResponse === 200) {
+        const blocos = [];
+
+        if ("bloco" in data.results) {
+          for (const bloco of data.results) {
+            blocos.push({
+              nome: bloco.nome,
+              id: bloco.id,
+              descricao: `Bloco ${bloco.nome}`,
+            });
+          }
+          setBlocos(blocos);
+        }
+      }
+    } catch (error: unknown) {
+      setBlocos([]);
+      console.error("Erro ao obter blocos:", error);
+    }
+  }
 
   function addBlocos(e: React.FormEvent) {
     e.preventDefault();
@@ -199,7 +226,10 @@ export function Blocos({ mudarTela }: BlocosProps) {
             </svg>
             Usuário
           </button>
-          <button onClick={() => mudarTela(0)} className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max">
+          <button
+            onClick={() => mudarTela(0)}
+            className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
+          >
             Sair
             <svg
               xmlns="http://www.w3.org/2000/svg"
