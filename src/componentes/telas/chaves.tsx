@@ -224,24 +224,24 @@ export function Chaves({ mudarTela }: ChavesProps) {
       <MenuTopo mudarTela={mudarTela} />
 
       {/* container */}
-      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6 py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
-        {/* título chaves */}
-        <div className="relative flex w-full gap-2 mt-5 justify-center items-center content-center flex-wrap tablet:flex-row mb-[30px]">
+      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-3 py-4 tablet:py-2 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%] mobile:h-[600px] mobile:w-[80%]">
+      {/* título chaves */}
+        <div className="relative flex w-full gap-2 mt-3 mobile:mt-2 justify-center items-center flex-col tablet:flex-row mb-[30px]">
           <h1 className="flex justify-center text-3xl text-[#081683] font-semibold">
             CHAVES
           </h1>
           {/* Adicionando botão de status */}
           <div className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
+          <button className="flex items-center gap-1">
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
-            <button>
-              <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
+               <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
             </button>
           </div>
         </div>
 
         <main className="flex flex-col mobile:px-8 px-4 py-3 w-auto justify-center gap-3">
           {/* inputs + botão */}
-          <div className="relative flex flex-wrap justify-between items-center gap-2">
+          <div className="mobile:justify-between relative flex flex-1 flex-wrap justify-between items-center gap-2">
             {/* Filtros de busca */}
             <div className="h-fit items-center w-full tablet:w-auto">
               {/* input de pesquisa */}
@@ -253,70 +253,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
             </div>
 
             {/* botão de + chaves */}
-            <div className="flex items-center w-full gap-10 tablet:w-auto">
-              <button
-                onClick={openDeleteModal}
-                className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  fill="#e11d48"
-                  className="bi bi-x-lg"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-                Excluir
-              </button>
-              {isDeleteModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={removeUser}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR USUÁRIO
-                      </p>
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" text-[#192160]" />
-                      </button>
-                    </div>
-                    <TriangleAlert className="size-16 text-red-700" />
 
-                    <p className="text-center px-2">
-                      Essa ação é{" "}
-                      <strong className="font-semibold ">definitiva</strong> e
-                      não pode ser desfeita.{" "}
-                      <strong className="font-semibold">
-                        Tem certeza disso?
-                      </strong>
-                    </p>
-                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                      >
-                        CANCELAR
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                      >
-                        EXCLUIR
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-              {/* Fim adicionando pop up de deletar usuario */}
 
               <button
                 onClick={openChavesModal}
@@ -459,25 +396,22 @@ export function Chaves({ mudarTela }: ChavesProps) {
                 </div>
               )}
             </div>
-          </div>
+          
 
           {/*lista de chaves */}
           <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
             <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
               <thead className="bg-white sticky top-0 z-10">
                 <tr>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[50%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[50%]">
                     Salas
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]">
                     Blocos
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]">
                     Quantidade de chaves
                   </th>
-                  {/* <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
-                    Lista de pessoas autorizadas
-                  </th> */}
                 </tr>
               </thead>
               <tbody>
@@ -758,8 +692,74 @@ export function Chaves({ mudarTela }: ChavesProps) {
                           Ver mais
                         </p>
                       </div>
+                      <div className="pl-[14px] flex items-center w-full gap-10 tablet:w-auto">
+              <button
+                onClick={openDeleteModal}
+                className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  fill="#e11d48"
+                  className="bi bi-x-lg"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+                Excluir
+              </button>
+              {isDeleteModalOpen && (
+                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                  <form
+                    onSubmit={removeUser}
+                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                  >
+                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                        EXCLUIR USUÁRIO
+                      </p>
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                      >
+                        <X className=" text-[#192160]" />
+                      </button>
+                    </div>
+                    <TriangleAlert className="size-16 text-red-700" />
+
+                    <p className="text-center px-2">
+                      Essa ação é{" "}
+                      <strong className="font-semibold ">definitiva</strong> e
+                      não pode ser desfeita.{" "}
+                      <strong className="font-semibold">
+                        Tem certeza disso?
+                      </strong>
+                    </p>
+                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                      >
+                        EXCLUIR
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+              </div>
+              {/* Fim adicionando pop up de deletar usuario */}
                     </td>
                   </tr>
+                  
                 ))}
               </tbody>
             </table>
