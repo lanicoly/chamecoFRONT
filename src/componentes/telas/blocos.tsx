@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 import { LayoutDashboard, X, Plus, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
 
+=======
+import { CirclePlus, LayoutDashboard, X, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+>>>>>>> 77e48ff3e63a1ae9f16efeb0ec20e7bf80e4a58b
 export interface Blocos {
   id: number;
   nome: string;
@@ -14,10 +21,13 @@ export interface Blocos {
 
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
-interface BlocosProps {
-  mudarTela: (index: number) => void;
-}
+const url =
+  "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/blocos/";
 
+export function Blocos() {
+  const navigate = useNavigate();
+
+<<<<<<< HEAD
 export function Blocos({ mudarTela }: BlocosProps) {
   // Adicionando lista de blocos
   const [blocos, setBlocos] = useState<Blocos[]>([
@@ -35,6 +45,47 @@ export function Blocos({ mudarTela }: BlocosProps) {
   const [nextId, setNextId] = useState(11);
 
   // Adicionando funcionalidade ao botão de blocos
+=======
+  // Adicionando funcionalidade ao button adicionar bloco
+  const [blocos, setBlocos] = useState<Blocos[]>([]);
+  const [nextId, setNextId] = useState(11);
+
+  useEffect(() => {
+    obterBlocos();
+  }, []);
+
+  async function obterBlocos() {
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const statusResponse = response.status;
+      const data = response.data;
+
+      if (statusResponse === 200) {
+        const blocos = [];
+
+        if ("bloco" in data.results) {
+          for (const bloco of data.results) {
+            blocos.push({
+              nome: bloco.nome,
+              id: bloco.id,
+              descricao: `Bloco ${bloco.nome}`,
+            });
+          }
+          setBlocos(blocos);
+        }
+      }
+    } catch (error: unknown) {
+      setBlocos([]);
+      console.error("Erro ao obter blocos:", error);
+    }
+  }
+
+>>>>>>> 77e48ff3e63a1ae9f16efeb0ec20e7bf80e4a58b
   function addBlocos(e: React.FormEvent) {
     e.preventDefault();
     const novoBloco: Blocos = {
@@ -169,10 +220,90 @@ export function Blocos({ mudarTela }: BlocosProps) {
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
       {/* Adicionando barra de navegação */}
+<<<<<<< HEAD
       <MenuTopo mudarTela={mudarTela} />
 
       {/* Adicionando container que irá conter as informações sobre os blocos */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
+=======
+      <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
+        <button
+          onClick={() => navigate("/menu")}
+          className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="#082f49"
+            className="bi bi-chevron-left"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+            />
+          </svg>
+          MENU
+        </button>
+
+        {/* logo chameco lateral */}
+        <div className="sm:flex hidden justify-start bottom-4">
+          <img
+            className="w-[150px]"
+            src="\logo_lateral.png"
+            alt="logo chameco"
+          />
+        </div>
+        {/* fim logo chameco lateral */}
+
+        <div className="flex">
+          <button className="flex justify-center items-center gap-1 text-[#565D8F] font-semibold text-base bg-[#B8C1FF] rounded-l-md p-2 h-max w-max">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi    bi-person-circle"
+              viewBox="0 0 16 16"
+            >
+              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+              <path
+                fill-rule="evenodd"
+                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
+              />
+            </svg>
+            Usuário
+          </button>
+          <button
+            onClick={() => navigate("/login")}
+            className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
+          >
+            Sair
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-box-arrow-right"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
+              />
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Adicionando container */}
+      <div className="container w-full tablet:w-3/5 p-4 rounded-[25px] mt-[80px] bg-white min-w-[300px] tablet:min-w-[600px] h-auto">
+>>>>>>> 77e48ff3e63a1ae9f16efeb0ec20e7bf80e4a58b
         {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
         <div className="flex flex-col tablet:flex-row justify-center tablet:items-start">
           <h1 className="text-2xl font-semibold mx-auto p-3 text-[#02006C] shadow-gray-800">
@@ -329,8 +460,13 @@ export function Blocos({ mudarTela }: BlocosProps) {
                   {/* inicio da div que terá os botoes de ver salas, editar e excluir */}
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
+<<<<<<< HEAD
                       className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
                       onClick={() => mudarTela(3)}
+=======
+                      className="flex w-[48%] h-[35px] text-[12px] justify-center items-center gap-[5px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#56ab71]"
+                      onClick={() => navigate("/salas")}
+>>>>>>> 77e48ff3e63a1ae9f16efeb0ec20e7bf80e4a58b
                     >
                       <svg
                         width="25"
