@@ -83,7 +83,7 @@ export function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-no-repeat bg-center">
+    <div className="flex items-center justify-center w-auto h-screen bg-login-fundo  flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
       <div className="container max-w-[650px] w-full p-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row">
         {/* Adicionando logo */}
@@ -96,22 +96,16 @@ export function Login() {
         </div>
 
         {/* Adicionando div do formulário */}
-        <div className="flex flex-col items-center pt-[12px] ml-[10px] ">
+        <div className="flex flex-col items-center pt-[30px]">
           <h1 className="text-[#16C34D] items-center font-semibold text-[40px] text-center">
             Boas Vindas!
           </h1>
-          <img
-            src="logo.login.png"
-            alt=""
-            className="w-[150px] h-auto block sm:hidden mt-2 "
-          />
-
           <p className="text-[#192160] items-center text-[15px] tablet:m-[5px] tablet:text-[17px] font-medium text-center mt-[10px]">
             Insira seus dados para continuar
           </p>
 
           {/* Adicionando formulário */}
-          <form className="ml-[20px] mt-[20px]" onSubmit={handleSubmit}>
+          <form className="ml-[30px] mt-[20px]" onSubmit={handleSubmit}>
             {/* Div com o primeiro input - login */}
             <div className="relative ">
               <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
@@ -155,15 +149,10 @@ export function Login() {
                 onChange={(e) => setUsuario(e.target.value)}
                 id="cpf"
               />
-              {errorUsuario && (
-                <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
-                  {errorUsuario}
-                </div>
-              )}
             </div>
 
             {/* Div com o segundo input - senha */}
-            <div className="relative mt-[10px]">
+            <div className="relative mt-[20px]">
               <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
                 Digite sua senha
               </p>
