@@ -50,6 +50,9 @@ export function Login() {
       const statusResponse = response.status;
       const data = response.data;
 
+         // Adicionar o console.log para exibir os dados da resposta(obter token)
+         console.log("Resposta do backend:", data);
+
       if (statusResponse === 200) {
         if ("usuario" in data) {
           navigate("/menu");
@@ -61,6 +64,8 @@ export function Login() {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
+
+         
 
         if (statusResponse === 400) {
           setError("Preencha os campos corretamente!");
