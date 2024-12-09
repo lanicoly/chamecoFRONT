@@ -27,7 +27,7 @@ export function Chaves() {
   }, []);
   
   const API_URL = 'https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/chaves/';
-  const token = '0719097d3d376ec1bc4313b8951af3af61a943a80dd90df506a581ebd2bc0c5c'; 
+  const token = "00f0ccd3dd82ff6bfd36542d7b0151ebb9ca11f06af4721d3bcd683e73e9794e"; 
 
 async function obterChaves(){
     try {
@@ -38,7 +38,10 @@ async function obterChaves(){
         } );
   const statusResponse = response.status;
   const data = response.data;
+
+
   if (statusResponse === 200) {
+    console.log("Congratulations! ");
     const chaves = [];
 
     if ("chave" in data.results) {
