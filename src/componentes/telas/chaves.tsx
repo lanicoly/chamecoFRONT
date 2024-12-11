@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
 import axios  from "axios";
+
 export interface Chaves {
   id: number;
   salas: string;
@@ -20,15 +21,18 @@ export function Chaves() {
 
   // const [pesquisaModal, setPesquisaModal] = useState<string>("");
   // const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
-  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+ 
+  //integracao 
   useEffect(() => {
     obterChaves();
+    
   }, []);
   
   const API_URL = 'https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/chaves/';
   const token = "00f0ccd3dd82ff6bfd36542d7b0151ebb9ca11f06af4721d3bcd683e73e9794e"; 
 
+//Funcao para a requisicao GET
 async function obterChaves(){
     try {
         const response = await axios.get(`${API_URL}?token=${token}`, {
@@ -51,7 +55,7 @@ async function obterChaves(){
           blocos:chave.blocos,
           id: chave.id,
           qntd:chave.qntd,
-          descricao: `Chave ${chave.nome}`,
+          descricao: `Chave ${chave.descricao}`,
         });
       }
       setChaves(chaves);
@@ -62,14 +66,80 @@ async function obterChaves(){
   console.error("Erro ao obter chaves:", error);
 }
 }
+//Adicionando integracao entre chaves locais e api (POST)
+async function adicionarChaveAPI(novaChave: Chaves) {
+  try {
+    const response = await axios.post(
+      `${API_URL}?token=${token}`,
+      novaChave,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Chave adicionada com sucesso:", response.data);
+    // Atualiza a lista de chaves após adicionar e mostra na tela 
+    obterChaves(); 
+  } catch (error: unknown) {
+    console.error("Erro ao adicionar chave:", error);
+  }
+}
+
+// Função para realizar a requisição PATCH
+async function atualizarChaveAPI(chaveAtualizada: Chaves) {
+  try {
+    const response = await axios.patch(
+      `${API_URL}${chaveAtualizada.id}?token=${token}`,
+      {
+        salas: chaveAtualizada.salas,
+        blocos: chaveAtualizada.blocos,
+        qntd: chaveAtualizada.qntd,
+        descricao: chaveAtualizada.descricao,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      console.log("Chave editada com sucesso na API:", response.data);
+      return response.data; 
+    }
+  } catch (error: unknown) {
+    console.error("Erro ao atualizar chave na API:", error);
+  }
+}
+
+//Função para realizar a requisicao DELETE
+
+async function excluirChaveAPI(chaveId: number) {
+  try {
+    const response = await axios.delete(`${API_URL}${chaveId}?token=${token}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 200 || response.status === 204) {
+      console.log("Chave excluída com sucesso");
+    }
+  } catch (error: unknown) {
+    console.error("Erro ao excluir chave:", error);
+    
+  }
+}
+
   
-    /*adicionando a função de adicionar chaves*/
+    //adicionando a função de adicionar chaves
   
   const [selectedSala, setSelectedSala] = useState("");
   const [selectedBloco, setSelectedBloco] = useState("");
   const [descricao, setDescricao] = useState("");
   {
-    /*aceitando apenas numeros na variavel qntd */
+    //aceitando apenas numeros na variavel qntd 
   }
   const [qntd, setQntd] = useState<number | string>("");
 
@@ -91,6 +161,7 @@ async function obterChaves(){
 
   function addChaves(e: React.FormEvent) {
     e.preventDefault();
+  
     const novaChave: Chaves = {
       id: nextId,
       salas: selectedSala,
@@ -98,9 +169,16 @@ async function obterChaves(){
       blocos: selectedBloco,
       descricao,
     };
+  
+    // Adiciona a chave à API
+    adicionarChaveAPI(novaChave);
+  
+    // Atualiza o estado local
     setChaves([...chaves, novaChave]);
-    setItensAtuais([...itensAtuais, novaChave]);
+    setItensAtuais([...listaChaves, novaChave]);
     setNextId(nextId + 1);
+  
+    // Reseta os campos
     setQntd(0);
     setSelectedSala("");
     setSelectedBloco("");
@@ -108,7 +186,7 @@ async function obterChaves(){
     closeChavesModal();
     // closePessoasModal();
   }
-
+  
   function statusSelecao(id: number) {
     const chave = listaChaves.find((chave) => chave.id === id) || null;
     setChaveSelecionada(chave);
@@ -126,22 +204,60 @@ async function obterChaves(){
     setIsDescricaoModalOpen(false);
   }
 
-  // function openEditModal() {
-  //   const chave = listaChaves.find(
-  //     (chave) => chave.id === chaveSelecionada?.id
-  //   );
-  //   if (chave) {
-  //     setSelectedSala(chave.salas);
-  //     setSelectedBloco(chave.blocos);
-  //     setQntd(chave.qntd);
-  //     setDescricao(chave.descricao);
-  //     setIsEditModalOpen(true);
-  //   }
-  // }
+   function openEditModal() {
+     const chave = listaChaves.find(
+     (chave) => chave.id === chaveSelecionada?.id
+    );
+    if (chave) {
+       setSelectedSala(chave.salas);
+       setSelectedBloco(chave.blocos);
+       setQntd(chave.qntd);
+       setDescricao(chave.descricao);
+       setIsEditModalOpen(true);
+     }
+   }
 
-  // function closeEditModal() {
-  //   setIsEditModalOpen(false);
-  // }
+   function closeEditModal() {
+     setIsEditModalOpen(false);
+   }
+
+   function editarChave(e: React.FormEvent) {
+    e.preventDefault();
+    if (chaveSelecionada !== null) {
+      const chaveAtualizada: Chaves = {
+        ...chaveSelecionada,
+        salas: selectedSala,
+        blocos: selectedBloco,
+        qntd,
+        descricao,
+      };
+    
+      // Chama a função de requisição e atualiza os estados
+      atualizarChaveAPI(chaveAtualizada)
+
+        // Atualizando estado local após a atualização na API
+        setChaves((prevChaves) =>
+          prevChaves.map((chave) =>
+            chave.id === chaveSelecionada.id ? chaveAtualizada : chave
+          )
+        );
+        setItensAtuais((prevLista) =>
+          prevLista.map((chave) =>
+            chave.id === chaveSelecionada.id ? chaveAtualizada : chave
+          )
+        );
+
+        // Resetando os campos e fechando o modal
+        setChaveSelecionada(null);
+        setSelectedSala("");
+        setSelectedBloco("");
+        setQntd("");
+        setDescricao("");
+        closeEditModal();
+      
+      
+  }
+}
   // function adicionarPessoa(chaveId: number, novaPessoa: string) {
   //   setItensAtuais((prevLista) => {
   //     return prevLista.map((chave) => {
@@ -224,13 +340,30 @@ async function obterChaves(){
   // adicionando função de excluir chave
   function removeUser(e: React.FormEvent) {
     e.preventDefault();
+  
+    if (chaveSelecionada) {
+      excluirChaveAPI(chaveSelecionada.id)
+        .then(() => {
+          // Atualiza a lista de chaves localmente após sucesso na API
+          setItensAtuais((prevLista) =>
+            prevLista.filter((chave) => chave.id !== chaveSelecionada.id)
+          );
+  
+          // Limpa a seleção e fecha o modal
+          setChaveSelecionada(null);
+          closeDeleteModal();
+        })
+        .catch((error) => {
+          console.error("Erro ao excluir a chave:", error);
+        });
+    
     setItensAtuais(
       listaChaves.filter((chave) => chave.id !== chaveSelecionada?.id)
     );
     setChaveSelecionada(null);
     closeDeleteModal();
   }
-
+} 
   // const [error, setError] = useState<string>("");
   // {
   //   /*garantir que qntd seja um número */
@@ -615,13 +748,144 @@ async function obterChaves(){
                         >
                           Ver mais
                         </p>
+                        
+
                       </div>
+                      <button
+                          onClick={() => openEditModal()}
+                          className="ml-3 flex gap-1 justify-center items-center font-medium text-sm text-[#646999] underline"
+                        >
+                          <img src="fi-rr-pencil (1).svg" alt="" />
+                          Editar
+                        </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {/*editar modal */}
+    {isEditModalOpen && (
+      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+        <form
+          onSubmit={editarChave}
+          className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+        >
+          <div className="flex justify-center mx-auto w-full max-w-[90%]">
+            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+              EDITAR CHAVE
+            </p>
+            <button
+              onClick={closeEditModal}
+              type="button"
+              className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+            >
+              <X className=" mb-[5px] text-[#192160]" />
+            </button>
+          </div>
+
+          <div className="justify-center items-center ml-[40px] mr-8">
+                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
+                        Selecione uma sala
+                      </p>
+                      <select
+                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
+                        value={selectedSala}
+                        onChange={(e) => setSelectedSala(e.target.value)}
+                        required
+                      >
+                        <option
+                          className="text-[#777DAA] text-xs font-medium"
+                          value=""
+                          disabled
+                        >
+                          Selecione uma sala
+                        </option>
+                        {salas.map((sala, index) => (
+                          <option
+                            key={index}
+                            value={sala}
+                            className="text-center bg-[#B8BCE0]"
+                          >
+                            {sala}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="justify-center items-center ml-[40px] mr-8">
+                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
+                        Selecione um bloco
+                      </p>
+                      <select
+                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
+                        value={selectedBloco}
+                        onChange={(e) => setSelectedBloco(e.target.value)}
+                        required
+                      >
+                        <option
+                          className="text-[#777DAA] text-xs font-medium"
+                          value=""
+                          disabled
+                        >
+                          Selecione um Bloco
+                        </option>
+                        {blocos.map((bloco, index) => (
+                          <option
+                            key={index}
+                            value={bloco}
+                            className="text-center bg-[#B8BCE0]"
+                          >
+                            {bloco}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* <div className="justify-center items-center ml-[40px] mr-8">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Informe a quantidade de chaves
+                      </p>
+
+                      <input
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                        type="text"
+                        placeholder="Quantidade de chaves"
+                        value={qntd}
+                        min="0"
+                        step="1"
+                        onChange={handleQntdChange}
+                        required
+                      />
+                      {/* Exibe a mensagem de erro se houver um erro */}
+                    {/* {error && (
+                        <p className="text-red-500 text-xs mt-1">{error}</p>
+                      )}
+                    </div> */}
+                    <div className="justify-center items-center ml-[40px] mr-8">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Descreva os detalhes sobre a chave
+                      </p>
+                      <textarea
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                        placeholder="Descrição do detalhamento sobre a chave"
+                        value={descricao}
+                        onChange={(e) => setDescricao(e.target.value)}
+                        required
+                      />
+                    </div>
+          <div className="flex justify-center items-center mt-[10px] w-full">
+            <button
+              type="submit"
+              className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+            >
+              SALVAR ALTERAÇÕES
+            </button>
+          </div>
+        </form>
+      </div>
+    )}
+    {/*fim modal editar chave */}
           {isDescricaoModalOpen && chaveSelecionada && (
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
@@ -670,8 +934,11 @@ async function obterChaves(){
             alt="logo chameco"
           />
         </div>
+
       </div>
+      
     </div>
+    
   );
 }
 
