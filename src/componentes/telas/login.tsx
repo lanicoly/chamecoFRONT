@@ -1,33 +1,89 @@
-import { useState } from "react";
+import axios from "axios";
+import IMask from "imask";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-interface LoginProps {
-  mudarTela: (index: number) => void;
-}
+export function Login() {
+  const navigate = useNavigate();
 
-export function Login({ mudarTela }: LoginProps) {
+  const url =
+    "https://web-6w992icupq09.up-de-fra1-k8s-1.apps.run-on-seenode.com//chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
   const [errorUsuario, setErrorUsuario] = useState<string>("");
   const [errorSenha, setErrorSenha] = useState<string>("");
 
-  function handleSubmit(event: React.FormEvent) {
+  useEffect(() => {
+    const cpfInput = document.getElementById("cpf");
+    if (cpfInput) {
+      IMask(cpfInput, {
+        mask: "000.000.000-00",
+      });
+    }
+  }, []);
+
+  function limparCPF(cpf: string) {
+    return cpf.replace(/\D/g, "");
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setErrorUsuario("");
-    setErrorSenha("");
+
+    const body = {
+      cpf: limparCPF(usuario),
+      password: senha,
+    };
+
 
     if (!usuario && !senha) {
-      setErrorUsuario("Por favor, insira o seu usuário!");
-      setErrorSenha("Por favor, insira a sua senha!");
-      return;
-    } else if (!usuario) {
-      setErrorUsuario("Por favor, insira o seu usuário!");
-      return;
-    } else if (!senha) {
+      setErrorUsuario("Por favor, insira o seu CPF!");
       setErrorSenha("Por favor, insira a sua senha!");
       return;
     }
-    mudarTela(1);
+    setErrorUsuario("");
+    setErrorSenha("");
+
+    try {
+      const response = await axios.post(url, body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const statusResponse = response.status;
+      const data = response.data;
+
+      if (statusResponse === 200) {
+        if ("usuario" in data) {
+          navigate("/menu");
+        } else {
+          setErrorSenha("Usuário não registrado no sistema!");
+          return;
+        }
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const statusResponse = error.response?.status;
+
+        if (statusResponse === 400) {
+          setErrorSenha("Preencha os campos corretamente!");
+          return;
+        }
+        if (statusResponse === 401) {
+          setErrorSenha("Usuário ou senha incorretos!");
+          return;
+        }
+        if (statusResponse === 403) {
+          setErrorSenha("Usuário não autorizado no sistema!");
+          return;
+        }
+        if (statusResponse === 500) {
+          setErrorSenha("Erro interno do servidor! Contate o suporte.");
+          return;
+        }
+      }
+    }
   }
 
   return (
@@ -63,7 +119,7 @@ export function Login({ mudarTela }: LoginProps) {
             {/* Div com o primeiro input - login */}
             <div className="relative ">
               <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
-                Digite seu usuário
+                Digite seu CPF
               </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -98,9 +154,10 @@ export function Login({ mudarTela }: LoginProps) {
               <input
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
-                placeholder="Usuário"
+                placeholder="CPF"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
+                id="cpf"
               />
               {errorUsuario && (
                 <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
