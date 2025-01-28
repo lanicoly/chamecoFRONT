@@ -3,6 +3,8 @@ import { useState } from "react";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
+import { useNavigate } from "react-router-dom";
+
 
 export interface Chaves {
   id: number;
@@ -14,14 +16,13 @@ export interface Chaves {
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
+//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
 
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
+//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
-interface ChavesProps {
-  mudarTela: (index: number) => void;
-}
-
-export function Chaves({ mudarTela }: ChavesProps) {
+export function Chaves() {
+  const navigate = useNavigate();
   // Adicionando funcionalidade ao button adicionar bloco
   const [chaves, setChaves] = useState<Chaves[]>([]);
   const [nextId, setNextId] = useState(1);
@@ -221,7 +222,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
       {/* background */}
       {/* header */}
-      <MenuTopo mudarTela={mudarTela} />
+      <MenuTopo />
 
       {/* container */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6 py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
@@ -231,7 +232,7 @@ export function Chaves({ mudarTela }: ChavesProps) {
             CHAVES
           </h1>
           {/* Adicionando botão de status */}
-          <div className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
+          <div onClick={() => navigate("/statusChaves")} className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
             <button>
               <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
@@ -816,3 +817,5 @@ export function Chaves({ mudarTela }: ChavesProps) {
     </div>
   );
 }
+
+

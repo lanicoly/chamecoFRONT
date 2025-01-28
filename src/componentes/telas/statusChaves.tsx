@@ -4,7 +4,6 @@ import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 
-
 export interface Chave {
     id: number;
     sala: string;
@@ -19,11 +18,8 @@ export interface Chave {
 
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
-interface StatusChavesProps {
-    mudarTela: (index: number) => void
-}
 
-export function StatusChaves({ mudarTela }: StatusChavesProps) {
+export function StatusChaves() {
 
     const [listaChaves, setListaChaves] = useState<Chave[]>([
         { id: 1, sala: "Laboratório Y", bloco: "E", tipo: "Principal", descricao:"Chave do lab 2 do bloco H", posse: "Em uso pela prof. Aryane", status: "INDISPONÍVEL"},
@@ -91,7 +87,7 @@ export function StatusChaves({ mudarTela }: StatusChavesProps) {
     return (
         <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
 
-            <MenuTopo mudarTela={mudarTela} />
+                  <MenuTopo />
 
             {/* parte informativa tela status chaves */}
             <div className="relative bg-white w-full max-w-[800px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-10 desktop:top-6 tablet:h-[480px] h-[90%]">
