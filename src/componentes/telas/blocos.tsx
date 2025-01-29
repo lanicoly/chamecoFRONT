@@ -98,10 +98,10 @@ export function Blocos() {
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
     ? blocos.filter(
-        (blocos) =>
-          blocos.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-      )
+      (blocos) =>
+        blocos.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+    )
     : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
@@ -194,10 +194,11 @@ export function Blocos() {
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
       {/* Adicionando barra de navegação */}
-      <MenuTopo/>
+      <MenuTopo />
 
       {/* Adicionando container */}
-      <div className="container w-full tablet:w-3/5 p-4 rounded-[25px] mt-[80px] bg-white min-w-[300px] tablet:min-w-[600px] h-auto">
+      <div className=" relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
+
         {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
         <div className="flex flex-col tablet:flex-row justify-center tablet:items-start">
           <h1 className="text-2xl font-semibold mx-auto p-3 text-[#02006C] shadow-gray-800">
@@ -470,7 +471,7 @@ export function Blocos() {
                       Excluir
                     </button>
 
-                    {/* Adicionando pop up de deletar usuario */}
+                    {/* Adicionando pop up de deletar bloco */}
                     {isDeleteModalOpen && (
                       <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                         <form
@@ -479,7 +480,7 @@ export function Blocos() {
                         >
                           <div className="flex justify-center mx-auto w-full max-w-[90%]">
                             <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                              EXCLUIR USUÁRIO
+                              EXCLUIR BLOCO
                             </p>
                             <button
                               onClick={closeDeleteModal}
@@ -525,18 +526,19 @@ export function Blocos() {
                 {/* fim da div de estrtura do pop up */}
               </div>
             )}
-            {/* fim do pop up de blocos */}
           </div>
+          {/* fim do pop up de blocos */}
+          {/* passador de página */}
+          <PassadorPagina
+            avancarPagina={avancarPagina}
+            voltarPagina={voltarPagina}
+            totalPaginas={totalPaginas}
+            paginaAtual={paginaAtual}
+          />
+          {/* fim passador de página */}
+
         </div>
         {/* fim da div que irá conter os blocos*/}
-        {/* passador de página */}
-        <PassadorPagina
-          avancarPagina={avancarPagina}
-          voltarPagina={voltarPagina}
-          totalPaginas={totalPaginas}
-          paginaAtual={paginaAtual}
-        />
-        {/* fim passador de página */}
 
         {/* logo chameco lateral */}
         <div className="flex justify-start bottom-2 left-2 absolute sm:hidden ">

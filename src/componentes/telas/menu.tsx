@@ -9,57 +9,60 @@ export function Menu() {
   return (
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-tijolos">
       {/*background*/}
-      <div className="w-full h-[120px] sm:h-[140px] md:h-[160px] flex-shrink-0 p-1 sm:p-1.5 bg-white flex justify-between items-center relative shadow-md">
+      <div className="w-full flex-shrink-0 sm:p-1.5 bg-white flex justify-between items-center relative shadow-md">
         {/*header*/}
-        <div className="w-full h-[140px] flex-shrink-0 p-5 flex justify-between items-center relative ">
-          {/* logo-spacer */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-            <img
-              className="w-24 h-auto tablet:w-32 laptop:w-56 desktop:w-64"
-              src="src/assets/logo_lateral.png"
-              alt="logo chameco"
+        <nav className="w-full flex justify-between items-center px-3 py-3 z-10">
+     
+
+      {/* logo chameco lateral */}
+      <div className="sm:flex hidden absolute left-1/2 transform -translate-x-1/2 items-center">
+        <img className="w-[150px]" src="\logo_lateral.png" alt="logo chameco" />
+      </div>
+      {/* fim logo chameco lateral */}
+
+      <div className="flex ml-auto">
+        <button className="flex justify-center items-center gap-1 text-[#565D8F] font-semibold text-base bg-[#B8C1FF] rounded-l-md p-2 h-max w-max cursor-default">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="bi    bi-person-circle"
+            viewBox="0 0 16 16"
+          >
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+            <path
+              fill-rule="evenodd"
+              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
             />
-          </div>
-          {/* User/Exit */}
-          <div className="flex ml-auto">
-            <button className="flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 text-[#565D8F] font-semibold text-xs mobile:text-sm tablet:text-base bg-[#B8C1FF] rounded-l-md p-1 mobile:p-1.5 tablet:p-2 h-max w-max">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                className="bi    bi-person-circle w-3 h-3 mobile:w-4 mobile:h-4 tablet:w-6 tablet:h-6"
-                viewBox="0 0 16 16"
-              >
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                <path
-                  fill-rule="evenodd"
-                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
-                />
-              </svg>
-              Usuário
-            </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="text-white flex justify-center items-center gap-0.5 mobile:gap-1.5 tablet:gap-2 w-max font-medium text-xs mobile:text-sm tablet:text-base bg-[#565D8F] rounded-r-md p-1 mobile:p-1.5 tablet:p-2 h-max"
-            >
-              Sair
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                className="bi bi-box-arrow-right w-3 h-3 mobile:w-4 mobile:h-4 tablet:w-6 tablet:h-6"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
-                />
-                <path
-                  fill-rule="evenodd"
-                  d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+          </svg>
+          Usuário
+        </button>
+        <button
+          onClick={() => navigate("/login")}
+          className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
+        >
+          Sair
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="bi bi-box-arrow-right"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
+            />
+          </svg>
+        </button>
+      </div>
+    </nav>
       </div>
 
       {/*main-container */}
