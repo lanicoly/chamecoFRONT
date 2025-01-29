@@ -187,11 +187,18 @@ export function Login() {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
-               {error && <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[17px] font-medium text-center">{error}</div>}
+              {error && (
+                <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[17px] font-medium text-center">
+                  {error}
+                </div>
+              )}
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[30px] text-center items-center ml-[70px]">
-                <button type="submit" className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]" >
+                <button
+                  type="submit"
+                  className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
+                >
                   ENTRAR
                 </button>
               </div>
