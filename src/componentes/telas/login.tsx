@@ -34,11 +34,14 @@ export function Login() {
       password: senha,
     };
 
-    if (!usuario || !senha) {
-      setError("Por favor, preencha todos os campos!");
+
+    if (!usuario && !senha) {
+      setErrorUsuario("Por favor, insira o seu CPF!");
+      setErrorSenha("Por favor, insira a sua senha!");
       return;
     }
-    setError("");
+    setErrorUsuario("");
+    setErrorSenha("");
 
     try {
       const response = await axios.post(url, body, {
@@ -57,7 +60,7 @@ export function Login() {
         if ("usuario" in data) {
           navigate("/menu");
         } else {
-          setError("Usuário não registrado no sistema!");
+          setErrorSenha("Usuário não registrado no sistema!");
           return;
         }
       }
@@ -68,19 +71,19 @@ export function Login() {
          
 
         if (statusResponse === 400) {
-          setError("Preencha os campos corretamente!");
+          setErrorSenha("Preencha os campos corretamente!");
           return;
         }
         if (statusResponse === 401) {
-          setError("Usuário ou senha incorretos!");
+          setErrorSenha("Usuário ou senha incorretos!");
           return;
         }
         if (statusResponse === 403) {
-          setError("Usuário não autorizado no sistema!");
+          setErrorSenha("Usuário não autorizado no sistema!");
           return;
         }
         if (statusResponse === 500) {
-          setError("Erro interno do servidor! Contate o suporte.");
+          setErrorSenha("Erro interno do servidor! Contate o suporte.");
           return;
         }
       }
