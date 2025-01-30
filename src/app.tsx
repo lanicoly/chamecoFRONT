@@ -12,7 +12,7 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/chaves" />} />
+        <Route path="/" element={<Navigate to="/menu" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/menu" element={<Menu />} />
         <Route path="/blocos" element={<Blocos />} />
