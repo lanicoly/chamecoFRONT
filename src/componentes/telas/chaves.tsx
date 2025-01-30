@@ -468,7 +468,7 @@ async function excluirChaveAPI(chaveId: number) {
             CHAVES
           </h1>
           {/* Adicionando botão de status */}
-          <div className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
+          <div onClick={() => navigate("/statusChaves")} className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
             <button onClick={() => navigate("/statusChaves")}>
               <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
@@ -516,7 +516,7 @@ async function excluirChaveAPI(chaveId: number) {
                   >
                     <div className="flex justify-center mx-auto w-full max-w-[90%]">
                       <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR USUÁRIO
+                        EXCLUIR CHAVE
                       </p>
                       <button
                         onClick={closeDeleteModal}

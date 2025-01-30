@@ -4,10 +4,10 @@ export function MenuTopo() {
   const navigate = useNavigate();
 
   return (
-    <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
+    <nav className="flex justify-center px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
       <button
         onClick={() => navigate("/menu")}
-        className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto"
+        className="flex gap-2 justify-start mr-auto items-center font-medium text-lg text-sky-900 w-auto"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -26,12 +26,12 @@ export function MenuTopo() {
       </button>
 
       {/* logo chameco lateral */}
-      <div className="sm:flex hidden justify-start bottom-4">
+      <div className="sm:flex pl-[85px] hidden  bottom-4 items-center">
         <img className="w-[150px]" src="\logo_lateral.png" alt="logo chameco" />
       </div>
       {/* fim logo chameco lateral */}
 
-      <div className="flex">
+      <div className="flex ml-auto">
         <button className="flex justify-center items-center gap-1 text-[#565D8F] font-semibold text-base bg-[#B8C1FF] rounded-l-md p-2 h-max w-max cursor-default">
           <svg
             xmlns="http://www.w3.org/2000/svg"
