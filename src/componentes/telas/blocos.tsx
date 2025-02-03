@@ -231,10 +231,10 @@ export function Blocos() {
       });
   
       if (response.status === 200 || response.status === 204) {
-        console.log("Chave excluída com sucesso");
+        console.log("Bloco excluído com sucesso!");
       }
     } catch (error: unknown) {
-      console.error("Erro ao excluir chave:", error);
+      console.error("Erro ao excluir bloco.", error);
     }
   }
 
