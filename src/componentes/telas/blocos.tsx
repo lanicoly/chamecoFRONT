@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
+import { Pesquisa } from "../elementosVisuais/pesquisa";
 export interface Blocos {
   id: number;
   nome: string;
@@ -185,44 +186,26 @@ export function Blocos() {
             BLOCOS
           </h1>
         </div>
-
+        
         {/* adicionar sala + pesquisa */}
         <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
-          {/* input de pesquisa */}
           <div className="h-fit items-center w-full tablet:w-auto">
-            <div className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
-              <input
-                type="text"
-                value={pesquisa}
-                onChange={(e) => {
-                  setPesquisa(e.target.value);
-                  setIsSearching(e.target.value.trim().length > 0);
-                }}
-                placeholder="Pesquisar..."
-                className="placeholder-sky-900 text-sm font-medium outline-none "
-              />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                fill="#64748b"
-                className="bi bi-search"
-                viewBox="0 0 16 16"
-              >
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-              </svg>
-            </div>
-          </div>
-          {/* fim input de pesquisa */}
-
+                        {/* input de pesquisa */}
+                        <Pesquisa
+                          pesquisa={pesquisa}
+                          setIsSearching={setIsSearching}
+                          setPesquisa={setPesquisa}
+                        />
+                      </div>
           <button
             onClick={openBlocoModal}
             className="flex  h-[40px] text-[14px] justify-center items-center mt-[5px] font-medium border-2 border-[#B8BCE0] bg-[#18C64F] text-[#FFF] hover:bg-[#56ab71] w-full tablet:w-auto gap-[5px]"
           >
             <CirclePlus className="w-4" /> ADICIONAR BLOCO
           </button>
+          
 
-          {/* Adicionando pop up de adicionar salas */}
+          {/* Adicionando pop up de adicionar bloco */}
           {isBlocoModalOpen && (
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               <form
@@ -358,6 +341,7 @@ export function Blocos() {
             )}
           </div>
         </div>
+       
 
         {/* Adicionando pop up de editar bloco */}
         {isEditModalOpen && (
@@ -416,58 +400,58 @@ export function Blocos() {
             </form>
           </div>
         )}
+        
+            {/* passador de página */}
+            <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
+              <button
+                onClick={voltarPagina}
+                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="#075985"
+                  className="bi bi-chevron-left"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                  />
+                </svg>
+              </button>
 
-        {/* Adicionando passador de página */}
-        <div className="flex justify-end items-center p-[10px] ">
-          <button
-            onClick={voltarPagina}
-            disabled={paginaAtual === 1}
-            className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="#075985"
-              className="bi bi-chevron-left"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-              />
-            </svg>
-          </button>
+              <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
+                <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
+                  {paginaAtual}
+                </div>
+                <div className="text-base text-sky-800 font-semibold">
+                  de <strong className="font-bold">{totalPaginas}</strong>
+                </div>
+              </div>
 
-          <div className="w-24 gap-1.5 px-2 py-1 flex items-center justify-center">
-            <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
-              {paginaAtual}
+              <button
+                onClick={avancarPagina}
+                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="#075985"
+                  className="bi bi-chevron-right"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                  />
+                </svg>
+              </button>
             </div>
-            <div className="text-base text-sky-800 font-semibold">
-              de <strong className="font-bold"> {totalPaginas} </strong>
-            </div>
-          </div>
-
-          <button
-            onClick={avancarPagina}
-            disabled={paginaAtual === totalPaginas}
-            className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="#075985"
-              className="bi bi-chevron-right"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
-              />
-            </svg>
-          </button>
-        </div>
+            {/* fim passador de página */}
+        
       </div>
     </div>
   );
