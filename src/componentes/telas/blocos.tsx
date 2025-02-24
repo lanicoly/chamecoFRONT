@@ -176,7 +176,7 @@ export function Blocos() {
 
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
-      <MenuTopo text = "MENU" backRoute="/menu" />
+      <MenuTopo text="MENU" backRoute="/menu" />
       {/* Adicionando container */}
       <div className="container w-full tablet:w-3/5 p-4 rounded-[25px] mt-[80px] bg-white min-w-[300px] tablet:min-w-[600px] h-auto">
         {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
