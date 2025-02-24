@@ -155,7 +155,7 @@ export function Salas() {
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
       {/* menu topo */}
-      <MenuTopo />
+      <MenuTopo text = "BLOCOS" backRoute="/blocos" />
 
       {/* menu topo */}
 

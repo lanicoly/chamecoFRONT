@@ -172,7 +172,7 @@ export function Usuarios() {
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
-      <MenuTopo />
+      <MenuTopo text = "MENU" backRoute="/menu" />
 
       {/* parte informativa tela usuarios */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
