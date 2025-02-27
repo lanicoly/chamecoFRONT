@@ -7,11 +7,12 @@ export function Login() {
   const navigate = useNavigate();
 
   const url =
-    "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/login/";
+    "https://chamecoapi.pythonanywhere.com//chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [errorUsuario, setErrorUsuario] = useState<string>("");
+  const [errorSenha, setErrorSenha] = useState<string>("");
 
   useEffect(() => {
     const cpfInput = document.getElementById("cpf");
@@ -34,11 +35,14 @@ export function Login() {
       password: senha,
     };
 
-    if (!usuario || !senha) {
-      setError("Por favor, preencha todos os campos!");
+
+    if (!usuario && !senha) {
+      setErrorUsuario("Por favor, insira o seu CPF!");
+      setErrorSenha("Por favor, insira a sua senha!");
       return;
     }
-    setError("");
+    setErrorUsuario("");
+    setErrorSenha("");
 
     try {
       const response = await axios.post(url, body, {
@@ -54,7 +58,7 @@ export function Login() {
         if ("usuario" in data) {
           navigate("/menu");
         } else {
-          setError("Usuário não registrado no sistema!");
+          setErrorSenha("Usuário não registrado no sistema!");
           return;
         }
       }
@@ -63,19 +67,19 @@ export function Login() {
         const statusResponse = error.response?.status;
 
         if (statusResponse === 400) {
-          setError("Preencha os campos corretamente!");
+          setErrorSenha("Preencha os campos corretamente!");
           return;
         }
         if (statusResponse === 401) {
-          setError("Usuário ou senha incorretos!");
+          setErrorSenha("Usuário ou senha incorretos!");
           return;
         }
         if (statusResponse === 403) {
-          setError("Usuário não autorizado no sistema!");
+          setErrorSenha("Usuário não autorizado no sistema!");
           return;
         }
         if (statusResponse === 500) {
-          setError("Erro interno do servidor! Contate o suporte.");
+          setErrorSenha("Erro interno do servidor! Contate o suporte.");
           return;
         }
       }
@@ -85,13 +89,13 @@ export function Login() {
   return (
     <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
-      <div className="container max-w-[650px] w-full p-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row">
+      <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
         {/* Adicionando logo */}
-        <div className="flex justify-center  mt-10 sm:mt-[60px] sm:ml-[30px]">
+        <div className="flex items-center justify-center w-full px-[15px] py-[20px] sm:w-[300px] sm:py-[90px]">
           <img
             src="logo.login.png"
             alt=""
-            className="w-[350px] h-auto hidden sm:block"
+            className="w-[200px] h-auto hidden sm:block sm:w-[350px] sm:mt-[50px] "
           />
         </div>
 
@@ -155,9 +159,9 @@ export function Login() {
                 onChange={(e) => setUsuario(e.target.value)}
                 id="cpf"
               />
-              {error && (
+              {errorUsuario && (
                 <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
-                  {error}
+                  {errorUsuario}
                 </div>
               )}
             </div>
@@ -187,14 +191,14 @@ export function Login() {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
-              {error && (
-                <div className="text-red-500 items-center text-[12px] pr-[2px] tablet:m-[5px] tablet:text-[17px] font-medium text-center">
-                  {error}
+              {errorSenha && (
+                <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
+                  {errorSenha}
                 </div>
               )}
 
               {/* Adicionando botão de entrar */}
-              <div className="mt-[30px] text-center items-center ml-[70px]">
+              <div className="mt-[15px] text-center items-center ml-[60px]">
                 <button
                   type="submit"
                   className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
@@ -209,3 +213,7 @@ export function Login() {
     </div>
   );
 }
+
+
+
+

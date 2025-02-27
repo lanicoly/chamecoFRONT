@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Plus, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
@@ -42,6 +42,8 @@ export function Salas() {
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const [salaSelecionada, setSalaSelecionada] = useState<number | null>(null);
 
   function openSalaModal() {
@@ -56,12 +58,29 @@ export function Salas() {
 
   function openEditModal() {
     if (salaSelecionada) {
-      setIsEditModalOpen(true);
+      const sala = listaSalas.find((sala) => sala.id === salaSelecionada);
+      if (sala) {
+        setNome(sala.nome);
+        setDescricao(sala.descricao);
+        setIsEditModalOpen(true);
+      }
     }
   }
 
   function closeEditModal() {
+    setNome("");
+    setDescricao("");
     setIsEditModalOpen(false);
+  }
+
+  function openDeleteModal() {
+    if (salaSelecionada !== null) {
+      setIsDeleteModalOpen(true);
+    }
+  }
+
+  function closeDeleteModal() {
+    setIsDeleteModalOpen(false);
   }
 
   function addSala(e: React.FormEvent) {
@@ -343,7 +362,7 @@ export function Salas() {
               {/* Fim adicionando pop up de editar sala */}
 
               <button
-                onClick={removeSala}
+                onClick={openDeleteModal}
                 className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
               >
                 <svg
@@ -358,6 +377,55 @@ export function Salas() {
                 </svg>
                 Excluir
               </button>
+
+              {/* Adicionando pop up de deletar sala */}
+              {isDeleteModalOpen && (
+                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                  <form
+                    onSubmit={removeSala}
+                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                  >
+                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                        EXCLUIR SALA
+                      </p>
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                      >
+                        <X className=" text-[#192160]" />
+                      </button>
+                    </div>
+                    <TriangleAlert className="size-16 text-red-700" />
+
+                    <p className="text-center px-2">
+                      Essa ação é{" "}
+                      <strong className="font-semibold ">definitiva</strong> e
+                      não pode ser desfeita.{" "}
+                      <strong className="font-semibold">
+                        Tem certeza disso?
+                      </strong>
+                    </p>
+                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                      >
+                        EXCLUIR
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+              {/* Fim adicionando pop up de deletar sala */}
             </div>
             {/* fim botões editar e excluir */}
 

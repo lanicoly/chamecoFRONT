@@ -5,6 +5,7 @@ import { Pesquisa } from "../elementosVisuais/pesquisa";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 export interface Blocos {
   id: number;
   nome: string;
@@ -16,7 +17,7 @@ export interface Blocos {
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 const url =
-  "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/blocos/";
+  "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
 
 export function Blocos() {
   const navigate = useNavigate();
