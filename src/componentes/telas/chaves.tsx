@@ -534,7 +534,7 @@ async function excluirChaveAPI(chaveId: number) {
                         ))}
                       </select>
                     </div>
-
+{/* 
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
@@ -562,7 +562,7 @@ async function excluirChaveAPI(chaveId: number) {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
                     {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
@@ -584,6 +584,7 @@ async function excluirChaveAPI(chaveId: number) {
                         <p className="text-red-500 text-xs mt-1">{error}</p>
                       )}
                     </div> */}
+
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
@@ -798,7 +799,7 @@ async function excluirChaveAPI(chaveId: number) {
                       </select>
                     </div>
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
+                    {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
                       </p>
@@ -825,7 +826,7 @@ async function excluirChaveAPI(chaveId: number) {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
                     {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
