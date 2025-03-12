@@ -62,7 +62,9 @@ export function Menu() {
               </span>
             </div>
           </div>
-          <div className="menu-item bg-white border-4 border-[#646999] rounded-[10px] flex justify-center items-center w-full md:w-[270px] h-[120px] md:h-[150px] cursor-pointer transition-all duration-200 hover:bg-[#e0e0e0] hover:transform hover:-translate-y-1">
+          <div 
+          onClick={() => navigate("/emprestimos")}
+          className="menu-item bg-white border-4 border-[#646999] rounded-[10px] flex justify-center items-center w-full md:w-[270px] h-[120px] md:h-[150px] cursor-pointer transition-all duration-200 hover:bg-[#e0e0e0] hover:transform hover:-translate-y-1">
             <div className="content flex flex-col items-center">
               <img
                 src="/emprestimo.svg"
