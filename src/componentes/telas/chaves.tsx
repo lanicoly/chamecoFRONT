@@ -3,6 +3,7 @@ import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
+import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import axios  from "axios";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 
@@ -483,23 +484,7 @@ async function excluirChaveAPI(chaveId: number) {
               )}
               {/* Fim adicionando pop up de deletar usuario */}
 
-              <button
-                onClick={openChavesModal}
-                className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="#ffffff"
-                  className="bi bi-plus-circle"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-                </svg>
-                ADICIONAR CHAVE
-              </button>
+              <BotaoAdicionar text = "ADICIONAR CHAVE" onClick={openChavesModal}/>
 
               {/* Adicionando pop up de adicionar chaves */}
               {isChavesModalOpen && (
@@ -549,7 +534,7 @@ async function excluirChaveAPI(chaveId: number) {
                         ))}
                       </select>
                     </div>
-
+{/* 
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
@@ -577,7 +562,7 @@ async function excluirChaveAPI(chaveId: number) {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
                     {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
@@ -599,6 +584,7 @@ async function excluirChaveAPI(chaveId: number) {
                         <p className="text-red-500 text-xs mt-1">{error}</p>
                       )}
                     </div> */}
+
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
@@ -813,7 +799,7 @@ async function excluirChaveAPI(chaveId: number) {
                       </select>
                     </div>
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
+                    {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
                       </p>
@@ -840,7 +826,7 @@ async function excluirChaveAPI(chaveId: number) {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
                     {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
@@ -941,4 +927,5 @@ async function excluirChaveAPI(chaveId: number) {
     
   );
 }
+
 

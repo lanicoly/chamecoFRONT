@@ -1,6 +1,7 @@
 import { Plus, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
@@ -157,7 +158,7 @@ export function Salas() {
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
       {/* menu topo */}
-      <MenuTopo text = "BLOCOS" backRoute="/blocos" />
+      <MenuTopo text = "VOLTAR" backRoute="/blocos" />
 
       {/* menu topo */}
 
@@ -177,30 +178,16 @@ export function Salas() {
           <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
             {/* input de pesquisa */}
             <div className="h-fit items-center w-full tablet:w-auto">
-                          {/* input de pesquisa */}
-                          <Pesquisa
-                            pesquisa={pesquisa}
-                            setIsSearching={setIsSearching}
-                            setPesquisa={setPesquisa}
-                          />
-                        </div>            {/* fim input de pesquisa */}
-            <button
-              onClick={openSalaModal}
-              className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="#ffffff"
-                className="bi bi-plus-circle"
-                viewBox="0 0 16 16"
-              >
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-              </svg>
-              ADICIONAR SALA
-            </button>
+              {/* input de pesquisa */}
+              <Pesquisa
+                pesquisa={pesquisa}
+                setIsSearching={setIsSearching}
+                setPesquisa={setPesquisa}
+              />
+            </div>
+            {/* fim input de pesquisa */}
+            <BotaoAdicionar text="ADICIONAR SALA" onClick={openSalaModal}/>
+            </div>
 
             {/* Adicionando pop up de adicionar salas */}
             {isSalaModalOpen && (
@@ -263,8 +250,6 @@ export function Salas() {
             )}
 
             {/* Fim adicionando pop up de adicionar salas */}
-          </div>
-          {/* fim adicionar sala + pesquisa */}
 
           {/* conteudo central tabela*/}
           <div>
