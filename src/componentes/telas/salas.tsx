@@ -1,6 +1,5 @@
 import { Plus, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
@@ -17,7 +16,6 @@ export interface Sala {
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Salas() {
-  const navigate = useNavigate();
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
