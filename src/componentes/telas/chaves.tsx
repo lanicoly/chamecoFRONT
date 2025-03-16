@@ -29,8 +29,8 @@ export function Chaves() {
     
   }, []);
   
-  const API_URL = 'https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/chaves/';
-  const token = "00f0ccd3dd82ff6bfd36542d7b0151ebb9ca11f06af4721d3bcd683e73e9794e"; 
+  const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
+  const token = "d781fc42a6ff9e8c3cc4903bf05a8f5478b69220bf9139f284733100c1189a93"; 
 
 //Funcao para a requisicao GET
 async function obterChaves(){

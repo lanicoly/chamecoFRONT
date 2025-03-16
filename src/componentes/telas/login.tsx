@@ -7,7 +7,7 @@ export function Login() {
   const navigate = useNavigate();
 
   const url =
-    "https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/login/";
+    "https://chamecoapi.pythonanywhere.com/chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");

@@ -26,8 +26,8 @@ export function Blocos() {
     obterBlocos();
   }, []);
 
-  const URL = "https://web-6w992icupq09.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/blocos/";
-  const token = "7a6298efea02a7f5b4700e72b57e64ff508f7921268db1a307faae2ef587cc40";
+  const URL = "https:/chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
+  const token = "d781fc42a6ff9e8c3cc4903bf05a8f5478b69220bf9139f284733100c1189a93";
 
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
