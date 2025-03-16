@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
+import { MainContainer } from "../elementosVisuais/container";
 export interface Blocos {
   id: number;
   nome: string;
@@ -179,13 +180,7 @@ export function Blocos() {
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
       <MenuTopo text="MENU" backRoute="/menu" />
       {/* Adicionando container */}
-      <div className="container w-full tablet:w-3/5 p-4 rounded-[25px] mt-[80px] bg-white min-w-[300px] tablet:min-w-[600px] h-auto">
-        {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
-        <div className="flex flex-col tablet:flex-row justify-center tablet:items-start">
-          <h1 className="text-2xl font-semibold mx-auto p-3 text-[#02006C] shadow-gray-800">
-            BLOCOS
-          </h1>
-        </div>
+      <MainContainer title="BLOCOS">
         
         {/* adicionar sala + pesquisa */}
         <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
@@ -451,8 +446,8 @@ export function Blocos() {
               </button>
             </div>
             {/* fim passador de página */}
-        
+            </MainContainer>
       </div>
-    </div>
+      
   );
 }
