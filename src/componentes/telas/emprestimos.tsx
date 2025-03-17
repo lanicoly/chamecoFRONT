@@ -6,7 +6,7 @@ import "react-day-picker/style.css";
 import { ptBR } from 'date-fns/locale';
 
 import { Pesquisa } from "../elementosVisuais/pesquisa";
-// import { PassadorPagina } from "../elementosVisuais/passadorPagina";
+import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
@@ -30,13 +30,145 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo) {
 
-    function criarEmprestimo() {
-        console.log("Emprestimo criado!")
+    const [emprestimosConcluidos, setEmprestimosConcluidos] = useState<Emprestimo[]>([
+        {
+            id: 1,
+            chave: "Laboratório Y",
+            solicitante: "Emilia Nunes",
+            responsavel: "Zezinho",
+            observacao: null,
+            dataRetirada: "02/03/2025",
+            horaRetirada: "07:02",
+            horaDevolucao: "07:02"
+        },
+        {
+            id: 3,
+            chave: "Laboratório Y",
+            solicitante: "Emilia Nunes",
+            responsavel: "Zezinho",
+            observacao: null,
+            dataRetirada: "02/03/2025",
+            horaRetirada: "07:02",
+            horaDevolucao: "07:02"
+        },
+        {
+            id: 5,
+            chave: "Laboratório Y",
+            solicitante: "Emilia Nunes",
+            responsavel: "Zezinho",
+            observacao: null,
+            dataRetirada: "02/03/2025",
+            horaRetirada: "07:02",
+            horaDevolucao: "07:02"
+        },
+        {
+            id: 2,
+            chave: "Laboratório Y",
+            solicitante: "Emilia Nunes",
+            responsavel: "Zezinho",
+            observacao: null,
+            dataRetirada: "02/03/2025",
+            horaRetirada: "07:02",
+            horaDevolucao: "07:02"
+        }
+        
+    ]);
+
+    //data atual
+    function obterDataAtual(): string{
+        const dataAtual = new Date();
+        const dia = String(dataAtual.getDate()).padStart(2, '0');
+        const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+        const ano = dataAtual.getFullYear();
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        return dataFormatada;
     }
+    //hora atual
+    function obterHoraAtual(): string {
+        const dataAtual = new Date();
+        const hora = String(dataAtual.getHours()).padStart(2, '0');
+        const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
+        const horaFormatada = `${hora}:${minutos}`;
+        return horaFormatada;
+    }
+
+    const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
+
+    function criarEmprestimo() {
+        
+        const novoEmprestimo: Emprestimo = {
+            id: Math.floor(Math.random() * 10000),
+            chave: chave,
+            solicitante: solicitante,
+            responsavel: responsavel,
+            observacao: observacao,
+            dataRetirada: obterDataAtual(),
+            horaRetirada: obterHoraAtual(),
+            horaDevolucao: null
+
+            
+        };
+        setEmprestimos([...emprestimos, novoEmprestimo]);
+        console.log("Emprestimo criado!", novoEmprestimo);
+
+
+        setChave('');
+        setSolicitante('');
+        setResponsavel('');
+        setResponsavel('');
+        setObservacao('');  
+    }
+    //estados p receberem do formulário
+    const[chave, setChave] = useState('');
+    const [solicitante, setSolicitante] = useState('');
+    const[responsavel,setResponsavel] = useState('');
+    const [observacao, setObservacao] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [isSearching, setIsSearching] = useState(false);
 
     const [isFiltroModalOpen, setIsFiltroModalOpen] = useState(false);
+
+    // Adicionando funcionalidade ao passador de página
+    const itensPorPaginaPendente = 3;
+    const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
+    const totalPaginasPendentes = Math.max(
+        1,
+        Math.ceil(emprestimos.length / itensPorPaginaPendente)
+    );
+    
+    function avancarPaginaPendente() {
+        if (paginaAtualPendente < totalPaginasPendentes) {
+        setPaginaAtualPendente(paginaAtualPendente + 1);
+        }
+    }
+
+    function voltarPaginaPendente() {
+        if (paginaAtualPendente > 1) {
+        setPaginaAtualPendente(paginaAtualPendente - 1);
+        }
+    }
+    //fim função passador
+
+    //passador p seção concluídos
+    const itensPorPaginaConcluidos = 3;
+    const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
+    const totalPaginasConcluidos = Math.max(
+        1,
+        Math.ceil(emprestimosConcluidos.length / itensPorPaginaConcluidos)
+    ); 
+
+    function avancarPaginaConcluidos() {
+    if (paginaAtualConcluidos < totalPaginasConcluidos) {
+        setPaginaAtualConcluidos(paginaAtualConcluidos + 1);
+    }
+    }
+
+    function voltarPaginaConcluidos() {
+    if (paginaAtualConcluidos > 1) {
+        setPaginaAtualConcluidos(paginaAtualConcluidos - 1);
+    }
+    }
+    //fim passador p seção concluídos
 
     function openFiltroModal() {
         setIsFiltroModalOpen(true)
@@ -202,14 +334,15 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                             <select
                                                 name="chave_sala"
                                                 id="chave_sala"
-                                                //   value={chave}
+                                                value={chave}
+                                                onChange={(e) => setChave(e.target.value)}
                                                 className=" justify-between items-start px-2 py-[5px] border-none text-[#646999] text-sm font-medium h-fit w-[95%]"
                                             >
                                                 <option value="">Selecionar sala</option>
-                                                <option value="todos">Sala E01</option>
-                                                <option value="administrativo">Sala E02</option>
-                                                <option value="codis">Lab de Info</option>
-                                                <option value="guarita">Lab de bio</option>
+                                                <option value="Sala E01">Sala E01</option>
+                                                <option value="Sala E02">Sala E02</option>
+                                                <option value="Lab de Info">Lab de Info</option>
+                                                <option value="Lab de bio">Lab de bio</option>
                                             </select>
                                         </td>
                                         <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-24 break-words flex-1 text-center">
@@ -219,7 +352,8 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                                     className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
                                                     type="text"
                                                     placeholder="Solicitante"
-                                                    // value={solicitante}
+                                                    value={solicitante}
+                                                    onChange={(e) => setSolicitante(e.target.value)}
                                                     required
                                                 />
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
@@ -231,7 +365,8 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                             <select
                                                 name="responsavel"
                                                 id="responsavel"
-                                                //   value={responsavel}
+                                                value={responsavel}
+                                                onChange={(e) => setResponsavel(e.target.value)}
                                                 className=" justify-between items-start px-2 py-[5px] border-none text-[#646999] text-sm font-medium h-fit w-[95%]"
                                             >
                                                 <option value="zezinho">Zezinho</option>
@@ -332,21 +467,25 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    {emprestimos.length > 0 ? (
+                                        emprestimos
+                                        .slice((paginaAtualPendente - 1) * itensPorPaginaPendente, paginaAtualPendente * itensPorPaginaPendente)
+                                        .map((emprestimo, index) =>(
+                                        <tr key={index}>
                                         <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
-                                            Laboratório Y
+                                            {emprestimo.chave}
                                         </td>
                                         <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Emilia Nunes
+                                            {emprestimo.solicitante}
                                         </td>
                                         <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Zezinho
+                                            {emprestimo.responsavel}
                                         </td>
                                         <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            02/03/2025
+                                            {emprestimo.dataRetirada}
                                         </td>
                                         <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
+                                            {emprestimo.horaRetirada}
                                         </td>
                                         <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
                                             <div className=" flex justify-center items-center mr-1 gap-2 p-1">
@@ -364,7 +503,7 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                                 Ver mais
                                             </button>
                                         </td>
-
+                                    
 
                                         {/* Adicionando pop up de detalhes do empréstimo */}
                                         {(isDetalhesModalOpen
@@ -431,104 +570,30 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                             ))}
                                         {/* Fim adicionando pop up de detalhes do emprestimo */}
 
-                                    </tr>
+                                        </tr>
+                                    ))
+                                ): (
                                     <tr>
-                                        <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
-                                            Laboratório Y
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Emilia Nunes
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Zezinho
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            02/03/2025
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
-                                            <div className=" flex justify-center items-center mr-1 gap-2 p-1">
-                                                <Check color="white" size={18} />
-                                                <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
-                                                    DEVOLVER
-                                                </p>
-                                            </div>
-
-                                        </td>
-                                        <td className="pl-2">
-
-                                            <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
-                                                <Info className="size-3 text-[#646999]" />
-                                                Ver mais
-                                            </button>
+                                        <td colSpan={7} className="p-4 text-center text-[#646999]">
+                                            Nenhum empréstimo pendente encontrado
                                         </td>
                                     </tr>
-
-                                    <tr>
-                                        <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
-                                            Laboratório Y
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Emilia Nunes
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Zezinho
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            02/03/2025
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
-                                            <div className=" flex justify-center items-center mr-1 gap-2 p-1">
-                                                <Check color="white" size={18} />
-                                                <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
-                                                    DEVOLVER
-                                                </p>
-                                            </div>
-
-                                        </td>
-                                        <td className="pl-2">
-
-                                            <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
-                                                <Info className="size-3 text-[#646999]" />
-                                                Ver mais
-                                            </button>
-                                        </td>
-                                    </tr>
-
+                                )}
+                                
                                 </tbody>
+                                
                             </table>
                         </div>
+                        
                         {/* fim tabela de emprestimo pendente */}
-
-                        {/* passador de página OBS: quando adaptar as tabelas, ADICIONAR O COMPONENTE */}
-                        <div className=" mt-2 flex justify-end items-center">
-
-                            <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-left" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                                </svg>
-                            </button>
-
-                            <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
-                                <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">1</div>
-                                <div className="text-base text-sky-800 font-semibold">de <strong className="font-bold">5</strong></div>
-                            </div>
-
-                            <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-right" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-                                </svg>
-                            </button>
-
-                        </div>
-
-                        {/* fim passador de página */}
-
+                        <PassadorPagina
+                            avancarPagina={avancarPaginaPendente}
+                            voltarPagina={voltarPaginaPendente}
+                            totalPaginas={totalPaginasPendentes}
+                            paginaAtual={paginaAtualPendente}
+                        />
+                        
+                        {/* Fim passador de página */}
 
                         <h2 className="text-[#0240E1] items-center font-semibold text-xl mt-2">
                             Empréstimos concluídos
@@ -549,65 +614,51 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td className=" p-2 text-xs text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className=" p-2 text-xs text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            02/03/2025
-                                        </td>
-                                        <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
-                                            Laboratório Y
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] break-words flex-1 text-center">
-                                            Emilia Nunes
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Zezinho
-                                        </td>
+                                {emprestimosConcluidos.length > 0 ? (
+                                    emprestimosConcluidos
+                                        .slice(
+                                            (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
+                                            paginaAtualConcluidos * itensPorPaginaConcluidos
+                                        )
+                                        .map((emprestimo, index) => (
+                                            <tr key={index}>
+                                                <td className=" p-2 text-xs text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                                                    {emprestimo.horaRetirada}
+                                                </td>
+                                                <td className=" p-2 text-xs text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                                                    {emprestimo.horaDevolucao}
+                                                </td>
+                                                <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                                                    {emprestimo.dataRetirada}
+                                                </td>
+                                                <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
+                                                    {emprestimo.chave}
+                                                </td>
+                                                <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] break-words flex-1 text-center">
+                                                    {emprestimo.solicitante}
+                                                </td>
+                                                <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                                                    {emprestimo.responsavel}
+                                                </td>
 
-                                        <td className="pl-2">
+                                                <td className="pl-2">
 
-                                            <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
-                                                <Info className="size-3 text-[#646999]" />
-                                                Ver mais
-                                            </button>
-                                        </td>
+                                                    <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
+                                                        <Info className="size-3 text-[#646999]" />
+                                                        Ver mais
+                                                    </button>
+                                                </td>
 
 
+                                                </tr>
+                                       ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={7} className="p-4 text-center text-[#646999]">
+                                                Nenhum empréstimo concluído encontrado
+                                            </td>
                                         </tr>
-                                    <tr>
-                                        <td className=" p-2 text-xs text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className=" p-2 text-xs text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            07:02
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                                            02/03/2025
-                                        </td>
-                                        <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[25%]">
-                                            Laboratório Y
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] break-words flex-1 text-center">
-                                            Emilia Nunes
-                                        </td>
-                                        <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                                            Zezinho
-                                        </td>
-
-                                        <td className="pl-2">
-
-                                            <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
-                                                <Info className="size-3 text-[#646999]" />
-                                                Ver mais
-                                            </button>
-                                        </td>
-
-                                    </tr>
+                                    )}
 
                                 </tbody>
                             </table>
@@ -616,27 +667,14 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                         {/* fim tabela com emprestimo concluido */}
 
 
-                        {/* passador de página */}
-                        <div className=" mt-2 flex justify-end items-center">
-
-                            <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-left" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0" />
-                                </svg>
-                            </button>
-
-                            <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
-                                <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">1</div>
-                                <div className="text-base text-sky-800 font-semibold">de <strong className="font-bold">5</strong></div>
-                            </div>
-
-                            <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-right" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
-                                </svg>
-                            </button>
-
-                        </div>
+                        {/* passador de página  de emprestimos concluidos*/}
+                        
+                        <PassadorPagina
+                            avancarPagina={avancarPaginaConcluidos}
+                            voltarPagina={voltarPaginaConcluidos}
+                            totalPaginas={totalPaginasConcluidos}
+                            paginaAtual={paginaAtualConcluidos}
+                        />
 
                         {/* fim passador de página */}
                         {/* fim tabela de emprestimo concluido */}
