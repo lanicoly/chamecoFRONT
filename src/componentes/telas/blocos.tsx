@@ -1,4 +1,9 @@
-import { LayoutDashboard, X, Plus, TriangleAlert } from "lucide-react";
+import {
+  LayoutDashboard,
+  X,
+  Plus,
+  TriangleAlert,
+} from "lucide-react";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
 import { useState, useEffect } from "react";
@@ -9,6 +14,11 @@ export interface Blocos {
   id: number;
   nome: string;
   descricao: string;
+}
+
+export interface DadosAPI {
+  nome: string;
+  token: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -26,8 +36,11 @@ export function Blocos() {
     obterBlocos();
   }, []);
 
-  const URL = "https:/chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
-  const token = "d781fc42a6ff9e8c3cc4903bf05a8f5478b69220bf9139f284733100c1189a93";
+  const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
+  const token = 
+    "790437356312160f6e804f3fb37ee6dba15b28c8f78130282a780345fbc9e2b8"
+
+;
 
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
@@ -62,18 +75,19 @@ export function Blocos() {
     }
   }
 
-  // Adicionando funcionalidade ao botão de blocos + função para requisição do método post 
-  async function adicionarBlocoAPI(novoBloco: Blocos) {
+  // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
+  async function adicionarBlocoAPI(dadosParaAPI: {token: string, nome:string}) {
     try {
-      const response = await axios.post(`${URL}?token=${token}`, novoBloco, {
+      console.log(dadosParaAPI);
+      const response = await axios.post(`${URL}?token=${token}`, dadosParaAPI, { 
         headers: {
           "Content-Type": "application/json",
         },
       });
       console.log("Bloco adicionado com sucesso!", response.data);
-      obterBlocos();
+      obterBlocos();  
     } catch (error: unknown) {
-      console.error("Erro ao adicionar bloco.", error);
+      console.log("Erro ao adicionar bloco", error)
     }
   }
 
@@ -85,8 +99,14 @@ export function Blocos() {
       nome,
       descricao,
     };
+
+    const dadosParaAPI = {
+      token: token,
+      nome,
+    };
+
     //Adiciona o novo bloco a API
-    adicionarBlocoAPI(novoBloco);
+    adicionarBlocoAPI(dadosParaAPI);
 
     setBlocos([...blocos, novoBloco]);
     setNextId(nextId + 1);
@@ -174,27 +194,27 @@ export function Blocos() {
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
-        const response = await axios.patch(
-          `${URL}${blocoSelecionado.id}?token=${token}`,
-          {
-            id: blocoSelecionado.id,
-            nome: blocoSelecionado.nome,
-            descricao: blocoSelecionado.descricao,
+      const response = await axios.patch(
+        `${URL}${blocoSelecionado.id}?token=${token}`,
+        {
+          id: blocoSelecionado.id,
+          nome: blocoSelecionado.nome,
+          descricao: blocoSelecionado.descricao,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-    
-        if (response.status === 200) {
-          console.log("Bloco editado com sucesso!", response.data);
-          return response.data; 
         }
-      } catch (error: unknown) {
-        console.error("Erro ao editar bloco.", error);
+      );
+
+      if (response.status === 200) {
+        console.log("Bloco editado com sucesso!", response.data);
+        return response.data;
       }
+    } catch (error: unknown) {
+      console.error("Erro ao editar bloco.", error);
+    }
   }
 
   //função de editar bloco
@@ -204,7 +224,7 @@ export function Blocos() {
       console.error("Nenhum bloco selecionado.");
       return;
     }
-  
+
     blocos.map((bloco) => {
       if (bloco.id === blocoSelecionado.id) {
         if (nome) {
@@ -220,7 +240,7 @@ export function Blocos() {
     setDescricao("");
     closeEditModal();
   }
-  
+
   //Adicionando função de excluir bloco + função para requisição delete
   async function excluirBlocoAPI(id: number) {
     try {
@@ -229,7 +249,7 @@ export function Blocos() {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.status === 200 || response.status === 204) {
         console.log("Bloco excluído com sucesso!");
       }
@@ -247,14 +267,16 @@ export function Blocos() {
       return;
     }
     try {
-    excluirBlocoAPI(blocoSelecionado.id);
-    setBlocos((prevBlocos) => prevBlocos.filter((bloco) => bloco.id !== blocoSelecionado.id));
-    setBlocoSelecionado(null);
-    closeDeleteModal();
-  } catch (error) {
-    console.error("Erro ao excluir bloco:", error);
+      excluirBlocoAPI(blocoSelecionado.id);
+      setBlocos((prevBlocos) =>
+        prevBlocos.filter((bloco) => bloco.id !== blocoSelecionado.id)
+      );
+      setBlocoSelecionado(null);
+      closeDeleteModal();
+    } catch (error) {
+      console.error("Erro ao excluir bloco:", error);
+    }
   }
-}
 
   //Adicionando funcão de abrir e fechar modal de excluir blocos
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -625,7 +647,8 @@ export function Blocos() {
                     {/* Adicionando pop up de deletar bloco */}
                     {isDeleteModalOpen && (
                       <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                        <form onSubmit={removeBloco}
+                        <form
+                          onSubmit={removeBloco}
                           className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
                         >
                           <div className="flex justify-center mx-auto w-full max-w-[90%]">
