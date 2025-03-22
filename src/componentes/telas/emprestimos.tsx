@@ -30,7 +30,7 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo) {
 
-    const [emprestimosConcluidos, setEmprestimosConcluidos] = useState<Emprestimo[]>([
+    const [emprestimosConcluidos, /*setEmprestimosConcluidos*/] = useState<Emprestimo[]>([
         {
             id: 1,
             chave: "Laboratório Y",
