@@ -31,7 +31,7 @@ export function Chaves() {
     
   }, []);
   
-  const API_URL = 'https://web-rsi1mpmw72mx.up-de-fra1-k8s-1.apps.run-on-seenode.com/chameco/api/v1/chaves/';
+  const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/schema/swagger/chaves/';
   const token = "00f0ccd3dd82ff6bfd36542d7b0151ebb9ca11f06af4721d3bcd683e73e9794e"; 
 
 //Funcao para a requisicao GET
@@ -153,7 +153,7 @@ async function excluirChaveAPI(chaveId: number) {
   // const [novaPessoa, setNovaPessoa] = useState("");
   const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
 
-  const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
+  //const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
   const salas = ["Sala E09", "Sala E08", "Sala E07", "Sala F06", "Sala F05"];
 
   {

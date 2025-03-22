@@ -124,6 +124,7 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
     const[responsavel,setResponsavel] = useState('');
     const [observacao, setObservacao] = useState('');
     const [pesquisa, setPesquisa] = useState('');
+
     const [isSearching, setIsSearching] = useState(false);
 
     const [isFiltroModalOpen, setIsFiltroModalOpen] = useState(false);
@@ -413,27 +414,22 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                                             </button>
                                                         </div>
 
-                                                        <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
-                                                            <p className="text-[#192160] font-medium p-1">
-                                                                Detalhadamento sobre o empréstimo que será criado, como pessoa que autorizou aluno, entre outros.
-                                                            </p>
+                                                        <textarea className=" w-full h-auto rounded-[10px] border border-[#646999] p-2 text-sm font-medium   focus:outline-none"
+                                                            placeholder="Detalhadamento sobre o empréstimo que será criado, como pessoa que autorizou aluno, entre outros."
+                                                            value={observacao}
+                                                            onChange={(e) => setObservacao(e.target.value)}
+                                                            
+                                                        />
                                                             <button
                                                                 // onClick={openEditObservacaoModal}
                                                                 className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
                                                             >
-                                                                <svg
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    width="12"
-                                                                    height="12"
-                                                                    fill="#646999"
-                                                                    className="bi bi-pen"
-                                                                    viewBox="0 0 16 16"
-                                                                >
-                                                                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" className="bi bi-check-lg" viewBox="0 0 16 16">
+                                                                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
                                                                 </svg>
-                                                                Editar
+                                                                Salvar
                                                             </button>
-                                                        </div>
+                                                        
 
                                                     </form>
                                                 </div>
@@ -560,7 +556,7 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
 
                                                         <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                                                             <p className="text-[#192160] font-medium p-1">
-                                                                Detalhes a cerca do empréstimo.
+                                                                {emprestimo.observacao}
                                                             </p>
 
                                                         </div>
