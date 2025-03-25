@@ -30,8 +30,7 @@ export function Blocos() {
 
   const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
   const token =
-    "57067526dce1261c2765f7f5246ebbcf18a7f8ab15269f26126081478a3fddad"
-;
+    "af9a581581abc6c39d2f454329dcb4acacf7f0e3c830208ca90a6b7da3a422d8";
 
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
@@ -186,7 +185,7 @@ export function Blocos() {
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
       const response = await axios.put(
-        `${URL}/${blocoSelecionado.id}`, {nome: blocoSelecionado.nome, token: token},
+        `${URL}${blocoSelecionado.id}/`, {nome: blocoSelecionado.nome, token: token},
         {
           headers: {
             "Content-Type": "application/json",
@@ -227,21 +226,18 @@ export function Blocos() {
   }
 
   //Adicionando função de excluir bloco + função para requisição delete
-  async function excluirBlocoAPI(id: number) {
+  async function excluirBlocoAPI(id: number, nome: string) {
     try {
-      const response = await axios.delete(`${URL}/${id}`, 
-        {
+      const response = await axios.delete(`${URL}${id}/`, {
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Content-Type": "application/json"
         },
+        data: { nome, token }
       });
-
-      if (response.status === 200 || response.status === 204) {
-        console.log("Bloco excluído com sucesso!");
-      }
+  
+      console.log("Bloco excluído com sucesso!", response.data);
     } catch (error: unknown) {
-      console.error("Erro ao excluir bloco.", error);
+      console.error("Erro ao excluir bloco:", error);
     }
   }
 
@@ -255,7 +251,7 @@ export function Blocos() {
     }
 
     try {
-      excluirBlocoAPI(blocoSelecionado.id);
+      excluirBlocoAPI(blocoSelecionado.id, blocoSelecionado.nome);
       setBlocos((prevBlocos) =>
         prevBlocos.filter((bloco) => bloco.id !== blocoSelecionado.id)
       );
