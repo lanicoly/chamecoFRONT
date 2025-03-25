@@ -6,10 +6,11 @@ import { Pesquisa } from "../elementosVisuais/pesquisa";
 import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import axios  from "axios";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
+//import { Usuarios } from "./usuarios";
 
 export interface Chaves {
   id: number;
-  salas: number;
+  sala: number;
   disponivel: boolean;
   usuarios: Usuario[];
   //qntd: number;
@@ -34,17 +35,7 @@ export function Chaves() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     
-  const [selectedSalaId, setSelectedSalaId] = useState<number | null>(null);
-  const [selectedSalaNome, setSelectedSalaNome] = useState<string>("");
-
-  const handleSalaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedIndex = e.target.selectedIndex;
-    const selectedOption = salas[selectedIndex - 1]; // -1 para ignorar o option padrão
-  
-    setSelectedSalaId(selectedOption.id);    // Armazena o ID (number)
-    setSelectedSalaNome(selectedOption.nome); // Armazena o nome (string)
-  };
-     
+  const [selectedSala, setSelectedSala] = useState<number | null>(null);
   //const [selectedBloco, setSelectedBloco] = useState("");
   //const [descricao, setDescricao] = useState("");
   {
@@ -83,7 +74,7 @@ export function Chaves() {
   const chavesFiltradas = isSearching
     ? listaChaves.filter(
         (chave) =>
-          chave.salas.toString().includes(pesquisa) //||
+          chave.sala.toString().includes(pesquisa) //||
           //chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) 
           //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
       )
@@ -107,13 +98,12 @@ export function Chaves() {
  
   //integracao 
   useEffect(() => {
-    console.log("Chaves atualizadas:", chaves);
     obterChaves();
     
   }, []);
   
   const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
-  const token = "f0f502a7e831964a171b049c33e50fce8ee95f79fe94b8ac575f1ad3cfcc1c03";
+  const token = "2838707856c2e91ed298b9172279d275c281e7d43cf2cd6f4c535dfd1170f6df";
 
 //Funcao para a requisicao GET
 async function obterChaves(){
@@ -134,7 +124,7 @@ async function obterChaves(){
     if (Array.isArray(data.results)) { // Verifica se data.results é um array
       for (const chave of data.results) {
         chaves.push({
-          salas: chave.sala,
+          sala: chave.sala,
           //blocos:chave.blocos,
           id: chave.id,
           //descricao: `Chave ${chave.descricao}`,
@@ -177,7 +167,7 @@ async function atualizarChaveAPI(chaveAtualizada: Chaves) {
     const response = await axios.patch(
       `${API_URL}${chaveAtualizada.id}?token=${token}`,
       {
-        salas: chaveAtualizada.salas,
+        salas: chaveAtualizada.sala,
         //blocos: chaveAtualizada.blocos,
        // descricao: chaveAtualizada.descricao,
       },
@@ -223,9 +213,9 @@ async function excluirChaveAPI(chaveId: number) {
     const novaChave: Chaves = {
       id: nextId,
       disponivel: true,
-      usuarios: [],
+      usuarios: [{ id: 1, nome: "Admin" }],
       //qntd: 1,
-      salas: selectedSalaId
+      sala: selectedSala as number,
       //blocos: selectedBloco,
       //descricao,
     };
@@ -239,8 +229,7 @@ async function excluirChaveAPI(chaveId: number) {
     setNextId(nextId + 1);
   
     // Reseta os campos
-    setSelectedSalaNome("");
-    setSelectedSalaId(null);
+    setSelectedSala(null);
     //setSelectedBloco("");
     //setDescricao("");
     closeChavesModal();
@@ -269,7 +258,7 @@ async function excluirChaveAPI(chaveId: number) {
      (chave) => chave.id === chaveSelecionada?.id
     );
     if (chave) {
-       setSelectedSala(chave.salas);
+       setSelectedSala(chave.sala);
        //setSelectedBloco(chave.blocos);
        //setDescricao(chave.descricao);
        setIsEditModalOpen(true);
@@ -282,13 +271,14 @@ async function excluirChaveAPI(chaveId: number) {
 
    function editarChave(e: React.FormEvent) {
     e.preventDefault();
-    if (chaveSelecionada !== null && selectedSalaId !== null) {
+    if (chaveSelecionada !== null) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
-        salas: selectedSalaId,
+        sala: selectedSala as number
         //blocos: selectedBloco,
         //descricao,
       };
+
     
       // Chama a função de requisição e atualiza os estados
       atualizarChaveAPI(chaveAtualizada)
@@ -307,8 +297,7 @@ async function excluirChaveAPI(chaveId: number) {
 
         // Resetando os campos e fechando o modal
         setChaveSelecionada(null);
-        setSelectedSalaId(null);
-        setSelectedSalaNome("");
+        setSelectedSala(0);
         //setSelectedBloco("");
         //setDescricao("");
         closeEditModal();
@@ -341,8 +330,7 @@ async function excluirChaveAPI(chaveId: number) {
   // }
 
   function closeChavesModal() {
-    setSelectedSalaNome("");
-    setSelectedSalaId(null);
+    setSelectedSala(0);
     //setSelectedBloco("");
     //setDescricao("");
     setIsChavesModalOpen(false);
@@ -543,20 +531,11 @@ async function excluirChaveAPI(chaveId: number) {
                         Selecione uma sala
                       </p>
                       <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSalaNome}
+                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                        value={selectedSala === null ? "" : selectedSala}
                         onChange={(e) => {
-                          const selectedIndex = e.target.selectedIndex;
-                          if (selectedIndex === 0) { // Opção padrão selecionada
-                            setSelectedSalaId(null);
-                            setSelectedSalaNome("");
-                          } else {
-                            const selectedSala = salas[selectedIndex - 1]; // -1 para ignorar a opção padrão
-                            setSelectedSalaId(selectedSala.id);
-                            setSelectedSalaNome(selectedSala.nome);
-                          }
+                          setSelectedSala(Number(e.target.value));
                         }}
-                        required
                       >
                         <option
                           className="text-[#777DAA] text-xs font-medium"
@@ -567,8 +546,8 @@ async function excluirChaveAPI(chaveId: number) {
                         </option>
                         {salas.map((sala) => (
                           <option
-                              key={sala.id}
-                              value={sala.nome}
+                            key={sala.id}
+                            value={sala.id}
                             className="text-center bg-[#B8BCE0]"
                           >
                             {sala.nome}
@@ -688,7 +667,7 @@ async function excluirChaveAPI(chaveId: number) {
                   >
                     <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%] ">
                       <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                        {chaves.salas}
+                        {salas.find((sala)=> sala.id === chaves.sala)?.nome || "Sala não encontrada"}
                       </p>
                     </td>
                     <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
@@ -819,20 +798,11 @@ async function excluirChaveAPI(chaveId: number) {
                         Selecione uma sala
                       </p>
                       <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSalaNome}
+                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                        value={selectedSala === null ? "" : selectedSala}
                         onChange={(e) => {
-                          const selectedIndex = e.target.selectedIndex;
-                          if (selectedIndex === 0) { // Opção padrão selecionada
-                            setSelectedSalaId(null);
-                            setSelectedSalaNome("");
-                          } else {
-                            const selectedSala = salas[selectedIndex - 1]; // -1 para ignorar a opção padrão
-                            setSelectedSalaId(selectedSala.id);
-                            setSelectedSalaNome(selectedSala.nome);
-                          }
+                          setSelectedSala(Number(e.target.value));
                         }}
-                        required
                       >
                         <option
                           className="text-[#777DAA] text-xs font-medium"
@@ -843,8 +813,8 @@ async function excluirChaveAPI(chaveId: number) {
                         </option>
                         {salas.map((sala) => (
                           <option
-                          key={sala.id}
-                          value={sala.nome}
+                            key={sala.id}
+                            value={sala.id}
                             className="text-center bg-[#B8BCE0]"
                           >
                             {sala.nome}
