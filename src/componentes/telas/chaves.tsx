@@ -33,9 +33,18 @@ export function Chaves() {
   // const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-     //adicionando a função de adicionar chaves
+    
+  const [selectedSalaId, setSelectedSalaId] = useState<number | null>(null);
+  const [selectedSalaNome, setSelectedSalaNome] = useState<string>("");
+
+  const handleSalaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedIndex = e.target.selectedIndex;
+    const selectedOption = salas[selectedIndex - 1]; // -1 para ignorar o option padrão
   
-  const [selectedSala, setSelectedSala] = useState<number| null >(null);
+    setSelectedSalaId(selectedOption.id);    // Armazena o ID (number)
+    setSelectedSalaNome(selectedOption.nome); // Armazena o nome (string)
+  };
+     
   //const [selectedBloco, setSelectedBloco] = useState("");
   //const [descricao, setDescricao] = useState("");
   {
@@ -101,7 +110,7 @@ export function Chaves() {
     console.log("Chaves atualizadas:", chaves);
     obterChaves();
     
-  }, [chaves]);
+  }, []);
   
   const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
   const token = "f0f502a7e831964a171b049c33e50fce8ee95f79fe94b8ac575f1ad3cfcc1c03";
@@ -210,13 +219,13 @@ async function excluirChaveAPI(chaveId: number) {
   
   function addChaves(e: React.FormEvent) {
     e.preventDefault();
-  
+
     const novaChave: Chaves = {
       id: nextId,
       disponivel: true,
       usuarios: [],
       //qntd: 1,
-      salas: Number(selectedSala),
+      salas: selectedSalaId
       //blocos: selectedBloco,
       //descricao,
     };
@@ -230,7 +239,8 @@ async function excluirChaveAPI(chaveId: number) {
     setNextId(nextId + 1);
   
     // Reseta os campos
-    setSelectedSala(0);
+    setSelectedSalaNome("");
+    setSelectedSalaId(null);
     //setSelectedBloco("");
     //setDescricao("");
     closeChavesModal();
@@ -272,10 +282,10 @@ async function excluirChaveAPI(chaveId: number) {
 
    function editarChave(e: React.FormEvent) {
     e.preventDefault();
-    if (chaveSelecionada !== null && selectedSala !== null) {
+    if (chaveSelecionada !== null && selectedSalaId !== null) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
-        salas: selectedSala,
+        salas: selectedSalaId,
         //blocos: selectedBloco,
         //descricao,
       };
@@ -297,7 +307,8 @@ async function excluirChaveAPI(chaveId: number) {
 
         // Resetando os campos e fechando o modal
         setChaveSelecionada(null);
-        setSelectedSala(0);
+        setSelectedSalaId(null);
+        setSelectedSalaNome("");
         //setSelectedBloco("");
         //setDescricao("");
         closeEditModal();
@@ -330,7 +341,8 @@ async function excluirChaveAPI(chaveId: number) {
   // }
 
   function closeChavesModal() {
-    setSelectedSala(0);
+    setSelectedSalaNome("");
+    setSelectedSalaId(null);
     //setSelectedBloco("");
     //setDescricao("");
     setIsChavesModalOpen(false);
@@ -532,10 +544,18 @@ async function excluirChaveAPI(chaveId: number) {
                       </p>
                       <select
                         className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSala ?? ""}
-                        onChange={(e) => setSelectedSala( 
-                           (Number(e.target.value))
-                        )}
+                        value={selectedSalaNome}
+                        onChange={(e) => {
+                          const selectedIndex = e.target.selectedIndex;
+                          if (selectedIndex === 0) { // Opção padrão selecionada
+                            setSelectedSalaId(null);
+                            setSelectedSalaNome("");
+                          } else {
+                            const selectedSala = salas[selectedIndex - 1]; // -1 para ignorar a opção padrão
+                            setSelectedSalaId(selectedSala.id);
+                            setSelectedSalaNome(selectedSala.nome);
+                          }
+                        }}
                         required
                       >
                         <option
@@ -547,8 +567,8 @@ async function excluirChaveAPI(chaveId: number) {
                         </option>
                         {salas.map((sala) => (
                           <option
-                            key={sala.id}
-                            value={sala.id}
+                              key={sala.id}
+                              value={sala.nome}
                             className="text-center bg-[#B8BCE0]"
                           >
                             {sala.nome}
@@ -800,8 +820,18 @@ async function excluirChaveAPI(chaveId: number) {
                       </p>
                       <select
                         className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSala || ''}
-                        onChange={(e) => setSelectedSala(Number(e.target.value))} // Convertendo para number
+                        value={selectedSalaNome}
+                        onChange={(e) => {
+                          const selectedIndex = e.target.selectedIndex;
+                          if (selectedIndex === 0) { // Opção padrão selecionada
+                            setSelectedSalaId(null);
+                            setSelectedSalaNome("");
+                          } else {
+                            const selectedSala = salas[selectedIndex - 1]; // -1 para ignorar a opção padrão
+                            setSelectedSalaId(selectedSala.id);
+                            setSelectedSalaNome(selectedSala.nome);
+                          }
+                        }}
                         required
                       >
                         <option
@@ -814,7 +844,7 @@ async function excluirChaveAPI(chaveId: number) {
                         {salas.map((sala) => (
                           <option
                           key={sala.id}
-                          value={sala.id}
+                          value={sala.nome}
                             className="text-center bg-[#B8BCE0]"
                           >
                             {sala.nome}
