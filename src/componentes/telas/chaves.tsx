@@ -10,10 +10,18 @@ import { MenuTopo } from "../elementosVisuais/menuTopo";
 export interface Chaves {
   id: number;
   salas: number;
-  qntd: number;
+  disponivel: boolean;
+  usuarios: Usuario[];
+  //qntd: number;
   //blocos: string;
   //descricao: string;
 }
+
+interface Usuario {
+  id: number;
+  nome: string;
+}
+
 
 export function Chaves() {
   const navigate= useNavigate();
@@ -66,8 +74,8 @@ export function Chaves() {
   const chavesFiltradas = isSearching
     ? listaChaves.filter(
         (chave) =>
-          chave.salas.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) 
+          chave.salas.toString().includes(pesquisa) //||
+          //chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) 
           //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
       )
     : listaChaves;
@@ -117,12 +125,12 @@ async function obterChaves(){
     if (Array.isArray(data.results)) { // Verifica se data.results é um array
       for (const chave of data.results) {
         chaves.push({
-          sala: chave.sala,
+          salas: chave.sala,
           //blocos:chave.blocos,
           id: chave.id,
           //descricao: `Chave ${chave.descricao}`,
           disponivel:chave.disponivel,
-          usuarios: Array.isArray(chave.usuarios) ? chave.usuarios : [] //usa um array vazio se não obtiver usuários
+          usuarios: chave.usuarios || []
         });
       }
       setChaves(chaves);
@@ -205,7 +213,9 @@ async function excluirChaveAPI(chaveId: number) {
   
     const novaChave: Chaves = {
       id: nextId,
-      qntd: 1,
+      disponivel: true,
+      usuarios: [],
+      //qntd: 1,
       salas: Number(selectedSala),
       //blocos: selectedBloco,
       //descricao,
@@ -262,7 +272,7 @@ async function excluirChaveAPI(chaveId: number) {
 
    function editarChave(e: React.FormEvent) {
     e.preventDefault();
-    if (chaveSelecionada !== null) {
+    if (chaveSelecionada !== null && selectedSala !== null) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
         salas: selectedSala,
@@ -790,8 +800,8 @@ async function excluirChaveAPI(chaveId: number) {
                       </p>
                       <select
                         className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSala}
-                        onChange={(e) => setSelectedSala(e.target.value)}
+                        value={selectedSala || ''}
+                        onChange={(e) => setSelectedSala(Number(e.target.value))} // Convertendo para number
                         required
                       >
                         <option
@@ -801,13 +811,13 @@ async function excluirChaveAPI(chaveId: number) {
                         >
                           Selecione uma sala
                         </option>
-                        {salas.map((sala, index) => (
+                        {salas.map((sala) => (
                           <option
-                            key={index}
-                            value={sala}
+                          key={sala.id}
+                          value={sala.id}
                             className="text-center bg-[#B8BCE0]"
                           >
-                            {sala}
+                            {sala.nome}
                           </option>
                         ))}
                       </select>
