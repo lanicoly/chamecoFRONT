@@ -7,7 +7,7 @@ export function Login() {
   const navigate = useNavigate();
 
   const url =
-    "https://chamecoapi.pythonanywhere.com//chameco/api/v1/login/";
+    "https://chamecoapi.pythonanywhere.com/chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
@@ -24,7 +24,7 @@ export function Login() {
   }, []);
 
   function limparCPF(cpf: string) {
-    return cpf.replace(/\D/g, "");
+    return cpf.replace(/\D/g, ""); //converte string em numero
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -50,6 +50,10 @@ export function Login() {
           "Content-Type": "application/json",
         },
       });
+      const token = response.data.token; 
+
+      // Armazena o token no localStorage
+      localStorage.setItem('token', token)
 
       const statusResponse = response.status;
       const data = response.data;
@@ -213,7 +217,6 @@ export function Login() {
     </div>
   );
 }
-
 
 
 

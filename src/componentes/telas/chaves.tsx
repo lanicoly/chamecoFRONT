@@ -9,10 +9,10 @@ import { MenuTopo } from "../elementosVisuais/menuTopo";
 
 export interface Chaves {
   id: number;
-  salas: string;
-  qntd: number | string;
-  blocos: string;
-  descricao: string;
+  salas: number;
+  qntd: number;
+  //blocos: string;
+  //descricao: string;
 }
 
 export function Chaves() {
@@ -24,15 +24,79 @@ export function Chaves() {
   // const [pesquisaModal, setPesquisaModal] = useState<string>("");
   // const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+     //adicionando a função de adicionar chaves
+  
+  const [selectedSala, setSelectedSala] = useState<number| null >(null);
+  //const [selectedBloco, setSelectedBloco] = useState("");
+  //const [descricao, setDescricao] = useState("");
+  {
+    //aceitando apenas numeros na variavel qntd 
+  }
+
+
+  // Adicionando função de abrir e fechar pop up
+  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+  //const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
+
+  // const [isPessoasModalOpen, setIsPessoasModalOpen] = useState(false);
+  // const [novaPessoa, setNovaPessoa] = useState("");
+  const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
+
+  //const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
+  //const salas = ["Sala E09", "Sala E08", "Sala E07", "Sala F06", "Sala F05"];
+  interface Sala {
+    id: number;
+    nome: string;
+  }
+  
+  const salas: Sala[] = [
+    { id: 1, nome: "Sala 101" },
+    { id: 2, nome: "Sala 202" }
+  ];
+
+  {
+    /*adiocionando lista chaves */
+  }
+  const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
+
+  const [isSearching, setIsSearching] = useState(false);
+  const [pesquisa, setPesquisa] = useState("");
+
+  const chavesFiltradas = isSearching
+    ? listaChaves.filter(
+        (chave) =>
+          chave.salas.toLowerCase().includes(pesquisa.toLowerCase()) ||
+          chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) 
+          //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
+      )
+    : listaChaves;
+
+  // Adicionando funcionalidade ao passador de página
+  const itensPorPagina = 4;
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(listaChaves.length / itensPorPagina)
+  );
+  const indexInicio = (paginaAtual - 1) * itensPorPagina;
+  const indexFim = indexInicio + itensPorPagina;
+
+  const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
+
+  // adicionando modal de excluir chave
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ 
  
   //integracao 
   useEffect(() => {
+    console.log("Chaves atualizadas:", chaves);
     obterChaves();
     
-  }, []);
+  }, [chaves]);
   
-  const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/schema/swagger/chaves/';
-  const token = "00f0ccd3dd82ff6bfd36542d7b0151ebb9ca11f06af4721d3bcd683e73e9794e"; 
+  const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
+  const token = "f0f502a7e831964a171b049c33e50fce8ee95f79fe94b8ac575f1ad3cfcc1c03";
 
 //Funcao para a requisicao GET
 async function obterChaves(){
@@ -47,25 +111,26 @@ async function obterChaves(){
 
 
   if (statusResponse === 200) {
-    console.log("Congratulations! ");
+    console.log("Get de chaves realizada ");
     const chaves = [];
 
-    if ("chave" in data.results) {
+    if (Array.isArray(data.results)) { // Verifica se data.results é um array
       for (const chave of data.results) {
         chaves.push({
-          salas: chave.salas,
-          blocos:chave.blocos,
+          sala: chave.sala,
+          //blocos:chave.blocos,
           id: chave.id,
-          qntd:chave.qntd,
-          descricao: `Chave ${chave.descricao}`,
+          //descricao: `Chave ${chave.descricao}`,
+          disponivel:chave.disponivel,
+          usuarios: Array.isArray(chave.usuarios) ? chave.usuarios : [] //usa um array vazio se não obtiver usuários
         });
       }
       setChaves(chaves);
     }
   }
 } catch (error: unknown) {
-  setChaves([]);
   console.error("Erro ao obter chaves:", error);
+  setChaves([]);
 }
 }
 //Adicionando integracao entre chaves locais e api (POST)
@@ -80,6 +145,7 @@ async function adicionarChaveAPI(novaChave: Chaves) {
         },
       }
     );
+    
     console.log("Chave adicionada com sucesso:", response.data);
     // Atualiza a lista de chaves após adicionar e mostra na tela 
     obterChaves(); 
@@ -95,9 +161,8 @@ async function atualizarChaveAPI(chaveAtualizada: Chaves) {
       `${API_URL}${chaveAtualizada.id}?token=${token}`,
       {
         salas: chaveAtualizada.salas,
-        blocos: chaveAtualizada.blocos,
-        qntd: chaveAtualizada.qntd,
-        descricao: chaveAtualizada.descricao,
+        //blocos: chaveAtualizada.blocos,
+       // descricao: chaveAtualizada.descricao,
       },
       {
         headers: {
@@ -133,43 +198,17 @@ async function excluirChaveAPI(chaveId: number) {
     
   }
 }
-
+//fim requisicoes api
   
-    //adicionando a função de adicionar chaves
-  
-  const [selectedSala, setSelectedSala] = useState("");
-  const [selectedBloco, setSelectedBloco] = useState("");
-  const [descricao, setDescricao] = useState("");
-  {
-    //aceitando apenas numeros na variavel qntd 
-  }
-  const [qntd, setQntd] = useState<number | string>("");
-
-  // Adicionando função de abrir e fechar pop up
-  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
-  const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
-
-  // const [isPessoasModalOpen, setIsPessoasModalOpen] = useState(false);
-  // const [novaPessoa, setNovaPessoa] = useState("");
-  const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
-
-  //const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
-  const salas = ["Sala E09", "Sala E08", "Sala E07", "Sala F06", "Sala F05"];
-
-  {
-    /*adiocionando lista chaves */
-  }
-  const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
-
   function addChaves(e: React.FormEvent) {
     e.preventDefault();
   
     const novaChave: Chaves = {
       id: nextId,
-      salas: selectedSala,
-      qntd,
-      blocos: selectedBloco,
-      descricao,
+      qntd: 1,
+      salas: Number(selectedSala),
+      //blocos: selectedBloco,
+      //descricao,
     };
   
     // Adiciona a chave à API
@@ -181,10 +220,9 @@ async function excluirChaveAPI(chaveId: number) {
     setNextId(nextId + 1);
   
     // Reseta os campos
-    setQntd(0);
-    setSelectedSala("");
-    setSelectedBloco("");
-    setDescricao("");
+    setSelectedSala(0);
+    //setSelectedBloco("");
+    //setDescricao("");
     closeChavesModal();
     // closePessoasModal();
   }
@@ -198,13 +236,13 @@ async function excluirChaveAPI(chaveId: number) {
     setIsChavesModalOpen(true);
   }
 
-  function openDescricaoModal() {
+ /* function openDescricaoModal() {
     setIsDescricaoModalOpen(true);
   }
   function closeDescricaoModal() {
     setDescricao("");
     setIsDescricaoModalOpen(false);
-  }
+  }*/
 
    function openEditModal() {
      const chave = listaChaves.find(
@@ -212,9 +250,8 @@ async function excluirChaveAPI(chaveId: number) {
     );
     if (chave) {
        setSelectedSala(chave.salas);
-       setSelectedBloco(chave.blocos);
-       setQntd(chave.qntd);
-       setDescricao(chave.descricao);
+       //setSelectedBloco(chave.blocos);
+       //setDescricao(chave.descricao);
        setIsEditModalOpen(true);
      }
    }
@@ -229,9 +266,8 @@ async function excluirChaveAPI(chaveId: number) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
         salas: selectedSala,
-        blocos: selectedBloco,
-        qntd,
-        descricao,
+        //blocos: selectedBloco,
+        //descricao,
       };
     
       // Chama a função de requisição e atualiza os estados
@@ -251,10 +287,9 @@ async function excluirChaveAPI(chaveId: number) {
 
         // Resetando os campos e fechando o modal
         setChaveSelecionada(null);
-        setSelectedSala("");
-        setSelectedBloco("");
-        setQntd("");
-        setDescricao("");
+        setSelectedSala(0);
+        //setSelectedBloco("");
+        //setDescricao("");
         closeEditModal();
       
       
@@ -285,35 +320,13 @@ async function excluirChaveAPI(chaveId: number) {
   // }
 
   function closeChavesModal() {
-    setQntd(0);
-    setSelectedSala("");
-    setSelectedBloco("");
-    setDescricao("");
+    setSelectedSala(0);
+    //setSelectedBloco("");
+    //setDescricao("");
     setIsChavesModalOpen(false);
   }
 
-  const [isSearching, setIsSearching] = useState(false);
-  const [pesquisa, setPesquisa] = useState("");
-
-  const chavesFiltradas = isSearching
-    ? listaChaves.filter(
-        (chave) =>
-          chave.salas.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
-      )
-    : listaChaves;
-
-  // Adicionando funcionalidade ao passador de página
-  const itensPorPagina = 4;
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const totalPaginas = Math.max(
-    1,
-    Math.ceil(listaChaves.length / itensPorPagina)
-  );
-  const indexInicio = (paginaAtual - 1) * itensPorPagina;
-  const indexFim = indexInicio + itensPorPagina;
-
+  
   function avancarPagina() {
     if (paginaAtual < totalPaginas) {
       setPaginaAtual(paginaAtual + 1);
@@ -325,10 +338,7 @@ async function excluirChaveAPI(chaveId: number) {
       setPaginaAtual(paginaAtual - 1);
     }
   }
-  const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
-
-  // adicionando modal de excluir chave
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ 
   function openDeleteModal() {
     if (chaveSelecionada !== null) {
       setIsDeleteModalOpen(true);
@@ -512,8 +522,10 @@ async function excluirChaveAPI(chaveId: number) {
                       </p>
                       <select
                         className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedSala}
-                        onChange={(e) => setSelectedSala(e.target.value)}
+                        value={selectedSala ?? ""}
+                        onChange={(e) => setSelectedSala( 
+                           (Number(e.target.value))
+                        )}
                         required
                       >
                         <option
@@ -523,13 +535,13 @@ async function excluirChaveAPI(chaveId: number) {
                         >
                           Selecione uma sala
                         </option>
-                        {salas.map((sala, index) => (
+                        {salas.map((sala) => (
                           <option
-                            key={index}
-                            value={sala}
+                            key={sala.id}
+                            value={sala.id}
                             className="text-center bg-[#B8BCE0]"
                           >
-                            {sala}
+                            {sala.nome}
                           </option>
                         ))}
                       </select>
@@ -585,7 +597,8 @@ async function excluirChaveAPI(chaveId: number) {
                       )}
                     </div> */}
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
+                    
+                    {/*<div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
                       </p>
@@ -596,7 +609,8 @@ async function excluirChaveAPI(chaveId: number) {
                         onChange={(e) => setDescricao(e.target.value)}
                         required
                       />
-                    </div>
+                    </div>*/}
+                    
 
                     <div className="flex justify-center items-center mt-[10px] w-full">
                       <button
@@ -655,7 +669,7 @@ async function excluirChaveAPI(chaveId: number) {
                           alt="icon bloco"
                         />
                         <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
-                          {chaves.blocos}
+                          {/*chaves.blocos*/}
                         </p>
                       </div>
                     </td>
@@ -729,7 +743,7 @@ async function excluirChaveAPI(chaveId: number) {
                           </defs>
                         </svg>
                         <p
-                          onClick={openDescricaoModal}
+                          //onClick={openDescricaoModal}
                           className="text-[#646999] font-montserrat text-[11px] font-medium underline"
                         >
                           Ver mais
@@ -847,7 +861,7 @@ async function excluirChaveAPI(chaveId: number) {
                     {/* {error && (
                         <p className="text-red-500 text-xs mt-1">{error}</p>
                       )}
-                    </div> */}
+                    </div> 
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
@@ -859,7 +873,7 @@ async function excluirChaveAPI(chaveId: number) {
                         onChange={(e) => setDescricao(e.target.value)}
                         required
                       />
-                    </div>
+                    </div>*/}
           <div className="flex justify-center items-center mt-[10px] w-full">
             <button
               type="submit"
@@ -871,7 +885,8 @@ async function excluirChaveAPI(chaveId: number) {
         </form>
       </div>
     )}
-    {/*fim modal editar chave */}
+    
+    {/*fim modal editar chave 
           {isDescricaoModalOpen && chaveSelecionada && (
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
@@ -894,14 +909,15 @@ async function excluirChaveAPI(chaveId: number) {
                   >
                     <p className="text-[#192160] text-center text-[20px] font-semibold ml-[10px] w-[85%]">
                       {chaveSelecionada.descricao}{" "}
-                      {/* Aqui você deve acessar a descrição da chave */}
+                      
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          )}*/}
         </main>
+        
         <div className="mt-2">
           <PassadorPagina
             avancarPagina={avancarPagina}
