@@ -87,7 +87,8 @@ export function StatusChaves() {
     return (
         <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
 
-                  <MenuTopo />
+        <MenuTopo text = "VOLTAR" backRoute="/chaves" />
+
 
             {/* parte informativa tela status chaves */}
             <div className="relative bg-white w-full max-w-[800px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-10 desktop:top-6 tablet:h-[480px] h-[90%]">

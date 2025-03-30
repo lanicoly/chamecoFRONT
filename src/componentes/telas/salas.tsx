@@ -24,8 +24,7 @@ export function Salas() {
   
 
     const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/salas/";
-    const token =
-      "80cf2b43dfeb97e7720742785d04059355288babd46a4de1652a939837567562";
+    const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
 
   //Função para requisição get (obter blocos)
  async function obterSalas() {
@@ -268,8 +267,7 @@ export function Salas() {
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
       {/* menu topo */}
-      <MenuTopo />
-
+      <MenuTopo text = "VOLTAR" backRoute="/blocos" />
       {/* menu topo */}
 
       {/* parte informativa tela salas */}
@@ -277,7 +275,7 @@ export function Salas() {
         {/* cabeçalho tela salas */}
         <div className="flex w-full gap-2">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
-          
+            BLOCO X
           </h1>
         </div>
         {/* fim cabeçalho tela salas */}
@@ -518,9 +516,9 @@ export function Salas() {
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[96px] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
                         {sala.nome}
                       </td>
-                      <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-2/4 max-w-[124px] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                      {/* <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-2/4 max-w-[124px] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         {sala.descricao}
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>

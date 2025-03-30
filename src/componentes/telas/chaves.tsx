@@ -48,7 +48,7 @@ export function Chaves() {
   //const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [novoUsuario, setNovoUsuario] = useState("");
+  // const [novoUsuario, setNovoUsuario] = useState("");
   const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
 
   //const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
@@ -103,7 +103,7 @@ export function Chaves() {
   }, []);
   
   const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
-  const token = "9e12b2fc218bff944312056c564fe7e339e08ecbc10463d6c8655f958224bc20";
+  const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
 
 //Funcao para a requisicao GET
 async function obterChaves(){
@@ -305,19 +305,19 @@ async function excluirChaveAPI(chaveId: number) {
       
   }
 }
-   function adicionarUsuarios(chaveId: number, novoUsuario: string) {
-     setItensAtuais((prevLista) => {
-      return prevLista.map((chave) => {
-         if (chave.id === chaveId) {
-           return {
-             ...chave,
-             usuarios: [...chave.usuarios, novoUsuario],
-           };
-         }
-         return chave;
-       });
-     });
-   }
+  //  function adicionarUsuarios(chaveId: number, novoUsuario: string) {
+  //    setItensAtuais((prevLista) => {
+  //     return prevLista.map((chave) => {
+  //        if (chave.id === chaveId) {
+  //          return {
+  //            ...chave,
+  //            usuarios: [...chave.usuarios, novoUsuario],
+  //          };
+  //        }
+  //        return chave;
+  //      });
+  //    });
+  //  }
 
    function openUserModal(chave: Chaves) {
      setChaveSelecionada(chave);

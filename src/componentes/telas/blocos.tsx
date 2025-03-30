@@ -1,6 +1,8 @@
 import { LayoutDashboard, X, Plus, TriangleAlert } from "lucide-react";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
+import { MenuTopo } from "../elementosVisuais/menuTopo";
+import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -11,7 +13,6 @@ export interface Blocos {
   // descricao: string;
   token: string;
 }
-
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
 
@@ -29,10 +30,7 @@ export function Blocos() {
   }, []);
 
   const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
-  const token =
-    "80cf2b43dfeb97e7720742785d04059355288babd46a4de1652a939837567562"
-;
-
+  const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
@@ -64,7 +62,6 @@ export function Blocos() {
       console.error("Erro ao obter blocos:", error);
     }
   }
-
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBlocoAPI(novoBloco: Blocos) {
@@ -130,9 +127,8 @@ export function Blocos() {
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
     ? blocos.filter(
-        (blocos) =>
-          blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
-          // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+        (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
+        // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       )
     : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
@@ -186,11 +182,12 @@ export function Blocos() {
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
       const response = await axios.put(
-        `${URL}${blocoSelecionado.id}/`, {nome: blocoSelecionado.nome, token: token},
+        `${URL}${blocoSelecionado.id}/`,
+        { nome: blocoSelecionado.nome, token: token },
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -205,25 +202,25 @@ export function Blocos() {
   }
 
   //função de editar bloco
-  function editarBloco(e: React.FormEvent) { 
+  function editarBloco(e: React.FormEvent) {
     e.preventDefault();
-    
-    if (!blocoSelecionado) { 
-      console.error("Nenhum bloco selecionado."); 
+
+    if (!blocoSelecionado) {
+      console.error("Nenhum bloco selecionado.");
       return;
     }
-  
-    blocos.forEach((bloco) => { 
-      if (bloco.id === blocoSelecionado.id) { 
+
+    blocos.forEach((bloco) => {
+      if (bloco.id === blocoSelecionado.id) {
         if (nome) {
-          bloco.nome = nome; 
+          bloco.nome = nome;
         }
       }
     });
 
     editarBlocoAPI(blocoSelecionado);
-    setNome(""); 
-    closeEditModal(); 
+    setNome("");
+    closeEditModal();
   }
 
   //Adicionando função de excluir bloco + função para requisição delete
@@ -231,11 +228,11 @@ export function Blocos() {
     try {
       const response = await axios.delete(`${URL}${id}/`, {
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        data: { nome, token }
+        data: { nome, token },
       });
-  
+
       console.log("Bloco excluído com sucesso!", response.data);
     } catch (error: unknown) {
       console.error("Erro ao excluir bloco:", error);
@@ -279,81 +276,7 @@ export function Blocos() {
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
       {/* Adicionando barra de navegação */}
-      <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
-        <button
-          onClick={() => navigate("/menu")}
-          className="flex gap-2 justify-start items-center font-medium text-lg text-sky-900 w-auto"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="#082f49"
-            className="bi bi-chevron-left"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-            />
-          </svg>
-          MENU
-        </button>
-
-        {/* logo chameco lateral */}
-        <div className="sm:flex hidden justify-start bottom-4">
-          <img
-            className="w-[150px]"
-            src="\logo_lateral.png"
-            alt="logo chameco"
-          />
-        </div>
-        {/* fim logo chameco lateral */}
-
-        <div className="flex">
-          <button className="flex justify-center items-center gap-1 text-[#565D8F] font-semibold text-base bg-[#B8C1FF] rounded-l-md p-2 h-max w-max">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi    bi-person-circle"
-              viewBox="0 0 16 16"
-            >
-              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-              <path
-                fill-rule="evenodd"
-                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
-              />
-            </svg>
-            Usuário
-          </button>
-          <button
-            onClick={() => navigate("/login")}
-            className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
-          >
-            Sair
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi bi-box-arrow-right"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"
-              />
-              <path
-                fill-rule="evenodd"
-                d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"
-              />
-            </svg>
-          </button>
-        </div>
-      </nav>
-
+      <MenuTopo text="MENU" backRoute="/menu" />
       {/* Adicionando container */}
       {/* Adicionando container que irá conter as informações sobre os blocos */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
@@ -376,23 +299,10 @@ export function Blocos() {
           {/* fim input de pesquisa */}
 
           {/* Adicionando botão de adicionar bloco */}
-          <button
+          <BotaoAdicionar
+            text="ADICIONAR BLOCO"
             onClick={openAdicionarBlocoModal}
-            className="px-2 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="#ffffff"
-              className="bi bi-plus-circle"
-              viewBox="0 0 16 16"
-            >
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-            </svg>
-            ADICIONAR BLOCO
-          </button>
+          />
           {/* fim do botão de adicionar bloco */}
 
           {/* Adicionando modal de adicionar blocos */}

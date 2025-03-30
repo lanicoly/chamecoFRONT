@@ -8,6 +8,7 @@ import { Chaves } from "./componentes/telas/chaves";
 import { Login } from "./componentes/telas/login";
 import { Usuarios } from "./componentes/telas/usuarios";
 import { StatusChaves } from "./componentes/telas/statusChaves";
+import { Emprestimos } from "./componentes/telas/emprestimos";
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/chaves" element={<Chaves />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/statusChaves" element={<StatusChaves />} />
+        <Route path="/emprestimos" element={<Emprestimos />} />
       </Routes>
     </BrowserRouter>
   );
