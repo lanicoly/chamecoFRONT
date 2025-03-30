@@ -1,12 +1,14 @@
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
-
+import axios from "axios";
 export interface Sala {
   id: number;
   nome: string;
-  descricao: string;
+  bloco: number;
+  token: string;
+  // descricao: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -15,6 +17,50 @@ export interface Sala {
 
 export function Salas() {
   const navigate = useNavigate();
+  //começo da integração 
+  useEffect(() => {
+    obterSalas();
+  }, []);
+  
+
+    const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/salas/";
+    const token =
+      "80cf2b43dfeb97e7720742785d04059355288babd46a4de1652a939837567562";
+
+  //Função para requisição get (obter blocos)
+ async function obterSalas() {
+     try {
+       const response = await axios.get(`${URL}?token=${token}`, {
+         headers: {
+           "Content-Type": "application/json",
+         },
+       });
+ 
+       if (response.status === 200) {
+         console.log("Ebaaa!!!");
+         const data = response.data;
+ 
+         if (data.results && Array.isArray(data.results)) {
+           const salas = (data.results as Sala[]).map((sala) => ({
+             id: sala.id,
+             nome: sala.nome,
+             bloco: sala.bloco,
+             // descricao: sala.descricao,
+             token: sala.token,
+           }));
+ 
+           setListaSalas(salas);
+         } else {
+           setListaSalas([]);
+         }
+       }
+     } catch (error) {
+       setListaSalas([]);
+       console.error("Erro ao obter salas:", error);
+     }
+   }
+ 
+  
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
@@ -31,8 +77,8 @@ export function Salas() {
   const salasFiltradas = isSearching
     ? listaSalas.filter(
         (sala) =>
-          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          sala.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) 
+          // sala.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       )
     : listaSalas;
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
@@ -64,46 +110,132 @@ export function Salas() {
     setIsEditModalOpen(false);
   }
 
+  // função para requisição do método post
+    async function adicionarSalaAPI(sala: Sala) {
+      try {
+        const response = await axios.post(`${URL}?token=${token}`, sala, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Sala adicionada com sucesso!", response.data);
+        obterSalas();
+      } catch (error: unknown) {
+        console.log("Erro ao adicionar sala", error);
+      }
+    }
+
   function addSala(e: React.FormEvent) {
     e.preventDefault();
     const sala: Sala = {
       id: nextId,
       nome,
-      descricao,
+      bloco: 1, //temos que alterar para adicionar a sala no id do bloco que queremos
+      token
+      // descricao,
     };
+
+    adicionarSalaAPI(sala);
+
     setListaSalas([...listaSalas, sala]);
     setNextId(nextId + 1);
     setNome("");
-    setDescricao("");
+    // setDescricao("");
     closeSalaModal();
   }
 
-  function removeSala() {
-    if (salaSelecionada !== null) {
-      setListaSalas(listaSalas.filter((sala) => sala.id !== salaSelecionada));
-      setSalaSelecionada(null);
+  //Adicionando função de excluir sala + função para requisição delete
+    async function excluirSalaAPI(id: number, nome: string, bloco:number) {
+      try {
+        const response = await axios.delete(`${URL}${id}/`, {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          data: { nome, token, bloco }
+        });
+    
+        console.log("Sala excluído com sucesso!", response.data);
+      } catch (error: unknown) {
+        console.error("Erro ao excluir sala:", error);
+      }
     }
-  }
 
-  function editaSala(e: React.FormEvent) {
-    e.preventDefault();
-    if (salaSelecionada !== null) {
-      listaSalas.map((sala) => {
-        if (sala.id === salaSelecionada) {
-          if (nome) {
-            sala.nome = nome;
-          }
-          if (descricao) {
-            sala.descricao = descricao;
-          }
-        }
-      });
-      setSalaSelecionada(null);
+    function removeSala(e: React.FormEvent) {
+      e.preventDefault();
+    
+      if (salaSelecionada === null) {
+        console.error("Nenhuma sala selecionada para excluir.");
+        return;
+      }
+      const salaSelecionadaObj = listaSalas.find(sala => sala.id === salaSelecionada);
+    
+      if (!salaSelecionadaObj) {
+        console.error("Sala não encontrada.");
+        return;
+      }
+    
+      const { id, nome, bloco } = salaSelecionadaObj;
+    
+      try {
+        excluirSalaAPI(id, nome, bloco);
+    
+        setListaSalas((prevSalas) =>
+          prevSalas.filter((sala) => sala.id !== salaSelecionada) 
+        );
+    
+        setSalaSelecionada(null);
+      } catch (error) {
+        console.error("Erro ao excluir sala:", error);
+      }
     }
-    setNome("");
-    setDescricao("");
-    closeEditModal();
-  }
+
+  // adicionando função de editar informações de uma sala + função para requisição PUT
+    async function editarSalaAPI(salaSelecionada: Sala) {
+      try {
+        const response = await axios.put(
+          `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, token: token, bloco: salaSelecionada.bloco},
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+          }
+        );
+  
+        if (response.status === 200) {
+          console.log("Sala editada com sucesso!", response.data);
+          return response.data;
+        }
+      } catch (error: unknown) {
+        console.error("Erro ao editar sala.", error);
+      }
+    }
+  
+
+    function editaSala(e: React.FormEvent) {
+      e.preventDefault();
+      
+      if (salaSelecionada !== null) {
+        const salaEditada = listaSalas.find((sala) => sala.id === salaSelecionada);
+    
+        if (salaEditada) {
+          if (nome) {
+            salaEditada.nome = nome; 
+          }
+          // if (descricao) {
+          //   salaEditada.descricao = descricao;  
+          // }
+    
+          editarSalaAPI(salaEditada);  
+        }
+    
+        setSalaSelecionada(null);  
+        setNome("");  
+        setDescricao("");  
+        closeEditModal();  
+      }
+    }
+    
 
   function statusSala(id: number) {
     if (salaSelecionada !== null) {
@@ -145,7 +277,7 @@ export function Salas() {
         {/* cabeçalho tela salas */}
         <div className="flex w-full gap-2">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
-            BLOCO X
+          
           </h1>
         </div>
         {/* fim cabeçalho tela salas */}
@@ -232,7 +364,7 @@ export function Salas() {
                       required
                     />
                   </div>
-
+{/* 
                   <div className="justify-center items-center ml-[40px] mr-8">
                     <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                       Descreva os detalhes sobre a sala
@@ -244,7 +376,7 @@ export function Salas() {
                       onChange={(e) => setDescricao(e.target.value)}
                       required
                     />
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-center items-center mt-[10px] w-full">
                     <button

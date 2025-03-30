@@ -30,7 +30,8 @@ export function Blocos() {
 
   const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
   const token =
-    "af9a581581abc6c39d2f454329dcb4acacf7f0e3c830208ca90a6b7da3a422d8";
+    "80cf2b43dfeb97e7720742785d04059355288babd46a4de1652a939837567562"
+;
 
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
