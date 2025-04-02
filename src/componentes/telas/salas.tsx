@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
 import axios from "axios";
 export interface Sala {
@@ -16,50 +16,44 @@ export interface Sala {
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Salas() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   //começo da integração 
   useEffect(() => {
     obterSalas();
-  }, []);
-  
+}, []);
 
     const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/salas/";
-    const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
-
+    const token = "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
+ 
   //Função para requisição get (obter blocos)
- async function obterSalas() {
-     try {
-       const response = await axios.get(`${URL}?token=${token}`, {
-         headers: {
-           "Content-Type": "application/json",
-         },
-       });
- 
-       if (response.status === 200) {
-         console.log("Ebaaa!!!");
-         const data = response.data;
- 
-         if (data.results && Array.isArray(data.results)) {
-           const salas = (data.results as Sala[]).map((sala) => ({
-             id: sala.id,
-             nome: sala.nome,
-             bloco: sala.bloco,
-             // descricao: sala.descricao,
-             token: sala.token,
-           }));
- 
-           setListaSalas(salas);
-         } else {
-           setListaSalas([]);
-         }
-       }
-     } catch (error) {
-       setListaSalas([]);
-       console.error("Erro ao obter salas:", error);
-     }
-   }
- 
-  
+  async function obterSalas() {
+    try {
+      const url = `${URL}?token=${token}`;
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        if (data.results && Array.isArray(data.results)) {
+          const salas = data.results.map((sala: Sala) => ({
+            id: sala.id,
+            nome: sala.nome,
+            bloco: sala.bloco,
+            token: sala.token,
+          }));
+          setListaSalas(salas);
+        } else {
+          setListaSalas([]);
+        }
+      }
+    } catch (error) {
+      setListaSalas([]);
+      console.error('Erro ao obter salas:', error);
+    }
+  }
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
@@ -129,7 +123,7 @@ export function Salas() {
     const sala: Sala = {
       id: nextId,
       nome,
-      bloco: 1, //temos que alterar para adicionar a sala no id do bloco que queremos
+      bloco: 10, //temos que alterar para adicionar a sala no id do bloco que queremos
       token
       // descricao,
     };

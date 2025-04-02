@@ -1,71 +1,194 @@
 import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PassadorPagina } from "../elementosVisuais/passadorPagina";
 import { Pesquisa } from "../elementosVisuais/pesquisa";
 import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
-import axios  from "axios";
+import axios from "axios";
 import { MenuTopo } from "../elementosVisuais/menuTopo";
-//import { Usuarios } from "./usuarios";
 
 export interface Chaves {
   id: number;
   sala: number;
   disponivel: boolean;
-  usuarios: Usuario[];
-  //qntd: number;
-  //blocos: string;
-  //descricao: string;
+  usuarios: number[];
+  token: string;
 }
 
-interface Usuario {
+interface Sala {
   id: number;
   nome: string;
 }
 
-
 export function Chaves() {
-  const navigate= useNavigate();
-  // Adicionando funcionalidade ao button adicionar bloco
+  const navigate = useNavigate();
+
+  //integracao
+  useEffect(() => {
+    obterChaves();
+  }, []);
+
+  const API_URL =
+    "https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/";
+  const token =
+    "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
+
   const [chaves, setChaves] = useState<Chaves[]>([]);
   const [nextId, setNextId] = useState(1);
-
-  // const [pesquisaModal, setPesquisaModal] = useState<string>("");
-  // const [isSearchingModal, setIsSearchingModal] = useState<boolean>(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-    
   const [selectedSala, setSelectedSala] = useState<number | null>(null);
-  //const [selectedBloco, setSelectedBloco] = useState("");
-  //const [descricao, setDescricao] = useState("");
-  {
-    //aceitando apenas numeros na variavel qntd 
-  }
-
-
-  // Adicionando função de abrir e fechar pop up
-  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
-  //const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
-
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  // const [novoUsuario, setNovoUsuario] = useState("");
   const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
 
-  //const blocos = ["Bloco C", "Bloco E", "Bloco J", "Bloco D"];
-  //const salas = ["Sala E09", "Sala E08", "Sala E07", "Sala F06", "Sala F05"];
-  interface Sala {
-    id: number;
-    nome: string;
+  //Funcao para a requisicao GET
+  async function obterChaves() {
+    try {
+      const response = await axios.get(`${API_URL}?token=${token}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const statusResponse = response.status;
+      const data = response.data;
+
+      if (statusResponse === 200) {
+        console.log("Get de chaves realizada ");
+        const chaves = [];
+
+        if (Array.isArray(data.results)) {
+          for (const chave of data.results) {
+            chaves.push({
+              sala: chave.sala,
+              id: chave.id,
+              disponivel: chave.disponivel,
+              usuarios: chave.usuarios || [],
+              token: chave.token,
+            });
+          }
+          setChaves(chaves);
+        }
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao obter chaves:", error);
+      setChaves([]);
+    }
   }
-  
+
+  //Adicionando integracao entre chaves locais e api (POST)
+  async function adicionarChaveAPI(novaChave: Chaves) {
+    console.log("Chave", novaChave);
+    try {
+      const response = await axios.post(
+        `${API_URL}?token=${token}`,
+        novaChave,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Chave adicionada com sucesso:", response.data);
+      // Atualiza a lista de chaves após adicionar e mostra na tela
+      obterChaves();
+    } catch (error: unknown) {
+      console.error("Erro ao adicionar chave:", error);
+    }
+  }
+
+  function addChaves(e: React.FormEvent) {
+    e.preventDefault();
+
+    const novaChave: Chaves = {
+      sala: Number(selectedSala),
+      disponivel: true,
+      usuarios: [],
+      token: token,
+      id: nextId,
+    };
+
+    // Adiciona a chave à API
+    adicionarChaveAPI(novaChave);
+
+    // Atualiza o estado local
+    setChaves([...chaves, novaChave]);
+    setItensAtuais([...listaChaves, novaChave]);
+    setNextId(nextId + 1);
+
+    // Reseta os campos
+    setSelectedSala(null);
+    closeChavesModal();
+    closeUserModal();
+  }
+
+  // Função para realizar a requisição PATCH
+  async function atualizarChaveAPI(chaveAtualizada: Chaves) {
+    try {
+      const response = await axios.patch(
+        `${API_URL}${chaveAtualizada.id}?token=${token}`,
+        {
+          salas: chaveAtualizada.sala,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Chave editada com sucesso na API:", response.data);
+        return response.data;
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao atualizar chave na API:", error);
+    }
+  }
+
+  //Função para realizar a requisicao DELETE
+
+  async function excluirChaveAPI(
+    chaveId: number,
+    sala: number,
+    disponivel: boolean,
+    usuarios: number[]
+  ) {
+    try {
+      const response = await axios.delete(
+        `${API_URL}${chaveId}?token=${token}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: {
+            sala,
+            disponivel,
+            usuarios_autorizados: usuarios,
+            token,
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 204) {
+        console.log("Chave excluída com sucesso");
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao excluir chave:", error);
+    }
+  }
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
   const salas: Sala[] = [
     { id: 1, nome: "Sala 101" },
-    { id: 2, nome: "Sala 202" }
+    { id: 2, nome: "Sala 202" },
+    { id: 3, nome: "Sala E09" },
+    { id: 4, nome: "Sala E10" },
+    { id: 5, nome: "Sala E11" },
+    { id: 6, nome: "Sala E12" }
   ];
 
-  {
-    /*adiocionando lista chaves */
-  }
   const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
 
   const [isSearching, setIsSearching] = useState(false);
@@ -73,10 +196,9 @@ export function Chaves() {
 
   const chavesFiltradas = isSearching
     ? listaChaves.filter(
-        (chave) =>
-          chave.sala.toString().includes(pesquisa) //||
-          //chave.blocos.toLowerCase().includes(pesquisa.toLowerCase()) 
-          //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
+        (chave) => chave.sala.toString().includes(pesquisa) //||
+        //chave.blocos.toLowerCase().includes(pesquisa.toLowerCase())
+        //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
       )
     : listaChaves;
 
@@ -94,148 +216,7 @@ export function Chaves() {
 
   // adicionando modal de excluir chave
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
- 
- 
-  //integracao 
-  useEffect(() => {
-    obterChaves();
-    
-  }, []);
-  
-  const API_URL = 'https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/';
-  const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
 
-//Funcao para a requisicao GET
-async function obterChaves(){
-    try {
-        const response = await axios.get(`${API_URL}?token=${token}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        } );
-  const statusResponse = response.status;
-  const data = response.data;
-
-
-  if (statusResponse === 200) {
-    console.log("Get de chaves realizada ");
-    const chaves = [];
-
-    if (Array.isArray(data.results)) { // Verifica se data.results é um array
-      for (const chave of data.results) {
-        chaves.push({
-          sala: chave.sala,
-          //blocos:chave.blocos,
-          id: chave.id,
-          //descricao: `Chave ${chave.descricao}`,
-          disponivel:chave.disponivel,
-          usuarios: chave.usuarios || []
-        });
-      }
-      setChaves(chaves);
-    }
-  }
-} catch (error: unknown) {
-  console.error("Erro ao obter chaves:", error);
-  setChaves([]);
-}
-}
-//Adicionando integracao entre chaves locais e api (POST)
-async function adicionarChaveAPI(novaChave: Chaves) {
-  try {
-    const response = await axios.post(
-      `${API_URL}?token=${token}`,
-      novaChave,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    
-    console.log("Chave adicionada com sucesso:", response.data);
-    // Atualiza a lista de chaves após adicionar e mostra na tela 
-    obterChaves(); 
-  } catch (error: unknown) {
-    console.error("Erro ao adicionar chave:", error);
-  }
-}
-
-// Função para realizar a requisição PATCH
-async function atualizarChaveAPI(chaveAtualizada: Chaves) {
-  try {
-    const response = await axios.patch(
-      `${API_URL}${chaveAtualizada.id}?token=${token}`,
-      {
-        salas: chaveAtualizada.sala,
-        //blocos: chaveAtualizada.blocos,
-       // descricao: chaveAtualizada.descricao,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (response.status === 200) {
-      console.log("Chave editada com sucesso na API:", response.data);
-      return response.data; 
-    }
-  } catch (error: unknown) {
-    console.error("Erro ao atualizar chave na API:", error);
-  }
-}
-
-//Função para realizar a requisicao DELETE
-
-async function excluirChaveAPI(chaveId: number) {
-  try {
-    const response = await axios.delete(`${API_URL}${chaveId}?token=${token}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.status === 200 || response.status === 204) {
-      console.log("Chave excluída com sucesso");
-    }
-  } catch (error: unknown) {
-    console.error("Erro ao excluir chave:", error);
-    
-  }
-}
-//fim requisicoes api
-  
-  function addChaves(e: React.FormEvent) {
-    e.preventDefault();
-
-    const novaChave: Chaves = {
-      id: nextId,
-      disponivel: true,
-      usuarios: [{ id: 1, nome: "Admin" }],
-      //qntd: 1,
-      sala: selectedSala as number,
-      //blocos: selectedBloco,
-      //descricao,
-    };
-  
-    // Adiciona a chave à API
-    adicionarChaveAPI(novaChave);
-  
-    // Atualiza o estado local
-    setChaves([...chaves, novaChave]);
-    setItensAtuais([...listaChaves, novaChave]);
-    setNextId(nextId + 1);
-  
-    // Reseta os campos
-    setSelectedSala(null);
-    //setSelectedBloco("");
-    //setDescricao("");
-    closeChavesModal();
-    closeUserModal();
-  }
-  
   function statusSelecao(id: number) {
     const chave = listaChaves.find((chave) => chave.id === id) || null;
     setChaveSelecionada(chave);
@@ -245,7 +226,7 @@ async function excluirChaveAPI(chaveId: number) {
     setIsChavesModalOpen(true);
   }
 
- /* function openDescricaoModal() {
+  /* function openDescricaoModal() {
     setIsDescricaoModalOpen(true);
   }
   function closeDescricaoModal() {
@@ -253,58 +234,49 @@ async function excluirChaveAPI(chaveId: number) {
     setIsDescricaoModalOpen(false);
   }*/
 
-   function openEditModal() {
-     const chave = listaChaves.find(
-     (chave) => chave.id === chaveSelecionada?.id
+  function openEditModal() {
+    const chave = listaChaves.find(
+      (chave) => chave.id === chaveSelecionada?.id
     );
     if (chave) {
-       setSelectedSala(chave.sala);
-       //setSelectedBloco(chave.blocos);
-       //setDescricao(chave.descricao);
-       setIsEditModalOpen(true);
-     }
-   }
+      setSelectedSala(chave.sala);
+      setIsEditModalOpen(true);
+    }
+  }
 
-   function closeEditModal() {
-     setIsEditModalOpen(false);
-   }
+  function closeEditModal() {
+    setIsEditModalOpen(false);
+  }
 
-   function editarChave(e: React.FormEvent) {
+  function editarChave(e: React.FormEvent) {
     e.preventDefault();
     if (chaveSelecionada !== null) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
-        sala: selectedSala as number
-        //blocos: selectedBloco,
-        //descricao,
+        sala: selectedSala as number,
       };
 
-    
       // Chama a função de requisição e atualiza os estados
-      atualizarChaveAPI(chaveAtualizada)
+      atualizarChaveAPI(chaveAtualizada);
 
-        // Atualizando estado local após a atualização na API
-        setChaves((prevChaves) =>
-          prevChaves.map((chave) =>
-            chave.id === chaveSelecionada.id ? chaveAtualizada : chave
-          )
-        );
-        setItensAtuais((prevLista) =>
-          prevLista.map((chave) =>
-            chave.id === chaveSelecionada.id ? chaveAtualizada : chave
-          )
-        );
+      // Atualizando estado local após a atualização na API
+      setChaves((prevChaves) =>
+        prevChaves.map((chave) =>
+          chave.id === chaveSelecionada.id ? chaveAtualizada : chave
+        )
+      );
+      setItensAtuais((prevLista) =>
+        prevLista.map((chave) =>
+          chave.id === chaveSelecionada.id ? chaveAtualizada : chave
+        )
+      );
 
-        // Resetando os campos e fechando o modal
-        setChaveSelecionada(null);
-        setSelectedSala(0);
-        //setSelectedBloco("");
-        //setDescricao("");
-        closeEditModal();
-      
-      
+      // Resetando os campos e fechando o modal
+      setChaveSelecionada(null);
+      setSelectedSala(0);
+      closeEditModal();
+    }
   }
-}
   //  function adicionarUsuarios(chaveId: number, novoUsuario: string) {
   //    setItensAtuais((prevLista) => {
   //     return prevLista.map((chave) => {
@@ -319,24 +291,21 @@ async function excluirChaveAPI(chaveId: number) {
   //    });
   //  }
 
-   function openUserModal(chave: Chaves) {
-     setChaveSelecionada(chave);
-     setIsUserModalOpen(true);
-   }
+  function openUserModal(chave: Chaves) {
+    setChaveSelecionada(chave);
+    setIsUserModalOpen(true);
+  }
 
-   function closeUserModal() {
-     setIsUserModalOpen(false);
-     setChaveSelecionada(null);
-   }
+  function closeUserModal() {
+    setIsUserModalOpen(false);
+    setChaveSelecionada(null);
+  }
 
   function closeChavesModal() {
     setSelectedSala(0);
-    //setSelectedBloco("");
-    //setDescricao("");
     setIsChavesModalOpen(false);
   }
 
-  
   function avancarPagina() {
     if (paginaAtual < totalPaginas) {
       setPaginaAtual(paginaAtual + 1);
@@ -348,7 +317,7 @@ async function excluirChaveAPI(chaveId: number) {
       setPaginaAtual(paginaAtual - 1);
     }
   }
- 
+
   function openDeleteModal() {
     if (chaveSelecionada !== null) {
       setIsDeleteModalOpen(true);
@@ -364,28 +333,25 @@ async function excluirChaveAPI(chaveId: number) {
     e.preventDefault();
   
     if (chaveSelecionada) {
-      excluirChaveAPI(chaveSelecionada.id)
+      excluirChaveAPI(
+        chaveSelecionada.id,
+        chaveSelecionada.sala,
+        chaveSelecionada.disponivel,
+        chaveSelecionada.usuarios
+      )
         .then(() => {
-          // Atualiza a lista de chaves localmente após sucesso na API
           setItensAtuais((prevLista) =>
             prevLista.filter((chave) => chave.id !== chaveSelecionada.id)
           );
-  
-          // Limpa a seleção e fecha o modal
           setChaveSelecionada(null);
           closeDeleteModal();
         })
         .catch((error) => {
           console.error("Erro ao excluir a chave:", error);
         });
-    
-    setItensAtuais(
-      listaChaves.filter((chave) => chave.id !== chaveSelecionada?.id)
-    );
-    setChaveSelecionada(null);
-    closeDeleteModal();
+    }
   }
-} 
+  
   // const [error, setError] = useState<string>("");
   // {
   //   /*garantir que qntd seja um número */
@@ -407,7 +373,7 @@ async function excluirChaveAPI(chaveId: number) {
   return (
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
       {/* background */}
-      <MenuTopo text = "MENU" backRoute="/menu" />
+      <MenuTopo text="MENU" backRoute="/menu" />
       {/* container */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6 py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
         {/* título chaves */}
@@ -416,11 +382,13 @@ async function excluirChaveAPI(chaveId: number) {
             CHAVES
           </h1>
           {/* Adicionando botão de status */}
-          <div onClick={() => navigate("/statusChaves")} className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0">
+          <div
+            onClick={() => navigate("/statusChaves")}
+            className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0"
+          >
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
             <button onClick={() => navigate("/statusChaves")}>
               <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
-              
             </button>
           </div>
         </div>
@@ -504,7 +472,10 @@ async function excluirChaveAPI(chaveId: number) {
               )}
               {/* Fim adicionando pop up de deletar cahve */}
 
-              <BotaoAdicionar text = "ADICIONAR CHAVE" onClick={openChavesModal}/>
+              <BotaoAdicionar
+                text="ADICIONAR CHAVE"
+                onClick={openChavesModal}
+              />
 
               {/* Adicionando pop up de adicionar chaves */}
               {isChavesModalOpen && (
@@ -555,7 +526,7 @@ async function excluirChaveAPI(chaveId: number) {
                         ))}
                       </select>
                     </div>
-{/* 
+                    {/* 
                     <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
@@ -606,7 +577,6 @@ async function excluirChaveAPI(chaveId: number) {
                       )}
                     </div> */}
 
-                    
                     {/*<div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Descreva os detalhes sobre a chave
@@ -619,7 +589,6 @@ async function excluirChaveAPI(chaveId: number) {
                         required
                       />
                     </div>*/}
-                    
 
                     <div className="flex justify-center items-center mt-[10px] w-full">
                       <button
@@ -651,7 +620,7 @@ async function excluirChaveAPI(chaveId: number) {
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
                     Lista de pessoas autorizadas
-                  </th> 
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -667,7 +636,8 @@ async function excluirChaveAPI(chaveId: number) {
                   >
                     <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%] ">
                       <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                        {salas.find((sala)=> sala.id === chaves.sala)?.nome || "Sala não encontrada"}
+                        {salas.find((sala) => sala.id === chaves.sala)?.nome ||
+                          "Sala não encontrada"}
                       </p>
                     </td>
                     <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
@@ -714,27 +684,46 @@ async function excluirChaveAPI(chaveId: number) {
                         </p>
                       </div>
                     </td>
-                    <button  className="border-2 border-[#B8BCE0] border-solid bg-[#081683] ">
-                     <td className="align-center p-0.5 font-semibold  w-[40%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
+                    <button className="border-2 border-[#B8BCE0] border-solid bg-[#081683] ">
+                      <td className="align-center p-0.5 font-semibold  w-[40%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
                         <div className=" flex justify-center items-center mr-1">
-                          <svg className="size-6 ml-2 mr-2"xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 35" fill="none">
+                          <svg
+                            className="size-6 ml-2 mr-2"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 36 35"
+                            fill="none"
+                          >
                             <g clip-path="url(#clip0_1781_438)">
-                              <path d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z" fill="white"/>
+                              <path
+                                d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z"
+                                fill="white"
+                              />
                             </g>
-                                <defs>
-                                  <clipPath id="clip0_1781_438">
-                                    <rect width="35" height="35" fill="white" transform="translate(0.5)"/>
-                                  </clipPath>
-                                </defs>
+                            <defs>
+                              <clipPath id="clip0_1781_438">
+                                <rect
+                                  width="35"
+                                  height="35"
+                                  fill="white"
+                                  transform="translate(0.5)"
+                                />
+                              </clipPath>
+                            </defs>
                           </svg>
-                            <p className=" text-xs text-[#FFFF] text-center  text-[15px] font-semibold leading-normal truncate">
+                          <p className=" text-xs text-[#FFFF] text-center  text-[15px] font-semibold leading-normal truncate">
                             Pessoas autorizadas
-                            </p>
+                          </p>
                         </div>
                       </td>
                     </button>
-                    <td className={` text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0]  break-words min-w-8 w-20 ${chaves.disponivel === true ? 'bg-[#22b350]' : 'bg-red-700'}`}>
-                    {chaves.disponivel}
+                    <td
+                      className={` text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0]  break-words min-w-8 w-20 ${
+                        chaves.disponivel === true
+                          ? "bg-[#22b350]"
+                          : "bg-red-700"
+                      }`}
+                    >
+                      {chaves.disponivel}
                     </td>
 
                     <td className="align-center p-0.5 tablet:max-w-[200px] laptop:max-w-[400px] break-words">
@@ -778,16 +767,14 @@ async function excluirChaveAPI(chaveId: number) {
                         >
                           Ver mais
                         </p>
-                        
-
                       </div>
                       <button
-                          onClick={() => openEditModal()}
-                          className="ml-3 flex gap-1 justify-center items-center font-medium text-sm text-[#646999] underline"
-                        >
-                          <img src="fi-rr-pencil (1).svg" alt="" />
-                          Editar
-                        </button>
+                        onClick={() => openEditModal()}
+                        className="ml-3 flex gap-1 justify-center items-center font-medium text-sm text-[#646999] underline"
+                      >
+                        <img src="fi-rr-pencil (1).svg" alt="" />
+                        Editar
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -795,56 +782,56 @@ async function excluirChaveAPI(chaveId: number) {
             </table>
           </div>
           {/*editar modal */}
-    {isEditModalOpen && (
-      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-        <form
-          onSubmit={editarChave}
-          className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-        >
-          <div className="flex justify-center mx-auto w-full max-w-[90%]">
-            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-              EDITAR CHAVE
-            </p>
-            <button
-              onClick={closeEditModal}
-              type="button"
-              className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-            >
-              <X className=" mb-[5px] text-[#192160]" />
-            </button>
-          </div>
+          {isEditModalOpen && (
+            <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+              <form
+                onSubmit={editarChave}
+                className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+              >
+                <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                  <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                    EDITAR CHAVE
+                  </p>
+                  <button
+                    onClick={closeEditModal}
+                    type="button"
+                    className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                  >
+                    <X className=" mb-[5px] text-[#192160]" />
+                  </button>
+                </div>
 
-          <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                        Selecione uma sala
-                      </p>
-                      <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
-                        value={selectedSala === null ? "" : selectedSala}
-                        onChange={(e) => {
-                          setSelectedSala(Number(e.target.value));
-                        }}
+                <div className="justify-center items-center ml-[40px] mr-8">
+                  <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
+                    Selecione uma sala
+                  </p>
+                  <select
+                    className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                    value={selectedSala === null ? "" : selectedSala}
+                    onChange={(e) => {
+                      setSelectedSala(Number(e.target.value));
+                    }}
+                  >
+                    <option
+                      className="text-[#777DAA] text-xs font-medium"
+                      value=""
+                      disabled
+                    >
+                      Selecione uma sala
+                    </option>
+                    {salas.map((sala) => (
+                      <option
+                        key={sala.id}
+                        value={sala.id}
+                        className="text-center bg-[#B8BCE0]"
                       >
-                        <option
-                          className="text-[#777DAA] text-xs font-medium"
-                          value=""
-                          disabled
-                        >
-                          Selecione uma sala
-                        </option>
-                        {salas.map((sala) => (
-                          <option
-                            key={sala.id}
-                            value={sala.id}
-                            className="text-center bg-[#B8BCE0]"
-                          >
-                            {sala.nome}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                        {sala.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    {/* <div className="justify-center items-center ml-[40px] mr-8">
+                {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Selecione um bloco
                       </p>
@@ -873,7 +860,7 @@ async function excluirChaveAPI(chaveId: number) {
                       </select>
                     </div> */}
 
-                    {/* <div className="justify-center items-center ml-[40px] mr-8">
+                {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Informe a quantidade de chaves
                       </p>
@@ -889,7 +876,7 @@ async function excluirChaveAPI(chaveId: number) {
                         required
                       />
                       {/* Exibe a mensagem de erro se houver um erro */}
-                    {/* {error && (
+                {/* {error && (
                         <p className="text-red-500 text-xs mt-1">{error}</p>
                       )}
                     </div> 
@@ -905,19 +892,19 @@ async function excluirChaveAPI(chaveId: number) {
                         required
                       />
                     </div>*/}
-          <div className="flex justify-center items-center mt-[10px] w-full">
-            <button
-              type="submit"
-              className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-            >
-              SALVAR ALTERAÇÕES
-            </button>
-          </div>
-        </form>
-      </div>
-    )}
-    
-    {/*fim modal editar chave 
+                <div className="flex justify-center items-center mt-[10px] w-full">
+                  <button
+                    type="submit"
+                    className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                  >
+                    SALVAR ALTERAÇÕES
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/*fim modal editar chave 
           {isDescricaoModalOpen && chaveSelecionada && (
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
@@ -948,7 +935,7 @@ async function excluirChaveAPI(chaveId: number) {
             </div>
           )}*/}
         </main>
-        
+
         <div className="mt-2">
           <PassadorPagina
             avancarPagina={avancarPagina}
@@ -967,10 +954,7 @@ async function excluirChaveAPI(chaveId: number) {
             alt="logo chameco"
           />
         </div>
-
       </div>
-      
     </div>
-    
   );
 }

@@ -30,7 +30,7 @@ export function Blocos() {
   }, []);
 
   const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
-  const token = "5047b86f8100918fca6efa3dbb86d787b6b57e6ecffb0a342e809af8ce6da94a";
+  const token = "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
@@ -87,12 +87,6 @@ export function Blocos() {
       // descricao,
       token,
     };
-
-    // const dadosParaAPI = {
-    //   token: token,
-    //   nome,
-    // };
-
     //Adiciona o novo bloco a API
     adicionarBlocoAPI(novoBloco);
 
@@ -177,6 +171,7 @@ export function Blocos() {
   function closeEditModal() {
     setIsEditModalOpen(false);
   }
+
 
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
@@ -272,6 +267,11 @@ export function Blocos() {
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
   }
+
+  const handleBlockSelect = (blocoSelecionado: Blocos) => {
+    // Navegando para a tela de salas com o bloco selecionado
+    navigate(`/salas?bloco=${blocoSelecionado.id}`);
+  };
 
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
@@ -424,7 +424,7 @@ export function Blocos() {
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
                       className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
-                      onClick={() => navigate("/salas")}
+                      onClick={() => handleBlockSelect(blocoSelecionado)}
                     >
                       <svg
                         width="25"
@@ -453,7 +453,7 @@ export function Blocos() {
                       </svg>
                       VER SALAS
                     </button>
-
+                    
                     <button
                       onClick={() => openEditModal()}
                       className="flex gap-1 justify-center items-center font-medium text-sm md:text-base text-[#646999] underline"
