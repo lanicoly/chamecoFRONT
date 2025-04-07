@@ -11,8 +11,8 @@ export interface Chaves {
   id: number;
   sala: number;
   disponivel: boolean;
-  usuarios: number[];
   token: string;
+  usuarios: number[];
 }
 
 interface Sala {
@@ -22,16 +22,16 @@ interface Sala {
 
 export function Chaves() {
   const navigate = useNavigate();
-
-  //integracao
   useEffect(() => {
     obterChaves();
   }, []);
 
+  //integracao
+
   const API_URL =
     "https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/";
   const token =
-    "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
+    "b0cc46ac70bed2584a425bfb318d2aa96cc0bd1d3d205a1947188c31493aaf2d";
 
   const [chaves, setChaves] = useState<Chaves[]>([]);
   const [nextId, setNextId] = useState(1);
@@ -51,6 +51,8 @@ export function Chaves() {
 
       if (statusResponse === 200) {
         console.log("Get de chaves realizada ");
+        console.log(data.results);
+
         const chaves = [];
 
         if (Array.isArray(data.results)) {
@@ -64,6 +66,7 @@ export function Chaves() {
             });
           }
           setChaves(chaves);
+          setItensAtuais(response.data.results);
         }
       }
     } catch (error: unknown) {
@@ -122,18 +125,22 @@ export function Chaves() {
   // Função para realizar a requisição PATCH
   async function atualizarChaveAPI(chaveAtualizada: Chaves) {
     try {
-      const response = await axios.patch(
-        `${API_URL}${chaveAtualizada.id}?token=${token}`,
+      const response = await axios.put(
+        `${API_URL}${chaveAtualizada.id}/`,
         {
-          salas: chaveAtualizada.sala,
+          sala: chaveAtualizada.sala,                         
+          disponivel: chaveAtualizada.disponivel,             
+          usuarios_autorizados: chaveAtualizada.usuarios,      
+          token: token                                         
         },
         {
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
         }
       );
-
+  
       if (response.status === 200) {
         console.log("Chave editada com sucesso na API:", response.data);
         return response.data;
@@ -142,6 +149,8 @@ export function Chaves() {
       console.error("Erro ao atualizar chave na API:", error);
     }
   }
+  
+  
 
   //Função para realizar a requisicao DELETE
 
@@ -153,10 +162,11 @@ export function Chaves() {
   ) {
     try {
       const response = await axios.delete(
-        `${API_URL}${chaveId}?token=${token}`,
+        `${API_URL}${chaveId}/`,
         {
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           data: {
             sala,
@@ -186,7 +196,7 @@ export function Chaves() {
     { id: 3, nome: "Sala E09" },
     { id: 4, nome: "Sala E10" },
     { id: 5, nome: "Sala E11" },
-    { id: 6, nome: "Sala E12" }
+    { id: 6, nome: "Sala E12" },
   ];
 
   const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
@@ -250,33 +260,39 @@ export function Chaves() {
 
   function editarChave(e: React.FormEvent) {
     e.preventDefault();
+  
     if (chaveSelecionada !== null) {
       const chaveAtualizada: Chaves = {
         ...chaveSelecionada,
-        sala: selectedSala as number,
+        sala: selectedSala as number, 
+        disponivel: chaveSelecionada.disponivel, 
+        usuarios: chaveSelecionada.usuarios, 
       };
-
-      // Chama a função de requisição e atualiza os estados
+  
+      // Chama a função de requisição para atualizar a chave na API
       atualizarChaveAPI(chaveAtualizada);
-
+  
       // Atualizando estado local após a atualização na API
       setChaves((prevChaves) =>
         prevChaves.map((chave) =>
           chave.id === chaveSelecionada.id ? chaveAtualizada : chave
         )
       );
+  
       setItensAtuais((prevLista) =>
         prevLista.map((chave) =>
           chave.id === chaveSelecionada.id ? chaveAtualizada : chave
         )
       );
-
+  
       // Resetando os campos e fechando o modal
       setChaveSelecionada(null);
       setSelectedSala(0);
       closeEditModal();
     }
   }
+  
+  
   //  function adicionarUsuarios(chaveId: number, novoUsuario: string) {
   //    setItensAtuais((prevLista) => {
   //     return prevLista.map((chave) => {
@@ -331,7 +347,7 @@ export function Chaves() {
   // adicionando função de excluir chave
   function removeChave(e: React.FormEvent) {
     e.preventDefault();
-  
+
     if (chaveSelecionada) {
       excluirChaveAPI(
         chaveSelecionada.id,
@@ -351,7 +367,7 @@ export function Chaves() {
         });
     }
   }
-  
+
   // const [error, setError] = useState<string>("");
   // {
   //   /*garantir que qntd seja um número */
@@ -620,6 +636,9 @@ export function Chaves() {
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
                     Lista de pessoas autorizadas
+                  </th>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[10%]">
+                    Disponível
                   </th>
                 </tr>
               </thead>
