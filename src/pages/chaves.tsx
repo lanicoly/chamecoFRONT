@@ -1,11 +1,11 @@
 import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
+import { PassadorPagina } from "../components/passadorPagina";
+import { Pesquisa } from "../components/pesquisa";
+import { BotaoAdicionar } from "../components/botaoAdicionar";
 import axios from "axios";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
+import { MenuTopo } from "../components/menuTopo";
 
 export interface Chaves {
   id: number;

@@ -1,8 +1,8 @@
 import { LayoutDashboard, X, Plus, TriangleAlert } from "lucide-react";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
-import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
+import { PassadorPagina } from "../components/passadorPagina";
+import { Pesquisa } from "../components/pesquisa";
+import { MenuTopo } from "../components/menuTopo";
+import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

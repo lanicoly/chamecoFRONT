@@ -1,8 +1,8 @@
 import { Info, X } from "lucide-react";
 import { useState } from "react";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
+import { MenuTopo } from "../components/menuTopo";
+import { Pesquisa } from "../components/pesquisa";
+import { PassadorPagina } from "../components/passadorPagina";
 
 export interface Chave {
     id: number;
@@ -13,6 +13,8 @@ export interface Chave {
     posse: string;
     status: string;
 }
+
+// chore/refactor-folder-structure
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
 
