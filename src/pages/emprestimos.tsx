@@ -1,16 +1,16 @@
 import { Info, Check, Plus, X, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
+import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ptBR } from 'date-fns/locale';
 
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-// import { PassadorPagina } from "../elementosVisuais/passadorPagina";
+import { Pesquisa } from "../components/pesquisa";
+// import { PassadorPagina } from "../passadorPagina";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
-// import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
+// import { BotaoAdicionar } from "../botaoAdicionar";
 
 export interface Emprestimo {
     id: number;

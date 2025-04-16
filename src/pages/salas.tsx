@@ -1,7 +1,7 @@
 import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
+import { MenuTopo } from "../components/menuTopo";
 import axios from "axios";
 export interface Sala {
   id: number;
