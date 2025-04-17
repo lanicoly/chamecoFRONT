@@ -1,9 +1,9 @@
 import { Check, Plus, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
-import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
+import { MenuTopo } from "../components/menuTopo";
+import { Pesquisa } from "../components/pesquisa";
+import { PassadorPagina } from "../components/passadorPagina";
+import { BotaoAdicionar } from "../components/botaoAdicionar";
 
 export interface Usuario {
   id: number;

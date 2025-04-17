@@ -1,78 +1,99 @@
 import { LayoutDashboard, X, Plus, TriangleAlert } from "lucide-react";
+import { PassadorPagina } from "../components/passadorPagina";
+import { Pesquisa } from "../components/pesquisa";
+import { MenuTopo } from "../components/menuTopo";
+import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
-import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export interface Blocos {
   id: number;
   nome: string;
-  descricao: string;
+  // descricao: string;
+  token: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
 
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
-const url =
-  "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
-
 export function Blocos() {
   const navigate = useNavigate();
 
-  // Adicionando funcionalidade ao button adicionar bloco
   const [blocos, setBlocos] = useState<Blocos[]>([]);
   const [nextId, setNextId] = useState(11);
 
+  //Começo da integração
   useEffect(() => {
     obterBlocos();
   }, []);
 
+  const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
+  const token = "bdff79d6edbbde980a0f232ef0ff35bdede31457ab3c733a0c6fe0e6274ee4f5";
+  //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
-      const response = await axios.get(url, {
+      const response = await axios.get(`${URL}?token=${token}`, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      const statusResponse = response.status;
-      const data = response.data;
+      if (response.status === 200) {
+        console.log("Ebaaa!!!");
+        const data = response.data;
 
-      if (statusResponse === 200) {
-        const blocos = [];
+        if (data.results && Array.isArray(data.results)) {
+          const blocos = (data.results as Blocos[]).map((bloco) => ({
+            id: bloco.id,
+            nome: bloco.nome,
+            // descricao: bloco.descricao,
+            token: bloco.token,
+          }));
 
-        if ("bloco" in data.results) {
-          for (const bloco of data.results) {
-            blocos.push({
-              nome: bloco.nome,
-              id: bloco.id,
-              descricao: `Bloco ${bloco.nome}`,
-            });
-          }
           setBlocos(blocos);
+        } else {
+          setBlocos([]);
         }
       }
-    } catch (error: unknown) {
+    } catch (error) {
       setBlocos([]);
       console.error("Erro ao obter blocos:", error);
     }
   }
 
+  // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
+  async function adicionarBlocoAPI(novoBloco: Blocos) {
+    try {
+      const response = await axios.post(`${URL}?token=${token}`, novoBloco, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("Bloco adicionado com sucesso!", response.data);
+      obterBlocos();
+    } catch (error: unknown) {
+      console.log("Erro ao adicionar bloco", error);
+    }
+  }
+
+  //função para adicionar blocos
   function addBlocos(e: React.FormEvent) {
     e.preventDefault();
     const novoBloco: Blocos = {
       id: nextId,
       nome,
-      descricao,
+      // descricao,
+      token,
     };
+    //Adiciona o novo bloco a API
+    adicionarBlocoAPI(novoBloco);
+
     setBlocos([...blocos, novoBloco]);
     setNextId(nextId + 1);
     setNome("");
-    setDescricao("");
+    // setDescricao("");
     closeAdicionarBlocoModal();
   }
 
@@ -100,10 +121,9 @@ export function Blocos() {
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
     ? blocos.filter(
-      (blocos) =>
-        blocos.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-    )
+        (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
+        // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+      )
     : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
@@ -111,7 +131,7 @@ export function Blocos() {
   const [isAdicionarBlocoModalOpen, setIsAdicionarBlocoModalOpen] =
     useState(false);
   const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
+  // const [descricao, setDescricao] = useState("");
 
   function openAdicionarBlocoModal() {
     setIsAdicionarBlocoModalOpen(true);
@@ -119,7 +139,7 @@ export function Blocos() {
 
   function closeAdicionarBlocoModal() {
     setNome("");
-    setDescricao("");
+    // setDescricao("");
     setIsAdicionarBlocoModalOpen(false);
   }
 
@@ -143,7 +163,7 @@ export function Blocos() {
   function openEditModal() {
     if (blocoSelecionado) {
       setNome(blocoSelecionado.nome);
-      setDescricao(blocoSelecionado.descricao);
+      // setDescricao(blocoSelecionado.descricao);
       setIsEditModalOpen(true);
     }
   }
@@ -152,32 +172,87 @@ export function Blocos() {
     setIsEditModalOpen(false);
   }
 
-  // adicionando função de editar informações de um bloco
+
+  // adicionando função de editar informações de um bloco + função para requisição PATCH
+  async function editarBlocoAPI(blocoSelecionado: Blocos) {
+    try {
+      const response = await axios.put(
+        `${URL}${blocoSelecionado.id}/`,
+        { nome: blocoSelecionado.nome, token: token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Bloco editado com sucesso!", response.data);
+        return response.data;
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao editar bloco.", error);
+    }
+  }
+
+  //função de editar bloco
   function editarBloco(e: React.FormEvent) {
     e.preventDefault();
-    if (blocoSelecionado !== null) {
-      blocos.map((blocos) => {
-        if (blocos.id === blocoSelecionado.id) {
-          if (nome) {
-            blocos.nome = nome;
-          }
-          if (descricao) {
-            blocos.descricao = descricao;
-          }
-        }
-      });
+
+    if (!blocoSelecionado) {
+      console.error("Nenhum bloco selecionado.");
+      return;
     }
+
+    blocos.forEach((bloco) => {
+      if (bloco.id === blocoSelecionado.id) {
+        if (nome) {
+          bloco.nome = nome;
+        }
+      }
+    });
+
+    editarBlocoAPI(blocoSelecionado);
     setNome("");
-    setDescricao("");
     closeEditModal();
   }
 
-  //Adicionando função de excluir bloco
+  //Adicionando função de excluir bloco + função para requisição delete
+  async function excluirBlocoAPI(id: number, nome: string) {
+    try {
+      const response = await axios.delete(`${URL}${id}/`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: { nome, token },
+      });
+
+      console.log("Bloco excluído com sucesso!", response.data);
+    } catch (error: unknown) {
+      console.error("Erro ao excluir bloco:", error);
+    }
+  }
+
+  //função para remover bloco
   function removeBloco(e: React.FormEvent) {
     e.preventDefault();
-    setBlocos(blocos.filter((blocos) => blocos.id !== blocoSelecionado?.id));
-    setBlocoSelecionado(null);
-    closeDeleteModal();
+
+    if (!blocoSelecionado) {
+      console.error("Nenhum bloco selecionado para excluir.");
+      return;
+    }
+
+    try {
+      excluirBlocoAPI(blocoSelecionado.id, blocoSelecionado.nome);
+      setBlocos((prevBlocos) =>
+        prevBlocos.filter((bloco) => bloco.id !== blocoSelecionado.id)
+      );
+      setBlocoSelecionado(null);
+      closeDeleteModal();
+    } catch (error) {
+      console.error("Erro ao excluir bloco:", error);
+    }
   }
 
   //Adicionando funcão de abrir e fechar modal de excluir blocos
@@ -193,12 +268,18 @@ export function Blocos() {
     setIsDeleteModalOpen(false);
   }
 
+  const handleBlockSelect = (blocoSelecionado: Blocos) => {
+    // Navegando para a tela de salas com o bloco selecionado
+    navigate(`/salas?bloco=${blocoSelecionado.id}`);
+  };
+
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
+      {/* Adicionando barra de navegação */}
       <MenuTopo text="MENU" backRoute="/menu" />
       {/* Adicionando container */}
-      <div className=" relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
-
+      {/* Adicionando container que irá conter as informações sobre os blocos */}
+      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
         {/* Adicionando div com botão de voltar ao menu e h1 blocos */}
         <div className="flex flex-col tablet:flex-row justify-center tablet:items-start">
           <h1 className="text-2xl font-semibold mx-auto p-3 text-[#02006C] shadow-gray-800">
@@ -218,7 +299,10 @@ export function Blocos() {
           {/* fim input de pesquisa */}
 
           {/* Adicionando botão de adicionar bloco */}
-          <BotaoAdicionar text = "ADICIONAR BLOCO" onClick={openAdicionarBlocoModal}/>
+          <BotaoAdicionar
+            text="ADICIONAR BLOCO"
+            onClick={openAdicionarBlocoModal}
+          />
           {/* fim do botão de adicionar bloco */}
 
           {/* Adicionando modal de adicionar blocos */}
@@ -262,7 +346,7 @@ export function Blocos() {
                 {/* fim da div com input de digitar nome do bloco */}
 
                 {/* inicio da div com input descrever bloco */}
-                <div className="justify-center items-center ml-[40px] mr-8">
+                {/* <div className="justify-center items-center ml-[40px] mr-8">
                   <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                     Descreva os detalhes sobre o bloco
                   </p>
@@ -273,7 +357,7 @@ export function Blocos() {
                     onChange={(e) => setDescricao(e.target.value)}
                     required
                   />
-                </div>
+                </div> */}
                 {/* fim da div com input descrever bloco */}
 
                 {/* inicio da div que terá botoa de criar novo bloco */}
@@ -329,18 +413,18 @@ export function Blocos() {
                   {/* fim do botão de fechar pop up */}
 
                   {/* inicio da div que terá a descriçao do bloco */}
-                  <div className="flex w-full h-auto px-[10px] mb-4 flex-col rounded-lg bg-[#B8BCE0]">
+                  {/* <div className="flex w-full h-auto px-[10px] mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                     <p className="text-[#192160] font-medium px-[5px] py-[5px]">
                       {blocoSelecionado.descricao}
                     </p>
-                  </div>
+                  </div> */}
                   {/* fim da div com descrição do bloco */}
 
                   {/* inicio da div que terá os botoes de ver salas, editar e excluir */}
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
-                      className="flex w-[48%] h-[35px] text-[12px] justify-center items-center gap-[5px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#56ab71]"
-                      onClick={() => navigate("/salas")}
+                      className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
+                      onClick={() => handleBlockSelect(blocoSelecionado)}
                     >
                       <svg
                         width="25"
@@ -369,7 +453,7 @@ export function Blocos() {
                       </svg>
                       VER SALAS
                     </button>
-
+                    
                     <button
                       onClick={() => openEditModal()}
                       className="flex gap-1 justify-center items-center font-medium text-sm md:text-base text-[#646999] underline"
@@ -401,7 +485,7 @@ export function Blocos() {
 
                           <div className="justify-center items-center ml-[40px] mr-8">
                             <p className="text-[#192160] text-sm font-medium mb-1">
-                              Digite o novo nome da sala
+                              Digite o novo nome do bloco
                             </p>
 
                             <input
@@ -413,7 +497,7 @@ export function Blocos() {
                             />
                           </div>
 
-                          <div className="justify-center items-center ml-[40px] mr-8">
+                          {/* <div className="justify-center items-center ml-[40px] mr-8">
                             <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                               Informe a nova descrição do bloco
                             </p>
@@ -423,7 +507,7 @@ export function Blocos() {
                               value={descricao}
                               onChange={(e) => setDescricao(e.target.value)}
                             />
-                          </div>
+                          </div> */}
 
                           <div className="flex justify-center items-center mt-[10px] w-full">
                             <button
@@ -510,19 +594,19 @@ export function Blocos() {
                 {/* fim da div de estrtura do pop up */}
               </div>
             )}
+            {/* fim do pop up de blocos */}
           </div>
-          {/* fim do pop up de blocos */}
-          {/* passador de página */}
-          <PassadorPagina
-            avancarPagina={avancarPagina}
-            voltarPagina={voltarPagina}
-            totalPaginas={totalPaginas}
-            paginaAtual={paginaAtual}
-          />
-          {/* fim passador de página */}
-
         </div>
         {/* fim da div que irá conter os blocos*/}
+
+        {/* passador de página */}
+        <PassadorPagina
+          avancarPagina={avancarPagina}
+          voltarPagina={voltarPagina}
+          totalPaginas={totalPaginas}
+          paginaAtual={paginaAtual}
+        />
+        {/* fim passador de página */}
 
         {/* logo chameco lateral */}
         <div className="flex justify-start bottom-2 left-2 absolute sm:hidden ">
@@ -533,7 +617,6 @@ export function Blocos() {
           />
         </div>
         {/* fim logo chameco lateral */}
-
       </div>
       {/* fim do container com informações dos blocos */}
     </div>

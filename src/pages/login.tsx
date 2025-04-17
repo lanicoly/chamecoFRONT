@@ -54,6 +54,9 @@ export function Login() {
       const statusResponse = response.status;
       const data = response.data;
 
+         // Adicionar o console.log para exibir os dados da resposta(obter token)
+         console.log("Resposta do backend:", response);
+
       if (statusResponse === 200) {
         if ("usuario" in data) {
           navigate("/menu");

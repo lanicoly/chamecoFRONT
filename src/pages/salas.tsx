@@ -1,14 +1,14 @@
-import { Plus, TriangleAlert, X } from "lucide-react";
-import { useState } from "react";
-import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
-import { MenuTopo } from "../elementosVisuais/menuTopo";
-import { PassadorPagina } from "../elementosVisuais/passadorPagina";
-import { Pesquisa } from "../elementosVisuais/pesquisa";
-
+import { Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+import { MenuTopo } from "../components/menuTopo";
+import axios from "axios";
 export interface Sala {
   id: number;
   nome: string;
-  descricao: string;
+  bloco: number;
+  token: string;
+  // descricao: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -16,6 +16,44 @@ export interface Sala {
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Salas() {
+  // const navigate = useNavigate();
+  //começo da integração 
+  useEffect(() => {
+    obterSalas();
+}, []);
+
+    const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/salas/";
+    const token = "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
+ 
+  //Função para requisição get (obter blocos)
+  async function obterSalas() {
+    try {
+      const url = `${URL}?token=${token}`;
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        if (data.results && Array.isArray(data.results)) {
+          const salas = data.results.map((sala: Sala) => ({
+            id: sala.id,
+            nome: sala.nome,
+            bloco: sala.bloco,
+            token: sala.token,
+          }));
+          setListaSalas(salas);
+        } else {
+          setListaSalas([]);
+        }
+      }
+    } catch (error) {
+      setListaSalas([]);
+      console.error('Erro ao obter salas:', error);
+    }
+  }
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
@@ -32,8 +70,8 @@ export function Salas() {
   const salasFiltradas = isSearching
     ? listaSalas.filter(
         (sala) =>
-          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          sala.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) 
+          // sala.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       )
     : listaSalas;
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
@@ -43,8 +81,6 @@ export function Salas() {
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [salaSelecionada, setSalaSelecionada] = useState<number | null>(null);
 
   function openSalaModal() {
@@ -59,71 +95,140 @@ export function Salas() {
 
   function openEditModal() {
     if (salaSelecionada) {
-      const sala = listaSalas.find((sala) => sala.id === salaSelecionada);
-      if (sala) {
-        setNome(sala.nome);
-        setDescricao(sala.descricao);
-        setIsEditModalOpen(true);
-      }
+      setIsEditModalOpen(true);
     }
   }
 
   function closeEditModal() {
-    setNome("");
-    setDescricao("");
     setIsEditModalOpen(false);
   }
 
-  function openDeleteModal() {
-    if (salaSelecionada !== null) {
-      setIsDeleteModalOpen(true);
+  // função para requisição do método post
+    async function adicionarSalaAPI(sala: Sala) {
+      try {
+        const response = await axios.post(`${URL}?token=${token}`, sala, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Sala adicionada com sucesso!", response.data);
+        obterSalas();
+      } catch (error: unknown) {
+        console.log("Erro ao adicionar sala", error);
+      }
     }
-  }
-
-  function closeDeleteModal() {
-    setIsDeleteModalOpen(false);
-  }
 
   function addSala(e: React.FormEvent) {
     e.preventDefault();
     const sala: Sala = {
       id: nextId,
       nome,
-      descricao,
+      bloco: 10, //temos que alterar para adicionar a sala no id do bloco que queremos
+      token
+      // descricao,
     };
+
+    adicionarSalaAPI(sala);
+
     setListaSalas([...listaSalas, sala]);
     setNextId(nextId + 1);
     setNome("");
-    setDescricao("");
+    // setDescricao("");
     closeSalaModal();
   }
 
-  function removeSala() {
-    if (salaSelecionada !== null) {
-      setListaSalas(listaSalas.filter((sala) => sala.id !== salaSelecionada));
-      setSalaSelecionada(null);
+  //Adicionando função de excluir sala + função para requisição delete
+    async function excluirSalaAPI(id: number, nome: string, bloco:number) {
+      try {
+        const response = await axios.delete(`${URL}${id}/`, {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          data: { nome, token, bloco }
+        });
+    
+        console.log("Sala excluído com sucesso!", response.data);
+      } catch (error: unknown) {
+        console.error("Erro ao excluir sala:", error);
+      }
     }
-  }
 
-  function editaSala(e: React.FormEvent) {
-    e.preventDefault();
-    if (salaSelecionada !== null) {
-      listaSalas.map((sala) => {
-        if (sala.id === salaSelecionada) {
-          if (nome) {
-            sala.nome = nome;
-          }
-          if (descricao) {
-            sala.descricao = descricao;
-          }
-        }
-      });
-      setSalaSelecionada(null);
+    function removeSala(e: React.FormEvent) {
+      e.preventDefault();
+    
+      if (salaSelecionada === null) {
+        console.error("Nenhuma sala selecionada para excluir.");
+        return;
+      }
+      const salaSelecionadaObj = listaSalas.find(sala => sala.id === salaSelecionada);
+    
+      if (!salaSelecionadaObj) {
+        console.error("Sala não encontrada.");
+        return;
+      }
+    
+      const { id, nome, bloco } = salaSelecionadaObj;
+    
+      try {
+        excluirSalaAPI(id, nome, bloco);
+    
+        setListaSalas((prevSalas) =>
+          prevSalas.filter((sala) => sala.id !== salaSelecionada) 
+        );
+    
+        setSalaSelecionada(null);
+      } catch (error) {
+        console.error("Erro ao excluir sala:", error);
+      }
     }
-    setNome("");
-    setDescricao("");
-    closeEditModal();
-  }
+
+  // adicionando função de editar informações de uma sala + função para requisição PUT
+    async function editarSalaAPI(salaSelecionada: Sala) {
+      try {
+        const response = await axios.put(
+          `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, token: token, bloco: salaSelecionada.bloco},
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+          }
+        );
+  
+        if (response.status === 200) {
+          console.log("Sala editada com sucesso!", response.data);
+          return response.data;
+        }
+      } catch (error: unknown) {
+        console.error("Erro ao editar sala.", error);
+      }
+    }
+  
+
+    function editaSala(e: React.FormEvent) {
+      e.preventDefault();
+      
+      if (salaSelecionada !== null) {
+        const salaEditada = listaSalas.find((sala) => sala.id === salaSelecionada);
+    
+        if (salaEditada) {
+          if (nome) {
+            salaEditada.nome = nome; 
+          }
+          // if (descricao) {
+          //   salaEditada.descricao = descricao;  
+          // }
+    
+          editarSalaAPI(salaEditada);  
+        }
+    
+        setSalaSelecionada(null);  
+        setNome("");  
+        setDescricao("");  
+        closeEditModal();  
+      }
+    }
+    
 
   function statusSala(id: number) {
     if (salaSelecionada !== null) {
@@ -157,7 +262,6 @@ export function Salas() {
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
       {/* menu topo */}
       <MenuTopo text = "VOLTAR" backRoute="/blocos" />
-
       {/* menu topo */}
 
       {/* parte informativa tela salas */}
@@ -176,16 +280,47 @@ export function Salas() {
           <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
             {/* input de pesquisa */}
             <div className="h-fit items-center w-full tablet:w-auto">
-              {/* input de pesquisa */}
-              <Pesquisa
-                pesquisa={pesquisa}
-                setIsSearching={setIsSearching}
-                setPesquisa={setPesquisa}
-              />
+              <div className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
+                <input
+                  type="text"
+                  value={pesquisa}
+                  onChange={(e) => {
+                    setPesquisa(e.target.value);
+                    setIsSearching(e.target.value.trim().length > 0);
+                  }}
+                  placeholder="Pesquisar..."
+                  className="placeholder-sky-900 text-sm font-medium outline-none "
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  fill="#64748b"
+                  className="bi bi-search"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                </svg>
+              </div>
             </div>
             {/* fim input de pesquisa */}
-            <BotaoAdicionar text="ADICIONAR SALA" onClick={openSalaModal}/>
-            </div>
+            <button
+              onClick={openSalaModal}
+              className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="#ffffff"
+                className="bi bi-plus-circle"
+                viewBox="0 0 16 16"
+              >
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+              </svg>
+              ADICIONAR SALA
+            </button>
 
             {/* Adicionando pop up de adicionar salas */}
             {isSalaModalOpen && (
@@ -221,7 +356,7 @@ export function Salas() {
                       required
                     />
                   </div>
-
+{/* 
                   <div className="justify-center items-center ml-[40px] mr-8">
                     <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                       Descreva os detalhes sobre a sala
@@ -233,7 +368,7 @@ export function Salas() {
                       onChange={(e) => setDescricao(e.target.value)}
                       required
                     />
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-center items-center mt-[10px] w-full">
                     <button
@@ -248,6 +383,8 @@ export function Salas() {
             )}
 
             {/* Fim adicionando pop up de adicionar salas */}
+          </div>
+          {/* fim adicionar sala + pesquisa */}
 
           {/* conteudo central tabela*/}
           <div>
@@ -330,7 +467,7 @@ export function Salas() {
               {/* Fim adicionando pop up de editar sala */}
 
               <button
-                onClick={openDeleteModal}
+                onClick={removeSala}
                 className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
               >
                 <svg
@@ -345,55 +482,6 @@ export function Salas() {
                 </svg>
                 Excluir
               </button>
-
-              {/* Adicionando pop up de deletar sala */}
-              {isDeleteModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={removeSala}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR SALA
-                      </p>
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" text-[#192160]" />
-                      </button>
-                    </div>
-                    <TriangleAlert className="size-16 text-red-700" />
-
-                    <p className="text-center px-2">
-                      Essa ação é{" "}
-                      <strong className="font-semibold ">definitiva</strong> e
-                      não pode ser desfeita.{" "}
-                      <strong className="font-semibold">
-                        Tem certeza disso?
-                      </strong>
-                    </p>
-                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                      >
-                        CANCELAR
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                      >
-                        EXCLUIR
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-              {/* Fim adicionando pop up de deletar sala */}
             </div>
             {/* fim botões editar e excluir */}
 
@@ -422,9 +510,9 @@ export function Salas() {
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[96px] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
                         {sala.nome}
                       </td>
-                      <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-2/4 max-w-[124px] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                      {/* <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-2/4 max-w-[124px] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         {sala.descricao}
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -432,12 +520,56 @@ export function Salas() {
             </div>
             {/* fim tabela com todas as salas */}
 
-            <PassadorPagina
-              avancarPagina={avancarPagina}
-              voltarPagina={voltarPagina}
-              totalPaginas={totalPaginas}
-              paginaAtual={paginaAtual}
-            />
+            {/* passador de página */}
+            <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
+              <button
+                onClick={voltarPagina}
+                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="#075985"
+                  className="bi bi-chevron-left"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
+                  />
+                </svg>
+              </button>
+
+              <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
+                <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
+                  {paginaAtual}
+                </div>
+                <div className="text-base text-sky-800 font-semibold">
+                  de <strong className="font-bold">{totalPaginas}</strong>
+                </div>
+              </div>
+
+              <button
+                onClick={avancarPagina}
+                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="#075985"
+                  className="bi bi-chevron-right"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                  />
+                </svg>
+              </button>
+            </div>
+            {/* fim passador de página */}
           </div>
           {/* fim conteudo central tabela*/}
         </div>
