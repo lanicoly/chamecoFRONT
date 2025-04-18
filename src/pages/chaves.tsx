@@ -391,7 +391,7 @@ export function Chaves() {
       {/* background */}
       <MenuTopo text="MENU" backRoute="/menu" />
       {/* container */}
-      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6 py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
+      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-2 py-2 tablet:py-4 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
         {/* título chaves */}
         <div className="relative flex w-full gap-2 mt-5 justify-center items-center content-center flex-wrap tablet:flex-row mb-[30px]">
           <h1 className="flex justify-center text-3xl text-[#081683] font-semibold">
@@ -409,7 +409,7 @@ export function Chaves() {
           </div>
         </div>
 
-        <main className="flex flex-col mobile:px-8 px-4 py-3 w-auto justify-center gap-3">
+        <main className="flex flex-col mobile:px-8  py-3 w-auto justify-center gap-3">
           {/* inputs + botão */}
           <div className="relative flex flex-wrap justify-between items-center gap-2">
             {/* Filtros de busca */}
@@ -426,7 +426,7 @@ export function Chaves() {
             <div className="flex items-center w-full gap-10 tablet:w-auto">
               <button
                 onClick={openDeleteModal}
-                className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
+                className="flex gap-1 items-center font-medium text-sm text-rose-600 underline"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -621,20 +621,20 @@ export function Chaves() {
           </div>
 
           {/*lista de chaves */}
-          <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-            <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
+          <div className="overflow-y-auto h-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+            <table className="w-auto h-auto border-separate border-spacing-y-2 tablet:mb-6 bg-white">
               <thead className="bg-white sticky top-0 z-10">
                 <tr>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[50%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[25%]">
                     Salas
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[25%]">
                     Blocos
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[10%]">
                     Quantidade de chaves
                   </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
                     Lista de pessoas autorizadas
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[10%]">
@@ -955,15 +955,7 @@ export function Chaves() {
           )}*/}
         </main>
 
-        <div className="mt-2">
-          <PassadorPagina
-            avancarPagina={avancarPagina}
-            voltarPagina={voltarPagina}
-            totalPaginas={totalPaginas}
-            paginaAtual={paginaAtual}
-          />
-        </div>
-        {/* Fim passador de página */}
+        
 
         {/* Logo Chameco lateral */}
         <div className="flex justify-start mt-2 sm:hidden">
@@ -973,6 +965,15 @@ export function Chaves() {
             alt="logo chameco"
           />
         </div>
+        <div className="mt-2">
+          <PassadorPagina
+            avancarPagina={avancarPagina}
+            voltarPagina={voltarPagina}
+            totalPaginas={totalPaginas}
+            paginaAtual={paginaAtual}
+          />
+        </div>
+        {/* Fim passador de página */}
       </div>
     </div>
   );
