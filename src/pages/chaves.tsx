@@ -632,7 +632,7 @@ export function Chaves() {
                     Blocos
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[10%]">
-                    Quantidade de chaves
+                    Quantidade
                   </th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
                     Lista de pessoas autorizadas

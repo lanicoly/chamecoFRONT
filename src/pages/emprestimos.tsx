@@ -75,7 +75,7 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
 
 
             {/* parte informativa tela de empréstimo */}
-            <div className="relative bg-white w-auto max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
+            <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
 
                 {/* cabeçalho tela de empréstimo*/}
                 <div className="flex w-full gap-2">
@@ -97,30 +97,6 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                             </h2>
                             {/* pesquisa + filtro */}
                             <div className="flex justify-center items-center w-full flex-wrap gap-2 flex-1 mobile:justify-end">
-
-                                <div className="flex gap-2 flex-wrap justify-end">
-
-                                    {/* input de pesquisa */}
-                                    <Pesquisa
-                                        pesquisa={pesquisa}
-                                        setIsSearching={setIsSearching}
-                                        setPesquisa={setPesquisa}
-                                    />
-                                    {/* fim input de pesquisa */}
-
-                                    {/* input de filtro */}
-
-                                    <div className="h-fit items-center w-full tablet:w-auto cursor-pointer min-w-[200px]">
-                                        <div onClick={openFiltroModal}
-                                            className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md gap-4 text-sky-900 text-sm font-medium ">
-                                                <p>
-                                            Filtrar...
-                                                </p>
-                                            <SlidersHorizontal size={14} />
-                                        </div>
-
-                                    </div>
-                                    {/* fim input de filtro */}
 
                                     {/* Adicionando pop up de filtrar emprestimos */}
                                     {isFiltroModalOpen && (
@@ -176,10 +152,6 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                         </div>
                                     )}
 
-                                    {/* Fim adicionando pop up de filtrar emprestimos */}
-
-                                </div>
-
                             </div>
                             {/* fim pesquisa + filtro */}
                         </div>
@@ -189,9 +161,10 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                             <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
                                 <thead className="bg-white sticky top-0 z-1">
                                     <tr>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">Informe a sala</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a sala</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a chave</th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">Informe quem solicitou</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] ">Informe quem entregou</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">Informe quem entregou</th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
                                     </tr>
@@ -199,18 +172,34 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                 <tbody>
                                     <tr>
                                         <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                                            <select
-                                                name="chave_sala"
-                                                id="chave_sala"
-                                                //   value={chave}
-                                                className=" justify-between items-start px-2 py-[5px] border-none text-[#646999] text-sm font-medium h-fit w-[95%]"
-                                            >
-                                                <option value="">Selecionar sala</option>
-                                                <option value="todos">Sala E01</option>
-                                                <option value="administrativo">Sala E02</option>
-                                                <option value="codis">Lab de Info</option>
-                                                <option value="guarita">Lab de bio</option>
-                                            </select>
+                                        <div className="flex justify-between items-center mr-3">
+
+                                            <input
+                                                className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                                                type="text"
+                                                placeholder="Sala"
+                                                // value={sala}
+                                                required
+                                            />
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
+                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                            </svg>
+                                        </div>
+                                        </td>
+                                        <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                                        <div className="flex justify-between items-center mr-3">
+
+                                            <input
+                                                className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                                                type="text"
+                                                placeholder="Chave"
+                                                // value={chave}
+                                                required
+                                            />
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
+                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                            </svg>
+                                        </div>
                                         </td>
                                         <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-24 break-words flex-1 text-center">
                                             <div className="flex justify-between items-center mr-3">
@@ -228,16 +217,19 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                             </div>
                                         </td>
                                         <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                                            <select
-                                                name="responsavel"
-                                                id="responsavel"
-                                                //   value={responsavel}
-                                                className=" justify-between items-start px-2 py-[5px] border-none text-[#646999] text-sm font-medium h-fit w-[95%]"
-                                            >
-                                                <option value="zezinho">Zezinho</option>
-                                                <option value="maria">Maria</option>
-                                                <option value="pedro">Pedro</option>
-                                            </select>
+                                        <div className="flex justify-between items-center mr-3">
+
+                                            <input
+                                                className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                                                type="text"
+                                                placeholder="Responsável"
+                                                // value={responsavel}
+                                                required
+                                            />
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
+                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                            </svg>
+                                        </div>
                                         </td>
 
                                         <td onClick={openObservacaoModal} className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words cursor-pointer">
@@ -309,13 +301,25 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                     </tr>
                                 </tbody>
                             </table>
+                            <hr className="text-[#646999] p-2 border-t-2 font-extrabold"/>
                         </div>
                         {/* fim tabela de criacao de emprestimo */}
-
+                        <div className="flex gap-2 flex-wrap justify-between items-center">
 
                         <h2 className="text-red-500 items-center font-semibold text-xl mt-2">
                             Empréstimos pendentes
                         </h2>
+                                            
+                                    {/* input de pesquisa */}
+                                    <Pesquisa
+                                        pesquisa={pesquisa}
+                                        setIsSearching={setIsSearching}
+                                        setPesquisa={setPesquisa}
+                                    />
+                                    {/* fim input de pesquisa */}
+
+                                    
+                        </div>
 
                         {/* tabela com emprestimo pendente */}
                         <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
