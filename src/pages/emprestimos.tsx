@@ -1,10 +1,13 @@
 import { Info, Check, Plus, X, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ptBR } from "date-fns/locale";
 import { Pesquisa } from "../components/pesquisa";
+
+
+
 // import { PassadorPagina } from "../components/passadorPagina";
 // import { set } from "date-fns";
 
@@ -14,7 +17,7 @@ import { Pesquisa } from "../components/pesquisa";
 
 export interface Emprestimo {
   id: number;
-  sala: string;
+  sala: number;
   chave: string;
   solicitante: string;
   responsavel: string;
@@ -41,12 +44,12 @@ export function Emprestimos({
   filtroDataEmprestimo,
   setFiltroDataEmprestimo,
 }: FiltroEmprestimo) {
-  const [emprestimosConcluidos, setEmprestimosConcluidos] = useState<
+  const [emprestimosConcluidos] = useState<
     Emprestimo[]
   >([
     {
       id: 1,
-      sala: "Laboratório X",
+      sala: 2,
       chave: "Reserva",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
@@ -58,7 +61,7 @@ export function Emprestimos({
     },
     {
       id: 3,
-      sala: "Laboratório Y",
+      sala: 2,
       chave: "Reserva",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
@@ -70,7 +73,7 @@ export function Emprestimos({
     },
     {
       id: 5,
-      sala: "Laboratório Y",
+      sala: 2,
       chave: "Principal",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
@@ -82,7 +85,7 @@ export function Emprestimos({
     },
     {
       id: 2,
-      sala: "Laboratório Y",
+      sala: 2,
       chave: "Principal",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
@@ -113,11 +116,13 @@ export function Emprestimos({
   }
 
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
+  
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
 
   function criarEmprestimo() {
     const novoEmprestimo: Emprestimo = {
       id: Math.floor(Math.random() * 10000),
-      sala: sala,
+      sala: salaSelecionadaId,
       chave: chave,
       solicitante: solicitante,
       responsavel: responsavel,
@@ -130,11 +135,11 @@ export function Emprestimos({
     setEmprestimos([...emprestimos, novoEmprestimo]);
     console.log("Emprestimo criado!", novoEmprestimo);
 
+    setSalaSelecionadaId(null); // Melhor que 0 para indicar "não selecionado"
     setSala("");
     setChave("");
     setSolicitante("");
-    setResponsavel("");
-    setResponsavel("");
+    setResponsavel(""); // Removida a duplicação
     setObservacao("");
   }
   //estados p receberem do formulário
@@ -328,7 +333,6 @@ export function Emprestimos({
   const today = new Date();
 
   const [busca,setBusca] = useState('');
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
   const [mostrarBusca, setMostrarBusca]= useState(false);
 
   const salasFiltradas = useMemo(() => {
@@ -340,7 +344,7 @@ export function Emprestimos({
 
     
   return (
-    <div className="flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
+    <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
       <MenuTopo text="MENU" backRoute="/menu" />
 
       {/* parte informativa tela de empréstimo */}
@@ -356,7 +360,7 @@ export function Emprestimos({
         {/* conteudo central tela de empréstimo */}
         <div className="flex flex-col px-4 py-1 w-auto justify-center gap-1">
           {/* conteudo central tabela*/}
-          <div>
+          <div >
             <div className="flex items-center justify-between mt-2">
               <h2 className="text-[#16C34D] items-center font-semibold text-xl shadow-none">
                 Criar novo empréstimo
@@ -365,7 +369,7 @@ export function Emprestimos({
               <div className="flex justify-center items-center w-full flex-wrap gap-2 flex-1 mobile:justify-end">
                 {/* Adicionando pop up de filtrar emprestimos */}
                 {isFiltroModalOpen && (
-                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-13">
                     <form
                       //   onSubmit={filtrarEmprestimos}
                       className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
@@ -420,65 +424,57 @@ export function Emprestimos({
             </div>
 
             {/* tabela de criacao de emprestimo */}
-            <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-              <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
-                <thead className="bg-white sticky top-0 z-1">
-                  <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
-                      Informe a sala
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
-                      Informe a chave
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">
-                      Informe quem solicitou
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">
-                      Informe quem entregou
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
-                  </tr>
-                </thead>
+            <div className=" max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+                            <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
+                                <thead className="bg-white sticky top-0 z-11">
+                                    <tr>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a sala</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a chave</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">Informe quem solicitou</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">Informe quem entregou</th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
+                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
+                                    </tr>
+                                </thead>
                 <tbody>
                   <tr>
                   <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                                            <div className="flex justify-between items-center mr-3 relative">
+                    <div className="flex justify-between items-center mr-3 relative">
 
-                                                <input 
-                                                    className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                                                    type="text"
-                                                    placeholder="Sala"
-                                                    value={busca}
-                                                    required
-                                                    onChange={(ev) =>{
-                                                        setBusca(ev.target.value)
-                                                        setMostrarBusca(true); }}
-                                                        onFocus={() => setMostrarBusca(true)}
-                                                />
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
-                                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                                                </svg>
-                                                {/* Renderiza a lista apenas quando há texto na busca */}
-                                                {mostrarBusca && busca && (
-                                                    <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-20 ">
-                                                        {salasFiltradas.map((sala) => (
-                                                            <li 
-                                                                key={sala.id}
-                                                                className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                                onClick={() => {
-                                                                    setSalaSelecionadaId(sala.id); 
-                                                                    setBusca(sala.nome);
-                                                                    setMostrarBusca(false);
-                                                                }}
-                                                            >
-                                                                {sala.nome}
-                                                            </li> 
-                                                        ))}
-                                                    </ul>
-                                                )}
-                                            </div>
-                                            </td>
+                        <input 
+                            className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                            type="text"
+                            placeholder="Sala"
+                            value={busca}
+                            required
+                            onChange={(ev) => {
+                                setBusca(ev.target.value);
+                                setMostrarBusca(true);
+                              }}
+                              onFocus={() => setMostrarBusca(true)}
+                        />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                        </svg>
+                        {mostrarBusca && busca && (
+                            <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-19 ">
+                                {salasFiltradas.map((sala) => (
+                                <li 
+                                key={sala.id}
+                                className="p-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                    setSalaSelecionadaId(sala.id); 
+                                    setBusca(sala.nome);
+                                    setMostrarBusca(false);
+                                }}
+                                >
+                                    {sala.nome}
+                                    </li> 
+                                ))}
+                                </ul>
+                        )}
+                        </div>
+                    </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <div className="flex justify-between items-center mr-3">
                         <input
@@ -621,7 +617,7 @@ export function Emprestimos({
             </div>
             {/* fim tabela de criacao de emprestimo */}
 
-            <div className="flex gap-2 flex-wrap justify-between items-center">
+            <div className=" flex gap-2 flex-wrap justify-between items-center">
               <div className="flex items-center gap-4">
                 <h2
                   className={`${
@@ -686,8 +682,8 @@ export function Emprestimos({
                 exibirEmprestimosPendentes ? "block" : "hidden"
               }`}
             >
-              <table className="w-full border-separate border-spacing-y-2 bg-white">
-                <thead className="bg-white sticky top-0 z-10">
+              <table className=" w-full border-separate border-spacing-y-2 bg-white">
+                <thead className="bg-white top-0 ">
                   <tr>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">
                       <div className="flex items-center gap-1">
@@ -944,7 +940,11 @@ export function Emprestimos({
                       .map((emprestimo, index) => (
                         <tr key={index}>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                            {emprestimo.sala}
+                          <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                          {salaSelecionadaId 
+                            ? salas.find(sala => sala.id === salaSelecionadaId)?.nome 
+                            : "Selecione uma sala"}
+                          </p>
                           </td>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                             {emprestimo.chave}
@@ -1219,7 +1219,7 @@ export function Emprestimos({
               }`}
             >
               <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
-                <thead className="bg-white sticky top-0 z-10">
+                <thead className="bg-white  top-0 z-10">
                   <tr>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
                       <div className="flex items-center gap-1">
