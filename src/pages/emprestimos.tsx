@@ -1,5 +1,5 @@
-import { Info, Check, Plus, X, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { Info, Check, Plus, X} from "lucide-react";
+import { useMemo, useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
@@ -28,11 +28,20 @@ export interface FiltroEmprestimo {
     filtroDataEmprestimo: DateRange | undefined
 }
 
+const salas = [
+    { id: 1, nome: 'Sala A' },
+    { id: 2, nome: 'Sala B' },
+    { id: 3, nome: 'Sala C' },
+    { id: 4, nome: 'Sala E9' }
+];
+
 export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo) {
 
     function criarEmprestimo() {
         console.log("Emprestimo criado!")
     }
+    
+
     const [pesquisa, setPesquisa] = useState('');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -66,6 +75,17 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
     }
 
     const today = new Date();
+
+    const [busca,setBusca] = useState('');
+    const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
+    const [mostrarBusca, setMostrarBusca]= useState(false);
+
+    const salasFiltradas = useMemo(() => {
+        const lowerBusca = busca.toLowerCase();
+        return salas.filter((sala) => 
+          sala.nome.toLowerCase().includes(lowerBusca)
+        ); 
+      }, [busca]); 
 
 
     return (
@@ -157,9 +177,9 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                         </div>
 
                         {/* tabela de criacao de emprestimo */}
-                        <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+                        <div className=" max-h-[248px] tablet:max-h-64 desktop:max-h-96">
                             <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
-                                <thead className="bg-white sticky top-0 z-1">
+                                <thead className="bg-white sticky top-0 z-11">
                                     <tr>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a sala</th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a chave</th>
@@ -171,22 +191,44 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                                        <div className="flex justify-between items-center mr-3">
+                                            <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                                            <div className="flex justify-between items-center mr-3 relative">
 
-                                            <input
-                                                className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                                                type="text"
-                                                placeholder="Sala"
-                                                // value={sala}
-                                                required
-                                            />
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
-                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                                            </svg>
-                                        </div>
-                                        </td>
-                                        <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                                                <input 
+                                                    className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                                                    type="text"
+                                                    placeholder="Sala"
+                                                    value={busca}
+                                                    required
+                                                    onChange={(ev) =>{
+                                                        setBusca(ev.target.value)
+                                                        setMostrarBusca(true); }}
+                                                        onFocus={() => setMostrarBusca(true)}
+                                                />
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
+                                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                                </svg>
+                                                {/* Renderiza a lista apenas quando há texto na busca */}
+                                                {mostrarBusca && busca && (
+                                                    <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-20 ">
+                                                        {salasFiltradas.map((sala) => (
+                                                            <li 
+                                                                key={sala.id}
+                                                                className="p-2 hover:bg-gray-100 cursor-pointer"
+                                                                onClick={() => {
+                                                                    setSalaSelecionadaId(sala.id); 
+                                                                    setBusca(sala.nome);
+                                                                    setMostrarBusca(false);
+                                                                }}
+                                                            >
+                                                                {sala.nome}
+                                                            </li> 
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                            </td>
+                                       <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                                         <div className="flex justify-between items-center mr-3">
 
                                             <input
@@ -301,7 +343,7 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                     </tr>
                                 </tbody>
                             </table>
-                            <hr className="text-[#646999] p-2 border-t-2 font-extrabold"/>
+                            <hr className="text-[#646999] mt-4 p-3 border-t-2 font-extrabold"/>
                         </div>
                         {/* fim tabela de criacao de emprestimo */}
                         <div className="flex gap-2 flex-wrap justify-between items-center">
@@ -318,13 +360,26 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
                                     />
                                     {/* fim input de pesquisa */}
 
+                                    {/*{/* input de filtro 
+
+                                    <div className="h-fit items-center w-full tablet:w-auto cursor-pointer min-w-[200px]">
+                                        <div onClick={openFiltroModal}
+                                            className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md gap-4 text-sky-900 text-sm font-medium ">
+                                                <p>
+                                            Filtrar...
+                                                </p>
+                                            <SlidersHorizontal size={14} />
+                                        </div>
+
+                                    </div>
+                                    */}
                                     
                         </div>
 
                         {/* tabela com emprestimo pendente */}
                         <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
                             <table className="w-full border-separate border-spacing-y-2 bg-white">
-                                <thead className="bg-white sticky top-0 z-10">
+                                <thead className="bg-white relative top-0 z-10">
                                     <tr>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[25%]">Nome da sala</th>
                                         <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1  w-[15%]">Solicitante</th>
