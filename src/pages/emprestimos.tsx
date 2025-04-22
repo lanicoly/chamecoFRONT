@@ -1,19 +1,15 @@
 import { Info, Check, Plus, X, TriangleAlert } from "lucide-react";
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ptBR } from "date-fns/locale";
 import { Pesquisa } from "../components/pesquisa";
-
-
-
-// import { PassadorPagina } from "../components/passadorPagina";
+import { PassadorPagina } from "../components/passadorPagina";
+import { FiltroModal } from "../components/filtragemModal";
 // import { set } from "date-fns";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
-
-// import { BotaoAdicionar } from "../elementosVisuais/botaoAdicionar";
 
 export interface Emprestimo {
   id: number;
@@ -34,19 +30,18 @@ export interface FiltroEmprestimo {
 }
 
 const salas = [
-    { id: 1, nome: 'Sala A' },
-    { id: 2, nome: 'Sala B' },
-    { id: 3, nome: 'Sala C' },
-    { id: 4, nome: 'Sala E9' }
+  { id: 1, nome: "Sala A" },
+  { id: 2, nome: "Sala B" },
+  { id: 3, nome: "Sala C" },
+  { id: 4, nome: "Sala E9" },
 ];
 
-export function Emprestimos({
-  filtroDataEmprestimo,
-  setFiltroDataEmprestimo,
-}: FiltroEmprestimo) {
-  const [emprestimosConcluidos] = useState<
-    Emprestimo[]
-  >([
+export function Emprestimos() {
+  // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
+  const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<
+    DateRange | undefined
+  >();
+  const [emprestimosConcluidos] = useState<Emprestimo[]>([
     {
       id: 1,
       sala: 2,
@@ -116,8 +111,10 @@ export function Emprestimos({
   }
 
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
-  
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
+
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
+    null
+  );
 
   function criarEmprestimo() {
     const novoEmprestimo: Emprestimo = {
@@ -151,116 +148,231 @@ export function Emprestimos({
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
-    useState(true);
-  const alternarEmprestimos = () => {
-    setExibirEmprestimosPendentes((prev) => !prev);
-  };
+  // Adicionando funcionalidade de filtragem para emprestimos pendentes e concluidos
+  const [filtroPendente, setFiltroPendente] = useState({
+    sala: "",
+    chave: "",
+    solicitante: "",
+    responsavel: "",
+    dataRetirada: "",
+    horaRetirada: "",
+  });
+
+  const [filtroConcluido, setFiltroConcluido] = useState({
+    sala: "",
+    chave: "",
+    solicitante: "",
+    responsavel: "",
+    dataRetirada: "",
+    horaRetirada: "",
+    dataDevolucao: "",
+    horaDevolucao: "",
+  });
+  const [isFiltroPendente, setIsFiltroPendente] = useState(true);
+  const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
+
+  function converterDataBRparaDate(dataStr: string): Date {
+    const [dia, mes, ano] = dataStr.split("/");
+    return new Date(Number(ano), Number(mes) - 1, Number(dia));
+  }
 
   //filtrando emprestimos pendentes
-  const emprestimosFiltradosPendentes = isSearching
-    ? emprestimos.filter(
-        (emprestimo) =>
+  const emprestimosFiltradosPendentes = emprestimos
+    .filter((emprestimo) => {
+      if (!isSearching) return true;
+      return (
+        emprestimo.solicitante
+          ?.toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimo.chave?.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        emprestimo.responsavel
+          ?.toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimo.dataRetirada
+          ?.toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimo.horaRetirada
+          ?.toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimo.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
+      );
+    })
+
+    .filter((emprestimo) => {
+      if (!isFiltroPendente) return true;
+
+      return (
+        (filtroPendente.chave === "" ||
+          emprestimo.chave
+            ?.toLowerCase()
+            .includes(filtroPendente.chave.toLowerCase())) &&
+        (filtroPendente.solicitante === "" ||
           emprestimo.solicitante
             ?.toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimo.sala?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          emprestimo.chave?.toLowerCase().includes(pesquisa.toLowerCase()) ||
+            .includes(filtroPendente.solicitante.toLowerCase())) &&
+        (filtroPendente.responsavel === "" ||
           emprestimo.responsavel
             ?.toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimo.dataRetirada
-            ?.toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
+            .includes(filtroPendente.responsavel.toLowerCase())) &&
+        (filtroPendente.horaRetirada === "" ||
           emprestimo.horaRetirada
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimo.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
+            ?.toLowerCase()
+            .includes(filtroPendente.horaRetirada.toLowerCase()))
+      );
+    })
+
+    .filter((emprestimo) => {
+      if (
+        !isFiltroPendente ||
+        !filtroDataEmprestimo?.from ||
+        !filtroDataEmprestimo?.to
       )
-    : emprestimos;
+        return true;
+
+      const dataEmprestimo = converterDataBRparaDate(emprestimo.dataRetirada);
+
+      return (
+        dataEmprestimo >= filtroDataEmprestimo.from &&
+        dataEmprestimo <= filtroDataEmprestimo.to
+      );
+    });
 
   //filtrando emprestimos concluidos
-  const emprestimosFiltradosConcluidos = isSearching
-    ? emprestimosConcluidos.filter(
-        (emprestimosConcluidos) =>
-          emprestimosConcluidos.solicitante
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.sala
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.chave
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.responsavel
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.dataRetirada
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.horaRetirada
-            .toLowerCase()
-            .includes(pesquisa.toLowerCase()) ||
-          emprestimosConcluidos.observacao
+  const emprestimosFiltradosConcluidos = emprestimosConcluidos
+    .filter((emprestimos) => {
+      if (!isSearching) return true;
+      return (
+        // emprestimosConcluidos.sala
+        //   .toLowerCase()
+        //   .includes(pesquisa.toLowerCase()) ||
+        emprestimos.chave.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        emprestimos.solicitante
+          .toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimos.responsavel
+          .toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimos.dataRetirada
+          .toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimos.horaRetirada
+          .toLowerCase()
+          .includes(pesquisa.toLowerCase()) ||
+        emprestimos.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
+      );
+    })
+    .filter((emprestimo) => {
+      if (!isFiltroConcluido) return true;
+      return (
+        // (filtroConcluido.sala === "" ||
+        //   emprestimo.sala
+        //     ?.toLowerCase()
+        //     .includes(filtroConcluido.sala.toLowerCase())) &&
+        (filtroConcluido.chave === "" ||
+          emprestimo.chave
             ?.toLowerCase()
-            .includes(pesquisa.toLowerCase())
+            .includes(filtroConcluido.chave.toLowerCase())) &&
+        (filtroConcluido.solicitante === "" ||
+          emprestimo.solicitante
+            ?.toLowerCase()
+            .includes(filtroConcluido.solicitante.toLowerCase())) &&
+        (filtroConcluido.responsavel === "" ||
+          emprestimo.responsavel
+            ?.toLowerCase()
+            .includes(filtroConcluido.responsavel.toLowerCase())) &&
+        (filtroConcluido.dataRetirada === "" ||
+          emprestimo.dataRetirada
+            ?.toLowerCase()
+            .includes(filtroConcluido.dataRetirada.toLowerCase())) &&
+        (filtroConcluido.horaRetirada === "" ||
+          emprestimo.horaRetirada
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
+            (filtroConcluido.horaDevolucao === "" ||
+              emprestimo.horaDevolucao
+                ?.toLowerCase()
+                .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+      );
+    })
+    .filter((emprestimo) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataEmprestimo?.from ||
+        !filtroDataEmprestimo?.to
       )
-    : emprestimosConcluidos;
+        return true;
+
+      const dataEmprestimo = converterDataBRparaDate(emprestimo.dataRetirada);
+
+      return (
+        !filtroDataEmprestimo?.from ||
+        !filtroDataEmprestimo?.to ||
+        (dataEmprestimo >= filtroDataEmprestimo.from &&
+          dataEmprestimo <= filtroDataEmprestimo.to)
+      );
+    });
 
   const itensAtuaisPendentes = emprestimosFiltradosPendentes.slice();
   const itensAtuaisConcluidos = emprestimosFiltradosConcluidos.slice();
 
-  const [isFiltroModalOpen, setIsFiltroModalOpen] = useState(false);
-
   // Adicionando funcionalidade ao passador de página
-  // const itensPorPaginaPendente = 3;
-  // const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
-  // const totalPaginasPendentes = Math.max(
-  //   1,
-  //   Math.ceil(emprestimos.length / itensPorPaginaPendente)
-  // );
+  const itensPorPaginaPendente = 3;
+  const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
+  const totalPaginasPendentes = Math.max(
+    1,
+    Math.ceil(emprestimos.length / itensPorPaginaPendente)
+  );
 
-  // function avancarPaginaPendente() {
-  //   if (paginaAtualPendente < totalPaginasPendentes) {
-  //     setPaginaAtualPendente(paginaAtualPendente + 1);
-  //   }
-  // }
+  function avancarPaginaPendente() {
+    if (paginaAtualPendente < totalPaginasPendentes) {
+      setPaginaAtualPendente(paginaAtualPendente + 1);
+    }
+  }
 
-  // function voltarPaginaPendente() {
-  //   if (paginaAtualPendente > 1) {
-  //     setPaginaAtualPendente(paginaAtualPendente - 1);
-  //   }
-  // }
+  function voltarPaginaPendente() {
+    if (paginaAtualPendente > 1) {
+      setPaginaAtualPendente(paginaAtualPendente - 1);
+    }
+  }
   //fim função passador
 
   //passador p seção concluídos
-  // const itensPorPaginaConcluidos = 3;
-  // const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
-  // const totalPaginasConcluidos = Math.max(
-  //   1,
-  //   Math.ceil(emprestimosConcluidos.length / itensPorPaginaConcluidos)
-  // );
+  const itensPorPaginaConcluidos = 3;
+  const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
+  const totalPaginasConcluidos = Math.max(
+    1,
+    Math.ceil(emprestimosConcluidos.length / itensPorPaginaConcluidos)
+  );
 
-  // function avancarPaginaConcluidos() {
-  //   if (paginaAtualConcluidos < totalPaginasConcluidos) {
-  //     setPaginaAtualConcluidos(paginaAtualConcluidos + 1);
-  //   }
-  // }
+  function avancarPaginaConcluidos() {
+    if (paginaAtualConcluidos < totalPaginasConcluidos) {
+      setPaginaAtualConcluidos(paginaAtualConcluidos + 1);
+    }
+  }
 
-  // function voltarPaginaConcluidos() {
-  //   if (paginaAtualConcluidos > 1) {
-  //     setPaginaAtualConcluidos(paginaAtualConcluidos - 1);
-  //   }
-  // }
+  function voltarPaginaConcluidos() {
+    if (paginaAtualConcluidos > 1) {
+      setPaginaAtualConcluidos(paginaAtualConcluidos - 1);
+    }
+  }
   //fim passador p seção concluídos
 
   // function openFiltroModal() {
   //   setIsFiltroModalOpen(true);
   // }
 
-  function closeFiltroModal() {
-    setIsFiltroModalOpen(false);
-  }
+  // function closeFiltroModal() {
+  //   setIsFiltroModalOpen(false);
+  // }
+
+  // function openInputFiltroModal() {
+  //   setIsInputFiltroModalOpen(true);
+  // }
+
+  // function closeInputFiltroModal() {
+  //   setIsInputFiltroModalOpen(false);
+  // }
+
   const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
   function openObservacaoModal() {
@@ -330,19 +442,29 @@ export function Emprestimos({
     closeEditModal();
   }
 
+  // Deixando o botão de alternar entre empréstimos pendentes e concluídos funcional
+  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
+    useState(true);
+  const alternarEmprestimos = () => {
+    setExibirEmprestimosPendentes(
+      (exibirEmprestimoAtual) => !exibirEmprestimoAtual
+    );
+  };
+
   const today = new Date();
 
-  const [busca,setBusca] = useState('');
-  const [mostrarBusca, setMostrarBusca]= useState(false);
+  const [busca, setBusca] = useState("");
+  const [mostrarBusca, setMostrarBusca] = useState(false);
 
   const salasFiltradas = useMemo(() => {
-      const lowerBusca = busca.toLowerCase();
-      return salas.filter((sala) => 
-        sala.nome.toLowerCase().includes(lowerBusca)
-      ); 
-    }, [busca]); 
+    const lowerBusca = busca.toLowerCase();
+    return salas.filter((sala) => sala.nome.toLowerCase().includes(lowerBusca));
+  }, [busca]);
 
-    
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+    null
+  );
+
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
       <MenuTopo text="MENU" backRoute="/menu" />
@@ -350,130 +472,121 @@ export function Emprestimos({
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
         {/* cabeçalho tela de empréstimo*/}
-        <div className="flex w-full gap-2">
+        <div className="flex w-full">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
             EMPRÉSTIMOS
           </h1>
+
+          <button>
+            <svg
+              width="30"
+              height="30"
+              viewBox="0 0 38 36"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                width="30"
+                height="30"
+                transform="translate(0.5)"
+                fill="white"
+              />
+              <g clip-path="url(#clip0_2169_2594)">
+                <path
+                  d="M36.1128 25.0627L32.4671 11.923C31.6886 9.11219 29.9923 6.64257 27.6482 4.90717C25.3041 3.17176 22.4469 2.27029 19.5313 2.34623C16.6157 2.42217 13.8093 3.47116 11.5587 5.32624C9.30811 7.18133 7.74269 9.7359 7.11159 12.5834L4.29182 25.2731C4.15538 25.8878 4.1587 26.5254 4.30156 27.1387C4.44441 27.752 4.72314 28.3254 5.11719 28.8166C5.51123 29.3079 6.01054 29.7043 6.57826 29.9768C7.14599 30.2493 7.76765 30.3908 8.39738 30.391H13.455C13.7768 31.9759 14.6367 33.4007 15.8888 34.4242C17.141 35.4476 18.7085 36.0067 20.3257 36.0067C21.9429 36.0067 23.5104 35.4476 24.7625 34.4242C26.0147 33.4007 26.8745 31.9759 27.1963 30.391H32.0619C32.7098 30.3907 33.349 30.2407 33.9294 29.9528C34.5099 29.6648 35.0159 29.2466 35.4082 28.7309C35.8004 28.2151 36.0682 27.6157 36.1907 26.9795C36.3131 26.3432 36.2869 25.6872 36.1142 25.0627H36.1128ZM20.3257 33.1953C19.4588 33.1917 18.6141 32.9204 17.9073 32.4184C17.2006 31.9164 16.6661 31.2083 16.3772 30.391H24.2742C23.9852 31.2083 23.4508 31.9164 22.744 32.4184C22.0372 32.9204 21.1926 33.1917 20.3257 33.1953ZM33.1766 27.0328C33.0458 27.2062 32.8762 27.3466 32.6814 27.4428C32.4867 27.539 32.2721 27.5882 32.0549 27.5866H8.39738C8.18742 27.5866 7.98015 27.5394 7.79087 27.4486C7.60158 27.3577 7.43512 27.2255 7.30376 27.0617C7.1724 26.8979 7.07951 26.7067 7.03193 26.5022C6.98435 26.2977 6.9833 26.0852 7.02886 25.8802L9.84863 13.1905C10.3455 10.9558 11.5751 8.9512 13.3421 7.49552C15.109 6.03985 17.3119 5.2166 19.6004 5.15665C21.889 5.0967 24.1319 5.80348 25.9727 7.16464C27.8134 8.5258 29.1463 10.4632 29.7595 12.6689L33.4052 25.8087C33.4647 26.0165 33.475 26.2352 33.4353 26.4477C33.3957 26.6602 33.3071 26.8605 33.1766 27.0328Z"
+                  fill="#C6191A"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_2169_2594">
+                  <rect
+                    width="33.6522"
+                    height="33.6522"
+                    fill="white"
+                    transform="translate(3.5 2.34766)"
+                  />
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
         </div>
         {/* fim cabeçalho tela de empréstimo */}
 
         {/* conteudo central tela de empréstimo */}
         <div className="flex flex-col px-4 py-1 w-auto justify-center gap-1">
           {/* conteudo central tabela*/}
-          <div >
+          <div>
             <div className="flex items-center justify-between mt-2">
               <h2 className="text-[#16C34D] items-center font-semibold text-xl shadow-none">
                 Criar novo empréstimo
               </h2>
-              {/* pesquisa + filtro */}
-              <div className="flex justify-center items-center w-full flex-wrap gap-2 flex-1 mobile:justify-end">
-                {/* Adicionando pop up de filtrar emprestimos */}
-                {isFiltroModalOpen && (
-                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-13">
-                    <form
-                      //   onSubmit={filtrarEmprestimos}
-                      className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                    >
-                      {/*cabeçalho modal filtrar emprestimo*/}
-                      <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                        <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                          FILTRAR EMPRÉSTIMOS
-                        </p>
-                        <button
-                          onClick={closeFiltroModal}
-                          type="button"
-                          className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                        >
-                          <X className=" mb-[5px] text-[#192160]" />
-                        </button>
-                      </div>
-                      {/* fim cabeçalho modal filtrar emprestimo*/}
-
-                      <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-                        {/* seção data */}
-
-                        <div className="flex justify-center items-center">
-                          <DayPicker
-                            animate
-                            mode="range"
-                            selected={filtroDataEmprestimo}
-                            onSelect={setFiltroDataEmprestimo}
-                            locale={ptBR}
-                            endMonth={new Date(today)}
-                          />
-                        </div>
-
-                        {/* fim seção data */}
-                      </div>
-
-                      {/* botão salvar filtro*/}
-                      <div className="flex justify-center items-center mt-[10px] w-full">
-                        <button
-                          type="submit"
-                          className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                        >
-                          <Plus className="h-10px" /> FILTRAR
-                        </button>
-                      </div>
-                      {/* fim botão salvar filtro*/}
-                    </form>
-                  </div>
-                )}
-              </div>
-              {/* fim pesquisa + filtro */}
             </div>
 
             {/* tabela de criacao de emprestimo */}
             <div className=" max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-                            <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
-                                <thead className="bg-white sticky top-0 z-11">
-                                    <tr>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a sala</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">Informe a chave</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">Informe quem solicitou</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">Informe quem entregou</th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
-                                        <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
-                                    </tr>
-                                </thead>
+              <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
+                <thead className="bg-white sticky top-0 z-11">
+                  <tr>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
+                      Informe a sala
+                    </th>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
+                      Informe a chave
+                    </th>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">
+                      Informe quem solicitou
+                    </th>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">
+                      Informe quem entregou
+                    </th>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2"></th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr>
-                  <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                    <div className="flex justify-between items-center mr-3 relative">
-
-                        <input 
-                            className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                            type="text"
-                            placeholder="Sala"
-                            value={busca}
-                            required
-                            onChange={(ev) => {
-                                setBusca(ev.target.value);
-                                setMostrarBusca(true);
-                              }}
-                              onFocus={() => setMostrarBusca(true)}
+                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                      <div className="flex justify-between items-center mr-3 relative">
+                        <input
+                          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
+                          type="text"
+                          placeholder="Sala"
+                          value={busca}
+                          required
+                          onChange={(ev) => {
+                            setBusca(ev.target.value);
+                            setMostrarBusca(true);
+                          }}
+                          onFocus={() => setMostrarBusca(true)}
                         />
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          fill="#64748b"
+                          className="bi bi-search"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
                         </svg>
                         {mostrarBusca && busca && (
-                            <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-19 ">
-                                {salasFiltradas.map((sala) => (
-                                <li 
+                          <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-19 ">
+                            {salasFiltradas.map((sala) => (
+                              <li
                                 key={sala.id}
                                 className="p-2 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
-                                    setSalaSelecionadaId(sala.id); 
-                                    setBusca(sala.nome);
-                                    setMostrarBusca(false);
+                                  setSalaSelecionadaId(sala.id);
+                                  setBusca(sala.nome);
+                                  setMostrarBusca(false);
                                 }}
-                                >
-                                    {sala.nome}
-                                    </li> 
-                                ))}
-                                </ul>
+                              >
+                                {sala.nome}
+                              </li>
+                            ))}
+                          </ul>
                         )}
-                        </div>
+                      </div>
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <div className="flex justify-between items-center mr-3">
@@ -688,120 +801,125 @@ export function Emprestimos({
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">
                       <div className="flex items-center gap-1">
                         Nome da sala
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                        <img src="src/assets/filter_list.svg" alt="" />
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">
-                      <div className="flex items-center gap-1">
-                        Tipo de chave
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Tipo de chave
+                          <button onClick={() => setCampoFiltroAberto("chave")}>
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "chave"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null); // Fecha o modal após o submit
+                          }}
+                          titulo="FILTRAR POR TIPO DE CHAVE"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroPendente.chave}
+                            onChange={(e) =>
+                              setFiltroPendente({
+                                ...filtroPendente,
+                                chave: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[15%]">
-                      <div className="flex items-center gap-1">
-                        Solicitante
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Solicitante
+                          <button
+                            onClick={() => setCampoFiltroAberto("solicitante")}
                           >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "solicitante"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null); // Fecha o modal após o submit
+                          }}
+                          titulo="FILTRAR POR SOLICITANTE"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroPendente.solicitante}
+                            onChange={(e) =>
+                              setFiltroPendente({
+                                ...filtroPendente,
+                                solicitante: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] ">
-                      <div className="flex items-center gap-1">
-                        Responsável
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Responsável
+                          <button
+                            onClick={() => setCampoFiltroAberto("responsavel")}
                           >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "responsavel"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR RESPONSÁVEL"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroPendente.responsavel}
+                            onChange={(e) =>
+                              setFiltroPendente({
+                                ...filtroPendente,
+                                responsavel: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -839,30 +957,30 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Data retirada
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button
+                          onClick={() => setCampoFiltroAberto("dataRetirada")}
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        {/* Adicionando pop up de filtrar emprestimos */}
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "dataRetirada"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR DATA"
+                        >
+                          <DayPicker
+                            animate
+                            mode="range"
+                            selected={filtroDataEmprestimo}
+                            onSelect={setFiltroDataEmprestimo}
+                            locale={ptBR}
+                            endMonth={new Date()}
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -901,30 +1019,32 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Hora da retirada
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
+                        <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "horaRetirada"}
+
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR HORA"
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroPendente.horaRetirada}
+                            onChange={(e) =>
+                              setFiltroPendente({
+                                ...filtroPendente,
+                                horaRetirada: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
                   </tr>
@@ -933,18 +1053,20 @@ export function Emprestimos({
                 <tbody>
                   {itensAtuaisPendentes.length > 0 ? (
                     emprestimosFiltradosPendentes
-                      // .slice(
-                      //   (paginaAtualPendente - 1) * itensPorPaginaPendente,
-                      //   paginaAtualPendente * itensPorPaginaPendente
-                      // )
+                      .slice(
+                        (paginaAtualPendente - 1) * itensPorPaginaPendente,
+                        paginaAtualPendente * itensPorPaginaPendente
+                      )
                       .map((emprestimo, index) => (
                         <tr key={index}>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                          <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                          {salaSelecionadaId 
-                            ? salas.find(sala => sala.id === salaSelecionadaId)?.nome 
-                            : "Selecione uma sala"}
-                          </p>
+                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                              {salaSelecionadaId
+                                ? salas.find(
+                                    (sala) => sala.id === salaSelecionadaId
+                                  )?.nome
+                                : "Selecione uma sala"}
+                            </p>
                           </td>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                             {emprestimo.chave}
@@ -1167,47 +1289,13 @@ export function Emprestimos({
               {/* fim tabela de emprestimo pendente */}
 
               {/* passador de página OBS: quando adaptar as tabelas, ADICIONAR O COMPONENTE */}
-              <div className=" mt-2 flex justify-end items-center">
-                <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="#075985"
-                    className="bi bi-chevron-left"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                    />
-                  </svg>
-                </button>
-
-                <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
-                  <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
-                    1
-                  </div>
-                  <div className="text-base text-sky-800 font-semibold">
-                    de <strong className="font-bold">5</strong>
-                  </div>
-                </div>
-
-                <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="#075985"
-                    className="bi bi-chevron-right"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
-                    />
-                  </svg>
-                </button>
+              <div className=" mt-5 flex justify-end items-center">
+                <PassadorPagina
+                  avancarPagina={avancarPaginaPendente}
+                  voltarPagina={voltarPaginaPendente}
+                  totalPaginas={totalPaginasPendentes}
+                  paginaAtual={paginaAtualPendente}
+                />
               </div>
             </div>
             {/* fim passador de página */}
@@ -1224,120 +1312,125 @@ export function Emprestimos({
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
                       <div className="flex items-center gap-1">
                         Nome da sala
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                        <img src="src/assets/filter_list.svg" alt="" />
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
-                      <div className="flex items-center gap-1">
-                        Tipo de chave
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Tipo de chave
+                          <button onClick={() => setCampoFiltroAberto("chave")}>
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "chave"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR TIPO DE CHAVE"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroConcluido.chave}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                chave: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1  w-[12%]">
-                      <div className="flex items-center gap-1">
-                        Solicitante
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Solicitante
+                          <button
+                            onClick={() => setCampoFiltroAberto("solicitante")}
                           >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "solicitante"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR SOLICITANTE"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroConcluido.solicitante}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                solicitante: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%] ">
-                      <div className="flex items-center gap-1">
-                        Responsável
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%] align-top">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Responsável
+                          <button
+                            onClick={() => setCampoFiltroAberto("responsavel")}
                           >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
                             />
-                          </g>
-                        </svg>
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "responsavel"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR RESPONSÁVEL"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroConcluido.responsavel}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                responsavel: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -1375,30 +1468,30 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Retirada
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button
+                          onClick={() => setCampoFiltroAberto("dataRetirada")}
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        {/* Adicionando pop up de filtrar emprestimos */}
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "dataRetirada"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR DATA"
+                        >
+                          <DayPicker
+                            animate
+                            mode="range"
+                            selected={filtroDataEmprestimo}
+                            onSelect={setFiltroDataEmprestimo}
+                            locale={ptBR}
+                            endMonth={new Date()}
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -1437,30 +1530,32 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Hora retirada
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
+                        <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "horaRetirada"}
+
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR HORA"
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroConcluido.horaRetirada}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                horaRetirada: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -1498,30 +1593,30 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Devolução
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button
+                          onClick={() => setCampoFiltroAberto("dataDevolucao")}
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        {/* Adicionando pop up de filtrar emprestimos */}
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "dataDevolucao"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR DATA"
+                        >
+                          <DayPicker
+                            animate
+                            mode="range"
+                            selected={filtroDataEmprestimo}
+                            onSelect={setFiltroDataEmprestimo}
+                            locale={ptBR}
+                            endMonth={new Date()}
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
@@ -1560,30 +1655,32 @@ export function Emprestimos({
                           </defs>
                         </svg>
                         Hora devolução
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <button onClick={() => setCampoFiltroAberto("horaDevolucao")}>
+                        <img src="src/assets/filter_list.svg" alt="" />
+                        </button>
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "horaDevolucao"}
+
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          titulo="FILTRAR POR HORA"
                         >
-                          <mask
-                            id="mask0_2194_2476"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="16"
-                            height="16"
-                          >
-                            <rect width="16" height="16" fill="#D9D9D9" />
-                          </mask>
-                          <g mask="url(#mask0_2194_2476)">
-                            <path
-                              d="M6.66667 12V10.6667H9.33333V12H6.66667ZM4 8.66667V7.33333H12V8.66667H4ZM2 5.33333V4H14V5.33333H2Z"
-                              fill="#081683"
-                            />
-                          </g>
-                        </svg>
+                          <input
+                            type="text"
+                            placeholder="Filtrar..."
+                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            value={filtroConcluido.horaDevolucao}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                horaDevolucao: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
                   </tr>
@@ -1591,10 +1688,10 @@ export function Emprestimos({
                 <tbody>
                   {itensAtuaisConcluidos.length > 0 ? (
                     emprestimosFiltradosConcluidos
-                      // .slice(
-                      //   (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
-                      //   paginaAtualConcluidos * itensPorPaginaConcluidos
-                      // )
+                      .slice(
+                        (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
+                        paginaAtualConcluidos * itensPorPaginaConcluidos
+                      )
                       .map((emprestimo, index) => (
                         <tr key={index}>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
@@ -1623,10 +1720,185 @@ export function Emprestimos({
                           </td>
 
                           <td className="pl-2">
-                            <button className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs">
+                            <button
+                              onClick={() => openDetalhesModal(emprestimo)}
+                              className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
+                            >
                               <Info className="size-5 text-[#646999]" />
                             </button>
                           </td>
+                          {/* Adicionando pop up de detalhes do empréstimo */}
+                          {isDetalhesModalOpen &&
+                            emprestimo.id === emprestimoSelecionado?.id && (
+                              // emprestimo.id === emprestimoSelecionado?.id &&
+                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
+                                  <div className="flex justify-between w-full px-3">
+                                    <p className="text-[#192160] text-left text-[20px] font-semibold pr-6">
+                                      DETALHES
+                                    </p>
+                                    <div className="flex justify-center items-center gap-3">
+                                      <button
+                                        type="button"
+                                        onClick={openEditModal}
+                                        className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="12"
+                                          height="12"
+                                          fill="#646999"
+                                          className="bi bi-pen"
+                                          viewBox="0 0 16 16"
+                                        >
+                                          <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                        </svg>
+                                        Editar
+                                      </button>
+
+                                      {/* Começo do pop up de editar emprestimo */}
+                                      {isEditModalOpen && (
+                                        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                          <form
+                                            // onSubmit={editarObservacao}
+                                            className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                                          >
+                                            <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                              <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                                EDITAR OBSERVAÇÃO
+                                              </p>
+
+                                              <button
+                                                onClick={closeEditModal}
+                                                type="button"
+                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                              >
+                                                <X className=" mb-[5px] text-[#192160]" />
+                                              </button>
+                                            </div>
+
+                                            <div className="justify-center items-center ml-[40px] mr-8">
+                                              <p className="text-[#192160] text-sm font-medium mb-1">
+                                                Digite a nova observação
+                                              </p>
+
+                                              <input
+                                                className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                                                type="text"
+                                                placeholder="Observação"
+                                                value={
+                                                  observacao !== null
+                                                    ? observacao
+                                                    : ""
+                                                }
+                                                onChange={(e) =>
+                                                  setObservacao(e.target.value)
+                                                }
+                                              />
+                                            </div>
+
+                                            <div className="flex justify-center items-center mt-[10px] w-full">
+                                              <button
+                                                type="submit"
+                                                onClick={editarObservacao}
+                                                className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                                              >
+                                                SALVAR ALTERAÇÕES
+                                              </button>
+                                            </div>
+                                          </form>
+                                        </div>
+                                      )}
+                                      {/* Fim do pop up de editar emprestimo */}
+
+                                      <button
+                                        type="button"
+                                        onClick={openDeleteModal}
+                                        className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="12"
+                                          height="12"
+                                          fill="#e11d48"
+                                          className="bi bi-x-lg"
+                                          viewBox="0 0 16 16"
+                                        >
+                                          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                        </svg>
+                                        Excluir
+                                      </button>
+
+                                      {/* Adicionando pop up de deletar emprestimo */}
+                                      {isDeleteModalOpen && (
+                                        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                          <form
+                                            onSubmit={removeObservacao}
+                                            className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                                          >
+                                            <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                              <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                                                EXCLUIR OBSERVAÇÃO
+                                              </p>
+                                              <button
+                                                onClick={closeDeleteModal}
+                                                type="button"
+                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                              >
+                                                <X className=" text-[#192160]" />
+                                              </button>
+                                            </div>
+                                            <TriangleAlert className="size-16 text-red-700" />
+
+                                            <p className="text-center px-2">
+                                              Essa ação é{" "}
+                                              <strong className="font-semibold ">
+                                                definitiva
+                                              </strong>{" "}
+                                              e não pode ser desfeita.{" "}
+                                              <strong className="font-semibold">
+                                                Tem certeza disso?
+                                              </strong>
+                                            </p>
+                                            <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                                              <button
+                                                onClick={closeDeleteModal}
+                                                type="button"
+                                                className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                                              >
+                                                CANCELAR
+                                              </button>
+                                              <button
+                                                type="submit"
+                                                onClick={removeObservacao}
+                                                className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                                              >
+                                                EXCLUIR
+                                              </button>
+                                            </div>
+                                          </form>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <button
+                                      onClick={closeDetalhesModal}
+                                      type="button"
+                                      className="px-2 py-1 rounded flex-shrink-0 "
+                                    >
+                                      <X className=" mb-[5px] text-[#192160]" />
+                                    </button>
+                                  </div>
+
+                                  <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
+                                    <p className="text-[#192160] font-medium p-1">
+                                      {emprestimoSelecionado.observacao ||
+                                        "Detalhes sobre o empréstimo"}
+                                    </p>
+                                  </div>
+                                </form>
+                              </div>
+                            )}
+                          {/* Fim adicionando pop up de detalhes do emprestimo */}
                         </tr>
                       ))
                   ) : (
@@ -1644,47 +1916,13 @@ export function Emprestimos({
               {/* fim tabela com emprestimo concluido */}
 
               {/* passador de página */}
-              <div className=" mt-2 flex justify-end items-center">
-                <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="#075985"
-                    className="bi bi-chevron-left"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                    />
-                  </svg>
-                </button>
-
-                <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
-                  <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
-                    1
-                  </div>
-                  <div className="text-base text-sky-800 font-semibold">
-                    de <strong className="font-bold">5</strong>
-                  </div>
-                </div>
-
-                <button className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="#075985"
-                    className="bi bi-chevron-right"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
-                    />
-                  </svg>
-                </button>
+              <div className=" mt-5 flex justify-end items-center">
+                <PassadorPagina
+                  avancarPagina={avancarPaginaConcluidos}
+                  voltarPagina={voltarPaginaConcluidos}
+                  totalPaginas={totalPaginasConcluidos}
+                  paginaAtual={paginaAtualConcluidos}
+                />
               </div>
               {/* fim passador de página */}
             </div>
