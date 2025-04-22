@@ -1,5 +1,5 @@
 import { Info, Check, Plus, X, TriangleAlert } from "lucide-react";
-import React, { useState, useMemo } from "react";
+import React, { useState} from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { FiltroModal } from "../components/filtragemModal";
+import { FilterableInput } from "../components/FilterableInput"
 // import { set } from "date-fns";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
@@ -14,9 +15,9 @@ import { FiltroModal } from "../components/filtragemModal";
 export interface Emprestimo {
   id: number;
   sala: number;
-  chave: string;
-  solicitante: string;
-  responsavel: string;
+  chave: number;
+  solicitante: number;
+  responsavel: number;
   observacao: string | null;
   dataRetirada: string; //não coloquei Date para facilitar a estilização inicial
   horaRetirada: string;
@@ -36,6 +37,40 @@ const salas = [
   { id: 4, nome: "Sala E9" },
 ];
 
+interface Chave {
+  id: number;
+  nome: string;
+}
+
+const chaves: Chave[] = [
+  { id: 1, nome: "Chave 101" },
+  { id: 2, nome: "Chave 202" },
+  { id: 3, nome: "Chave 303" },
+];
+
+interface Solicitante {
+  id: number;
+  nome: string;
+}
+
+const solicitantes: Solicitante[] = [
+  { id: 1, nome: "Joao" },
+  { id: 2, nome: "Jose" },
+  { id: 3, nome: "Chico" },
+];
+
+interface Responsavel {
+  id: number;
+  nome: string;
+}
+
+const responsaveis: Responsavel[] = [
+  { id: 1, nome: "Joao" },
+  { id: 2, nome: "Jose" },
+  { id: 3, nome: "Chico" },
+];
+
+
 export function Emprestimos() {
   // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
   const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<
@@ -44,8 +79,8 @@ export function Emprestimos() {
   const [emprestimosConcluidos] = useState<Emprestimo[]>([
     {
       id: 1,
-      sala: 2,
-      chave: "Reserva",
+      sala: "Sala e09",
+      chave: "Chave 19",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
       observacao: null,
@@ -56,8 +91,8 @@ export function Emprestimos() {
     },
     {
       id: 3,
-      sala: 2,
-      chave: "Reserva",
+      sala: "Sala e09",
+      chave: "Chave x",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
       observacao: null,
@@ -68,8 +103,8 @@ export function Emprestimos() {
     },
     {
       id: 5,
-      sala: 2,
-      chave: "Principal",
+      sala: "Sala e09",
+      chave: "Chave x",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
       observacao: null,
@@ -80,8 +115,8 @@ export function Emprestimos() {
     },
     {
       id: 2,
-      sala: 2,
-      chave: "Principal",
+      sala: "Sala e09",
+      chave: "Chave x",
       solicitante: "Emilia Nunes",
       responsavel: "Zezinho",
       observacao: null,
@@ -112,17 +147,14 @@ export function Emprestimos() {
 
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
 
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
-    null
-  );
 
   function criarEmprestimo() {
     const novoEmprestimo: Emprestimo = {
       id: Math.floor(Math.random() * 10000),
       sala: salaSelecionadaId,
-      chave: chave,
-      solicitante: solicitante,
-      responsavel: responsavel,
+      chave: chaveSelecionadaId,
+      solicitante: solicitanteSelecionadoId,
+      responsavel: responsavelSelecionadoId,
       observacao: observacao,
       dataRetirada: obterDataAtual(),
       horaRetirada: obterHoraAtual(),
@@ -132,16 +164,15 @@ export function Emprestimos() {
     setEmprestimos([...emprestimos, novoEmprestimo]);
     console.log("Emprestimo criado!", novoEmprestimo);
 
-    setSalaSelecionadaId(null); // Melhor que 0 para indicar "não selecionado"
-    setSala("");
-    setChave("");
+    setSalaSelecionadaId(0); 
+    setChaveSelecionadaId(0);
+    setSolicitanteSelecionadoId(0);
+    setResponsavelSelecionadoId(0);
     setSolicitante("");
-    setResponsavel(""); // Removida a duplicação
+    setResponsavel(""); 
     setObservacao("");
   }
-  //estados p receberem do formulário
-  const [sala, setSala] = useState("");
-  const [chave, setChave] = useState("");
+
   const [solicitante, setSolicitante] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [observacao, setObservacao] = useState<string | null>(null);
@@ -421,6 +452,7 @@ export function Emprestimos() {
   // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+
   function openEditModal() {
     if (emprestimoSelecionado) {
       setObservacao(emprestimoSelecionado.observacao);
@@ -453,13 +485,13 @@ export function Emprestimos() {
 
   const today = new Date();
 
-  const [busca, setBusca] = useState("");
-  const [mostrarBusca, setMostrarBusca] = useState(false);
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number>(0);
 
-  const salasFiltradas = useMemo(() => {
-    const lowerBusca = busca.toLowerCase();
-    return salas.filter((sala) => sala.nome.toLowerCase().includes(lowerBusca));
-  }, [busca]);
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number>(0);
+
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number>(0);
+
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number>(0);
 
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
@@ -546,113 +578,36 @@ export function Emprestimos() {
                 <tbody>
                   <tr>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                      <div className="flex justify-between items-center mr-3 relative">
-                        <input
-                          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                          type="text"
-                          placeholder="Sala"
-                          value={busca}
-                          required
-                          onChange={(ev) => {
-                            setBusca(ev.target.value);
-                            setMostrarBusca(true);
-                          }}
-                          onFocus={() => setMostrarBusca(true)}
-                        />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          fill="#64748b"
-                          className="bi bi-search"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                        </svg>
-                        {mostrarBusca && busca && (
-                          <ul className="absolute top-full left-0 right-0 bg-white shadow-md z-19 ">
-                            {salasFiltradas.map((sala) => (
-                              <li
-                                key={sala.id}
-                                className="p-2 hover:bg-gray-100 cursor-pointer"
-                                onClick={() => {
-                                  setSalaSelecionadaId(sala.id);
-                                  setBusca(sala.nome);
-                                  setMostrarBusca(false);
-                                }}
-                              >
-                                {sala.nome}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
+                    <FilterableInput
+                      items={salas}
+                      placeholder="Sala"
+                      selectedItemId={salaSelecionadaId}
+                      onSelectItem={setSalaSelecionadaId}
+                    />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                      <div className="flex justify-between items-center mr-3">
-                        <input
-                          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                          type="text"
-                          placeholder="Chave"
-                          value={chave}
-                          onChange={(e) => setChave(e.target.value)}
-                          required
-                        />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          fill="#64748b"
-                          className="bi bi-search"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                        </svg>
-                      </div>
+                    <FilterableInput
+                      items={chaves}
+                      placeholder="Chave"
+                      selectedItemId={chaveSelecionadaId}
+                      onSelectItem={setChaveSelecionadaId}
+                    />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-24 break-words flex-1 text-center">
-                      <div className="flex justify-between items-center mr-3">
-                        <input
-                          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                          type="text"
-                          placeholder="Solicitante"
-                          value={solicitante}
-                          onChange={(e) => setSolicitante(e.target.value)}
-                          required
-                        />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          fill="#64748b"
-                          className="bi bi-search"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                        </svg>
-                      </div>
+                    <FilterableInput
+                      items={solicitantes}
+                      placeholder="Solicitante"
+                      selectedItemId={solicitanteSelecionadoId}
+                      onSelectItem={setSolicitanteSelecionadoId}
+                    />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                      <div className="flex justify-between items-center mr-3">
-                        <input
-                          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium "
-                          type="text"
-                          placeholder="Responsável"
-                          value={responsavel}
-                          onChange={(e) => setResponsavel(e.target.value)}
-                          required
-                        />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          fill="#64748b"
-                          className="bi bi-search"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                        </svg>
-                      </div>
+                    <FilterableInput
+                      items={responsaveis}
+                      placeholder="Responsavel"
+                      selectedItemId={responsavelSelecionadoId}
+                      onSelectItem={setResponsavelSelecionadoId}
+                    />
                     </td>
 
                     <td
@@ -695,14 +650,14 @@ export function Emprestimos() {
                               <X className=" mb-[5px] text-[#192160] ml-auto" />
                             </button>
                           </div>
-
+                          
                           <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                             <p className="text-[#192160] font-medium p-1">
                               Detalhadamento sobre o empréstimo que será criado,
                               como pessoa que autorizou aluno, entre outros.
                             </p>
                             <button
-                              // onClick={openEditObservacaoModal}
+                              onClick={openObservacaoModal}
                               className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
                             >
                               <svg
@@ -1061,21 +1016,40 @@ export function Emprestimos() {
                         <tr key={index}>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                             <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                              {salaSelecionadaId
+                              {emprestimo.sala
                                 ? salas.find(
-                                    (sala) => sala.id === salaSelecionadaId
+                                    (sala) => sala.id === emprestimo.sala
                                   )?.nome
                                 : "Selecione uma sala"}
+
                             </p>
                           </td>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                            {emprestimo.chave}
+                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                              {emprestimo.chave
+                              ? chaves.find(
+                                (chave) => chave.id === emprestimo.chave
+                              )?.nome
+                            : "Selecione uma sala"}
+                            </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                            {emprestimo.solicitante}
+                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                              {emprestimo.solicitante
+                              ? solicitantes.find(
+                                (solicitante) => solicitante.id === emprestimo.solicitante
+                              )?.nome
+                            : "Selecione uma sala"}
+                            </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                            {emprestimo.responsavel}
+                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                              {emprestimo.responsavel
+                              ? responsaveis.find(
+                                (responsavel) => responsavel.id === emprestimo.responsavel
+                              )?.nome
+                            : "Selecione uma sala"}
+                            </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                             {emprestimo.dataRetirada}
