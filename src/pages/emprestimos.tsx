@@ -4,13 +4,19 @@ import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ptBR } from 'date-fns/locale';
-
+import axios from "axios";
 import { Pesquisa } from "../components/pesquisa";
 // import { PassadorPagina } from "../passadorPagina";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
 // import { BotaoAdicionar } from "../botaoAdicionar";
+
+const url_base = "https://chamecoapi.pythonanywhere.com/";
+const token: string | null = localStorage.getItem("authToken")
+var userInfo = localStorage.getItem("user")
+const user_data = JSON.parse(userInfo as string)
+console.log("Opa:", user_data)
 
 export interface Emprestimo {
     id: number;
@@ -28,15 +34,101 @@ export interface FiltroEmprestimo {
     filtroDataEmprestimo: DateRange | undefined
 }
 
+
+// hook de chaves
+const useGetChaves = async () => {
+
+    try {
+        const response = await axios.get(url_base + `/chameco/api/v1/chaves/?token=${token}`, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status !== 200) {
+            throw new Error("Erro ao puxar as chaves" + response.status)
+        }
+
+        console.log("Chaves:", response.data)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// hook de usuários
+export interface IuserData {
+    usuario: string;
+    tipo: string;
+}
+  
+const getResponsaveis = async (token: string | null) => {
+
+    if (!token) {
+      console.error("Campo obrigatório.");
+      return;
+    }
+  
+    const params = new URLSearchParams({
+      token: token,
+    //   superusuario: user_data.usuario,
+    //   nome: user_data.tipo
+    });
+  
+    const url = `${url_base}/chameco/api/v1/responsaveis/?${params.toString()}`;
+  
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      console.log("Responsáveis:", response.data);
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
+};
+  
+
 export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo) {
 
-    function criarEmprestimo() {
-        console.log("Emprestimo criado!")
-    }
     const [pesquisa, setPesquisa] = useState('');
     const [isSearching, setIsSearching] = useState(false);
-
+    const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
     const [isFiltroModalOpen, setIsFiltroModalOpen] = useState(false);
+    const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
+
+    if (token) {
+        getResponsaveis(token)
+        useGetChaves()
+    }
+
+    async function criarEmprestimo() {
+
+        console.log("Empréstimo criado com sucesso!");
+
+        // try {
+
+        //     const response = await axios.post(url_base + "/chameco/api/v1/realizar-emprestimo/", {
+        //         chave : 1,
+        //         usuario_responsavel : "",
+        //         usuario_solicitante : "",
+        //     }, {
+        //         headers: {
+        //             "Content-Type" : "aplication/json",
+        //             "Authorization" : `Bearer ${"skssk"}`
+        //         }
+        //     })
+
+        //     if (response.status !== 200) {
+        //         throw new Error("Erro na requisição" + response.status)
+        //     }
+
+            
+
+        // } catch (error) {
+        //     console.log(error)
+        // }
+    }
 
     function openFiltroModal() {
         setIsFiltroModalOpen(true)
@@ -45,7 +137,6 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
     function closeFiltroModal() {
         setIsFiltroModalOpen(false)
     }
-    const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
     function openObservacaoModal() {
         setIsObservacaoModalOpen(true)
@@ -54,8 +145,6 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
     function closeObservacaoModal() {
         setIsObservacaoModalOpen(false)
     }
-
-    const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
 
     function openDetalhesModal() {
         setIsDetalhesModalOpen(true)
@@ -655,6 +744,5 @@ export function Emprestimos({ filtroDataEmprestimo, setFiltroDataEmprestimo }: F
             </div>
             {/* fim parte informativa tela de empréstimo */}
         </div>
-
     )
 }
