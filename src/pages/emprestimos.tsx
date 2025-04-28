@@ -228,15 +228,15 @@ export function Emprestimos() {
   const emprestimosFiltradosPendentes = emprestimos
     .filter((emprestimos) => {
       if (!isSearching) return true;
-      const salaNome = getNomeSala(emprestimos.sala);
-      const chaveNome = getNomeChave(emprestimos.chave);
-      const responsavelNome = getNomeResponsavel(emprestimos.responsavel);
-      const solicitanteNome = getNomeSolicitante(emprestimos.solicitante);
+      const salaNomePendentes = getNomeSala(emprestimos.sala);
+      const chaveNomePendentes = getNomeChave(emprestimos.chave);
+      const responsavelNomePendentes = getNomeResponsavel(emprestimos.responsavel);
+      const solicitanteNomePendetes = getNomeSolicitante(emprestimos.solicitante);
       return (
-        salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        chaveNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        solicitanteNome?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        salaNomePendentes.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        chaveNomePendentes.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        solicitanteNomePendetes?.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        responsavelNomePendentes.toLowerCase().includes(pesquisa.toLowerCase()) ||
         emprestimos.dataRetirada
           ?.toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
@@ -528,10 +528,12 @@ export function Emprestimos() {
   // Deixando o botão de alternar entre empréstimos pendentes e concluídos funcional
   const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
     useState(true);
+    
   const alternarEmprestimos = () => {
     setExibirEmprestimosPendentes(
       (exibirEmprestimoAtual) => !exibirEmprestimoAtual
     );
+    setPesquisa("");
   };
 
   // const today = new Date();
@@ -1152,8 +1154,7 @@ export function Emprestimos() {
 
                 <tbody>
                   {itensAtuaisPendentes.length > 0 ? (
-                    emprestimosFiltradosPendentes
-                      .slice(
+                    emprestimosFiltradosPendentes.slice(
                         (paginaAtualPendente - 1) * itensPorPaginaPendente,
                         paginaAtualPendente * itensPorPaginaPendente
                       )
