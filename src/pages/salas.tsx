@@ -78,7 +78,7 @@ export function Salas() {
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
   const [nextId, setNextId] = useState(1);
   const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
+  // const [descricao, setDescricao] = useState("");
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -90,7 +90,7 @@ export function Salas() {
 
   function closeSalaModal() {
     setNome("");
-    setDescricao("");
+    // setDescricao("");
     setIsSalaModalOpen(false);
   }
 
@@ -225,7 +225,7 @@ export function Salas() {
     
         setSalaSelecionada(null);  
         setNome("");  
-        setDescricao("");  
+        // setDescricao("");  
         closeEditModal();  
       }
     }
@@ -441,7 +441,7 @@ export function Salas() {
                       />
                     </div>
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
+                    {/* <div className="justify-center items-center ml-[40px] mr-8">
                       <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
                         Informe a nova descrição da sala
                       </p>
@@ -451,7 +451,7 @@ export function Salas() {
                         value={descricao}
                         onChange={(e) => setDescricao(e.target.value)}
                       />
-                    </div>
+                    </div> */}
 
                     <div className="flex justify-center items-center mt-[10px] w-full">
                       <button
@@ -491,12 +491,12 @@ export function Salas() {
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-24  ">
+                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-full  ">
                       Nome da sala
                     </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">
+                    {/* <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">
                       Descrição da sala
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody>
