@@ -1,5 +1,5 @@
 import { Info, Check, Plus, X, TriangleAlert } from "lucide-react";
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
@@ -7,7 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { FiltroModal } from "../components/filtragemModal";
-import { FilterableInput } from "../components/FilterableInput"
+import { FilterableInput } from "../components/FilterableInput";
 // import { set } from "date-fns";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
@@ -19,7 +19,7 @@ export interface Emprestimo {
   solicitante: number;
   responsavel: number;
   observacao: string | null;
-  dataRetirada: string; //não coloquei Date para facilitar a estilização inicial
+  dataRetirada: string;
   horaRetirada: string;
   dataDevolucao: string | null;
   horaDevolucao: string | null;
@@ -29,13 +29,6 @@ export interface FiltroEmprestimo {
   setFiltroDataEmprestimo: (dates: DateRange | undefined) => void;
   filtroDataEmprestimo: DateRange | undefined;
 }
-
-const salas = [
-  { id: 1, nome: "Sala A" },
-  { id: 2, nome: "Sala B" },
-  { id: 3, nome: "Sala C" },
-  { id: 4, nome: "Sala E9" },
-];
 
 interface Chave {
   id: number;
@@ -70,19 +63,32 @@ const responsaveis: Responsavel[] = [
   { id: 3, nome: "Chico" },
 ];
 
+const salas = [
+  { id: 1, nome: "Sala A" },
+  { id: 2, nome: "Sala B" },
+  { id: 3, nome: "Sala C" },
+  { id: 4, nome: "Sala E9" },
+];
 
 export function Emprestimos() {
   // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
-  const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<
-    DateRange | undefined
-  >();
+  const [filtroDataEmprestimoConcluidos, setFiltroDataEmprestimoConcluidos] =
+    useState<DateRange | undefined>();
+  const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] =
+    useState<DateRange | undefined>();
+  const [
+    filtroDataEmprestimoRetiradaConcluidos,
+    setFiltroDataEmprestimoRetiradaConcluidos,
+  ] = useState<DateRange | undefined>();
+
+  // Lista de empréstimos pendentes
   const [emprestimosConcluidos] = useState<Emprestimo[]>([
     {
       id: 1,
-      sala: "Sala e09",
-      chave: "Chave 19",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      sala: 1,
+      chave: 1,
+      solicitante: 1,
+      responsavel: 1,
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -91,10 +97,10 @@ export function Emprestimos() {
     },
     {
       id: 3,
-      sala: "Sala e09",
-      chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      sala: 2,
+      chave: 2,
+      solicitante: 2,
+      responsavel: 2,
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -103,10 +109,10 @@ export function Emprestimos() {
     },
     {
       id: 5,
-      sala: "Sala e09",
-      chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      sala: 3,
+      chave: 3,
+      solicitante: 3,
+      responsavel: 3,
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -115,10 +121,10 @@ export function Emprestimos() {
     },
     {
       id: 2,
-      sala: "Sala e09",
-      chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      sala: 1,
+      chave: 1,
+      solicitante: 1,
+      responsavel: 1,
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -146,8 +152,13 @@ export function Emprestimos() {
   }
 
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
+  const [solicitante, setSolicitante] = useState("");
+  const [responsavel, setResponsavel] = useState("");
+  const [observacao, setObservacao] = useState<string | null>(null);
+  const [pesquisa, setPesquisa] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
-
+  // Função para criar novo empréstimo
   function criarEmprestimo() {
     const novoEmprestimo: Emprestimo = {
       id: Math.floor(Math.random() * 10000),
@@ -164,20 +175,14 @@ export function Emprestimos() {
     setEmprestimos([...emprestimos, novoEmprestimo]);
     console.log("Emprestimo criado!", novoEmprestimo);
 
-    setSalaSelecionadaId(0); 
+    setSalaSelecionadaId(0);
     setChaveSelecionadaId(0);
     setSolicitanteSelecionadoId(0);
     setResponsavelSelecionadoId(0);
     setSolicitante("");
-    setResponsavel(""); 
-    setObservacao("");
+    setResponsavel("");
+    setObservacao(null);
   }
-
-  const [solicitante, setSolicitante] = useState("");
-  const [responsavel, setResponsavel] = useState("");
-  const [observacao, setObservacao] = useState<string | null>(null);
-  const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
 
   // Adicionando funcionalidade de filtragem para emprestimos pendentes e concluidos
   const [filtroPendente, setFiltroPendente] = useState({
@@ -207,42 +212,63 @@ export function Emprestimos() {
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
+  // Constantes para "pegar" o nome através do id.
+  const getNomeSala = (idSala: number) =>
+    salas.find((sala) => sala.id === idSala)?.nome || "";
+  const getNomeChave = (idChave: number) =>
+    chaves.find((chave) => chave.id === idChave)?.nome || "";
+  const getNomeResponsavel = (idResponsavel: number) =>
+    responsaveis.find((responsavel) => responsavel.id === idResponsavel)
+      ?.nome || "";
+  const getNomeSolicitante = (idSolicitante: number) =>
+    solicitantes.find((solicitante) => solicitante.id === idSolicitante)
+      ?.nome || "";
+
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = emprestimos
-    .filter((emprestimo) => {
+    .filter((emprestimos) => {
       if (!isSearching) return true;
+      const salaNome = getNomeSala(emprestimos.sala);
+      const chaveNome = getNomeChave(emprestimos.chave);
+      const responsavelNome = getNomeResponsavel(emprestimos.responsavel);
+      const solicitanteNome = getNomeSolicitante(emprestimos.solicitante);
       return (
-        emprestimo.solicitante
+        salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        chaveNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        solicitanteNome?.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        emprestimos.dataRetirada
           ?.toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
-        emprestimo.chave?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emprestimo.responsavel
+        emprestimos.horaRetirada
           ?.toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
-        emprestimo.dataRetirada
-          ?.toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimo.horaRetirada
-          ?.toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimo.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
+        emprestimos.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
       );
     })
 
     .filter((emprestimo) => {
       if (!isFiltroPendente) return true;
+      const salaNome = getNomeSala(emprestimo.sala);
+      const chaveNome = getNomeChave(emprestimo.chave);
+      const responsavelNome = getNomeResponsavel(emprestimo.responsavel);
+      const solicitanteNome = getNomeSolicitante(emprestimo.solicitante);
 
       return (
+        (filtroPendente.sala === "" ||
+          salaNome
+            ?.toLowerCase()
+            .includes(filtroPendente.sala.toLowerCase())) &&
         (filtroPendente.chave === "" ||
-          emprestimo.chave
+          chaveNome
             ?.toLowerCase()
             .includes(filtroPendente.chave.toLowerCase())) &&
         (filtroPendente.solicitante === "" ||
-          emprestimo.solicitante
+          solicitanteNome
             ?.toLowerCase()
             .includes(filtroPendente.solicitante.toLowerCase())) &&
         (filtroPendente.responsavel === "" ||
-          emprestimo.responsavel
+          responsavelNome
             ?.toLowerCase()
             .includes(filtroPendente.responsavel.toLowerCase())) &&
         (filtroPendente.horaRetirada === "" ||
@@ -255,16 +281,16 @@ export function Emprestimos() {
     .filter((emprestimo) => {
       if (
         !isFiltroPendente ||
-        !filtroDataEmprestimo?.from ||
-        !filtroDataEmprestimo?.to
+        !filtroDataEmprestimoRetirada?.from ||
+        !filtroDataEmprestimoRetirada?.to
       )
         return true;
 
       const dataEmprestimo = converterDataBRparaDate(emprestimo.dataRetirada);
 
       return (
-        dataEmprestimo >= filtroDataEmprestimo.from &&
-        dataEmprestimo <= filtroDataEmprestimo.to
+        dataEmprestimo >= filtroDataEmprestimoRetirada.from &&
+        dataEmprestimo <= filtroDataEmprestimoRetirada.to
       );
     });
 
@@ -272,17 +298,15 @@ export function Emprestimos() {
   const emprestimosFiltradosConcluidos = emprestimosConcluidos
     .filter((emprestimos) => {
       if (!isSearching) return true;
+      const salaNome = getNomeSala(emprestimos.sala);
+      const chaveNome = getNomeChave(emprestimos.chave);
+      const responsavelNome = getNomeResponsavel(emprestimos.responsavel);
+      const solicitanteNome = getNomeSolicitante(emprestimos.solicitante);
       return (
-        // emprestimosConcluidos.sala
-        //   .toLowerCase()
-        //   .includes(pesquisa.toLowerCase()) ||
-        emprestimos.chave.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emprestimos.solicitante
-          .toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimos.responsavel
-          .toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
+        salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        chaveNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        solicitanteNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
         emprestimos.dataRetirada
           .toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
@@ -294,21 +318,25 @@ export function Emprestimos() {
     })
     .filter((emprestimo) => {
       if (!isFiltroConcluido) return true;
+      const salaNome = getNomeSala(emprestimo.sala);
+      const chaveNome = getNomeChave(emprestimo.chave);
+      const responsavelNome = getNomeResponsavel(emprestimo.responsavel);
+      const solicitanteNome = getNomeSolicitante(emprestimo.solicitante);
       return (
-        // (filtroConcluido.sala === "" ||
-        //   emprestimo.sala
-        //     ?.toLowerCase()
-        //     .includes(filtroConcluido.sala.toLowerCase())) &&
+        (filtroConcluido.sala === "" ||
+          salaNome
+            ?.toLowerCase()
+            .includes(filtroConcluido.sala.toLowerCase())) &&
         (filtroConcluido.chave === "" ||
-          emprestimo.chave
+          chaveNome
             ?.toLowerCase()
             .includes(filtroConcluido.chave.toLowerCase())) &&
         (filtroConcluido.solicitante === "" ||
-          emprestimo.solicitante
+          solicitanteNome
             ?.toLowerCase()
             .includes(filtroConcluido.solicitante.toLowerCase())) &&
         (filtroConcluido.responsavel === "" ||
-          emprestimo.responsavel
+          responsavelNome
             ?.toLowerCase()
             .includes(filtroConcluido.responsavel.toLowerCase())) &&
         (filtroConcluido.dataRetirada === "" ||
@@ -319,27 +347,47 @@ export function Emprestimos() {
           emprestimo.horaRetirada
             ?.toLowerCase()
             .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
-            (filtroConcluido.horaDevolucao === "" ||
-              emprestimo.horaDevolucao
-                ?.toLowerCase()
-                .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+        (filtroConcluido.horaDevolucao === "" ||
+          emprestimo.horaDevolucao
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaDevolucao.toLowerCase()))
       );
     })
     .filter((emprestimo) => {
       if (
         !isFiltroConcluido ||
-        !filtroDataEmprestimo?.from ||
-        !filtroDataEmprestimo?.to
+        !filtroDataEmprestimoConcluidos?.from ||
+        !filtroDataEmprestimoConcluidos?.to
       )
         return true;
 
       const dataEmprestimo = converterDataBRparaDate(emprestimo.dataRetirada);
 
       return (
-        !filtroDataEmprestimo?.from ||
-        !filtroDataEmprestimo?.to ||
-        (dataEmprestimo >= filtroDataEmprestimo.from &&
-          dataEmprestimo <= filtroDataEmprestimo.to)
+        !filtroDataEmprestimoConcluidos?.from ||
+        !filtroDataEmprestimoConcluidos?.to ||
+        (dataEmprestimo >= filtroDataEmprestimoConcluidos.from &&
+          dataEmprestimo <= filtroDataEmprestimoConcluidos.to)
+      );
+    })
+    .filter((emprestimo) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataEmprestimoRetiradaConcluidos?.from ||
+        !filtroDataEmprestimoRetiradaConcluidos?.to
+      )
+        return true;
+
+      const dataEmprestimo = emprestimo.dataDevolucao
+        ? converterDataBRparaDate(emprestimo.dataDevolucao)
+        : null;
+
+      return (
+        !filtroDataEmprestimoRetiradaConcluidos?.from ||
+        !filtroDataEmprestimoRetiradaConcluidos?.to ||
+        (dataEmprestimo &&
+          dataEmprestimo >= filtroDataEmprestimoRetiradaConcluidos.from &&
+          dataEmprestimo <= filtroDataEmprestimoRetiradaConcluidos.to)
       );
     });
 
@@ -414,6 +462,16 @@ export function Emprestimos() {
     setIsObservacaoModalOpen(false);
   }
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  function openEditModal() {
+    setIsEditModalOpen(true);
+  }
+
+  function closeEditModal() {
+    setIsEditModalOpen(false);
+  }
+
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
@@ -449,20 +507,7 @@ export function Emprestimos() {
     closeDeleteModal();
   }
 
-  // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-
-  function openEditModal() {
-    if (emprestimoSelecionado) {
-      setObservacao(emprestimoSelecionado.observacao);
-      setIsEditModalOpen(true);
-    }
-  }
-
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
+  const [observacaoEditando, setObservacaoEditando] = useState("");
 
   // adicionando função de editar observação de um emprestimo
   function editarObservacao(e: React.FormEvent) {
@@ -474,6 +519,12 @@ export function Emprestimos() {
     closeEditModal();
   }
 
+  function salvarEdicao() {
+    setObservacao(observacaoEditando);
+    setObservacaoEditando("");
+    setIsEditModalOpen(false);
+  }
+
   // Deixando o botão de alternar entre empréstimos pendentes e concluídos funcional
   const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
     useState(true);
@@ -483,15 +534,17 @@ export function Emprestimos() {
     );
   };
 
-  const today = new Date();
+  // const today = new Date();
 
   const [salaSelecionadaId, setSalaSelecionadaId] = useState<number>(0);
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number>(0);
 
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number>(0);
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] =
+    useState<number>(0);
 
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number>(0);
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] =
+    useState<number>(0);
 
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
@@ -559,16 +612,16 @@ export function Emprestimos() {
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
                 <thead className="bg-white sticky top-0 z-11">
                   <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a sala
                     </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a chave
                     </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 min-w-10 w-[20%] ">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 flex-1 min-w-10 w-[22%] ">
                       Informe quem solicitou
                     </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[19%] ">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[22%] ">
                       Informe quem entregou
                     </th>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[20%]   "></th>
@@ -578,36 +631,36 @@ export function Emprestimos() {
                 <tbody>
                   <tr>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                    <FilterableInput
-                      items={salas}
-                      placeholder="Sala"
-                      selectedItemId={salaSelecionadaId}
-                      onSelectItem={setSalaSelecionadaId}
-                    />
+                      <FilterableInput
+                        items={salas}
+                        placeholder="Sala"
+                        selectedItemId={salaSelecionadaId}
+                        onSelectItem={setSalaSelecionadaId}
+                      />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                    <FilterableInput
-                      items={chaves}
-                      placeholder="Chave"
-                      selectedItemId={chaveSelecionadaId}
-                      onSelectItem={setChaveSelecionadaId}
-                    />
+                      <FilterableInput
+                        items={chaves}
+                        placeholder="Chave"
+                        selectedItemId={chaveSelecionadaId}
+                        onSelectItem={setChaveSelecionadaId}
+                      />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-24 break-words flex-1 text-center">
-                    <FilterableInput
-                      items={solicitantes}
-                      placeholder="Solicitante"
-                      selectedItemId={solicitanteSelecionadoId}
-                      onSelectItem={setSolicitanteSelecionadoId}
-                    />
+                      <FilterableInput
+                        items={solicitantes}
+                        placeholder="Solicitante"
+                        selectedItemId={solicitanteSelecionadoId}
+                        onSelectItem={setSolicitanteSelecionadoId}
+                      />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                    <FilterableInput
-                      items={responsaveis}
-                      placeholder="Responsavel"
-                      selectedItemId={responsavelSelecionadoId}
-                      onSelectItem={setResponsavelSelecionadoId}
-                    />
+                      <FilterableInput
+                        items={responsaveis}
+                        placeholder="Responsavel"
+                        selectedItemId={responsavelSelecionadoId}
+                        onSelectItem={setResponsavelSelecionadoId}
+                      />
                     </td>
 
                     <td
@@ -650,14 +703,15 @@ export function Emprestimos() {
                               <X className=" mb-[5px] text-[#192160] ml-auto" />
                             </button>
                           </div>
-                          
+
                           <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                             <p className="text-[#192160] font-medium p-1">
-                              Detalhadamento sobre o empréstimo que será criado,
-                              como pessoa que autorizou aluno, entre outros.
+                              {observacao ||
+                                "Detalhadamento sobre o empréstimo que será criado, como pessoa que autorizou aluno, entre outros."}
                             </p>
                             <button
-                              onClick={openObservacaoModal}
+                              type="button"
+                              onClick={() => openEditModal()}
                               className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
                             >
                               <svg
@@ -672,6 +726,61 @@ export function Emprestimos() {
                               </svg>
                               Editar
                             </button>
+
+                            {/* Começo do pop up de editar emprestimo */}
+                            {isEditModalOpen && (
+                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                <form
+                                  // onSubmit={editarObservacao}
+                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                                >
+                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                                      EDITAR OBSERVAÇÃO
+                                    </p>
+
+                                    <button
+                                      onClick={closeEditModal}
+                                      type="button"
+                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                    >
+                                      <X className=" mb-[5px] text-[#192160]" />
+                                    </button>
+                                  </div>
+
+                                  <div className="justify-center items-center ml-[40px] mr-8">
+                                    <p className="text-[#192160] text-sm font-medium mb-1">
+                                      Digite a nova observação
+                                    </p>
+
+                                    <input
+                                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                                      type="text"
+                                      placeholder="Observação"
+                                      value={
+                                        observacaoEditando !== null
+                                          ? observacaoEditando
+                                          : ""
+                                      }
+                                      onChange={(e) =>
+                                        setObservacaoEditando(e.target.value)
+                                      }
+                                    />
+                                  </div>
+
+                                  <div className="flex justify-center items-center mt-[10px] w-full">
+                                    <button
+                                      type="button"
+                                      onClick={salvarEdicao}
+                                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                                    >
+                                      SALVAR ALTERAÇÕES
+                                    </button>
+                                  </div>
+                                </form>
+                              </div>
+                            )}
+                            {/* Fim do pop up de editar emprestimo */}
                           </div>
                         </form>
                       </div>
@@ -753,14 +862,46 @@ export function Emprestimos() {
               <table className=" w-full border-separate border-spacing-y-2 bg-white">
                 <thead className="bg-white top-0 ">
                   <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">
-                      <div className="flex items-center gap-1">
-                        Nome da sala
-                        <img src="src/assets/filter_list.svg" alt="" />
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%]">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Nome da sala
+                          <button onClick={() => setCampoFiltroAberto("sala")}>
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
+                            />
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "sala"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          textoInformativo="Digite o nome da sala"
+                          titulo="Filtrar por sala"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar por sala"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
+                            value={filtroPendente.sala}
+                            onChange={(e) =>
+                              setFiltroPendente({
+                                ...filtroPendente,
+                                sala: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Tipo de chave
@@ -778,14 +919,15 @@ export function Emprestimos() {
                           onClose={() => setCampoFiltroAberto(null)}
                           onSubmit={(e) => {
                             e.preventDefault();
-                            setCampoFiltroAberto(null); // Fecha o modal após o submit
+                            setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR TIPO DE CHAVE"
+                          textoInformativo="Digite o tipo de chave"
+                          titulo="Filtrar por tipo de chave"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por tipo de chave"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroPendente.chave}
                             onChange={(e) =>
                               setFiltroPendente({
@@ -798,7 +940,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Solicitante
@@ -818,14 +960,15 @@ export function Emprestimos() {
                           onClose={() => setCampoFiltroAberto(null)}
                           onSubmit={(e) => {
                             e.preventDefault();
-                            setCampoFiltroAberto(null); // Fecha o modal após o submit
+                            setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR SOLICITANTE"
+                          textoInformativo="Digite o solicitante"
+                          titulo="Filtrar por solicitante"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por solicitante"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroPendente.solicitante}
                             onChange={(e) =>
                               setFiltroPendente({
@@ -838,7 +981,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Responsável
@@ -860,12 +1003,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR RESPONSÁVEL"
+                          textoInformativo="Digite o responsável"
+                          titulo="Filtrar por responsável"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por responsável"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroPendente.responsavel}
                             onChange={(e) =>
                               setFiltroPendente({
@@ -878,7 +1022,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[15%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%]">
                       <div className="flex items-center gap-1">
                         <svg
                           width="16"
@@ -917,7 +1061,6 @@ export function Emprestimos() {
                         >
                           <img src="src/assets/filter_list.svg" alt="" />
                         </button>
-                        {/* Adicionando pop up de filtrar emprestimos */}
                         <FiltroModal
                           isOpen={campoFiltroAberto === "dataRetirada"}
                           onClose={() => setCampoFiltroAberto(null)}
@@ -925,13 +1068,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR DATA"
+                          titulo="Filtrar por data de retirada"
                         >
                           <DayPicker
                             animate
                             mode="range"
-                            selected={filtroDataEmprestimo}
-                            onSelect={setFiltroDataEmprestimo}
+                            selected={filtroDataEmprestimoRetirada}
+                            onSelect={setFiltroDataEmprestimoRetirada}
                             locale={ptBR}
                             endMonth={new Date()}
                           />
@@ -939,7 +1082,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 pl-2 w-[18%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 pl-2 w-[18%]">
                       <div className="flex items-center gap-1">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -974,23 +1117,25 @@ export function Emprestimos() {
                           </defs>
                         </svg>
                         Hora da retirada
-                        <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
-                        <img src="src/assets/filter_list.svg" alt="" />
+                        <button
+                          onClick={() => setCampoFiltroAberto("horaRetirada")}
+                        >
+                          <img src="src/assets/filter_list.svg" alt="" />
                         </button>
                         <FiltroModal
                           isOpen={campoFiltroAberto === "horaRetirada"}
-
                           onClose={() => setCampoFiltroAberto(null)}
                           onSubmit={(e) => {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR HORA"
+                          textoInformativo="Digite a hora de retirada"
+                          titulo="Filtrar por hora de retirada"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por hora de retirada"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroPendente.horaRetirada}
                             onChange={(e) =>
                               setFiltroPendente({
@@ -1015,46 +1160,47 @@ export function Emprestimos() {
                       .map((emprestimo, index) => (
                         <tr key={index}>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                            <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                               {emprestimo.sala
                                 ? salas.find(
                                     (sala) => sala.id === emprestimo.sala
                                   )?.nome
                                 : "Selecione uma sala"}
-
                             </p>
                           </td>
                           <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                            <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                               {emprestimo.chave
-                              ? chaves.find(
-                                (chave) => chave.id === emprestimo.chave
-                              )?.nome
-                            : "Selecione uma sala"}
+                                ? chaves.find(
+                                    (chave) => chave.id === emprestimo.chave
+                                  )?.nome
+                                : "Selecione uma sala"}
                             </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                            <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                               {emprestimo.solicitante
-                              ? solicitantes.find(
-                                (solicitante) => solicitante.id === emprestimo.solicitante
-                              )?.nome
-                            : "Selecione uma sala"}
+                                ? solicitantes.find(
+                                    (solicitante) =>
+                                      solicitante.id === emprestimo.solicitante
+                                  )?.nome
+                                : "Selecione uma sala"}
                             </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                            <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                               {emprestimo.responsavel
-                              ? responsaveis.find(
-                                (responsavel) => responsavel.id === emprestimo.responsavel
-                              )?.nome
-                            : "Selecione uma sala"}
+                                ? responsaveis.find(
+                                    (responsavel) =>
+                                      responsavel.id === emprestimo.responsavel
+                                  )?.nome
+                                : "Selecione uma sala"}
                             </p>
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                             {emprestimo.dataRetirada}
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
                             {emprestimo.horaRetirada}
                           </td>
                           <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
@@ -1077,7 +1223,6 @@ export function Emprestimos() {
                           {/* Adicionando pop up de detalhes do empréstimo */}
                           {isDetalhesModalOpen &&
                             emprestimo.id === emprestimoSelecionado?.id && (
-                              // emprestimo.id === emprestimoSelecionado?.id &&
                               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                 <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
                                   <div className="flex justify-between w-full px-3">
@@ -1103,7 +1248,7 @@ export function Emprestimos() {
                                         Editar
                                       </button>
 
-                                      {/* Começo do pop up de editar emprestimo */}
+                                      {/* Começo do pop up de editar observacao*/}
                                       {isEditModalOpen && (
                                         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                           <form
@@ -1156,7 +1301,7 @@ export function Emprestimos() {
                                           </form>
                                         </div>
                                       )}
-                                      {/* Fim do pop up de editar emprestimo */}
+                                      {/* Fim do pop up de editar observacao */}
 
                                       <button
                                         type="button"
@@ -1176,56 +1321,58 @@ export function Emprestimos() {
                                         Excluir
                                       </button>
 
-                                      {/* Adicionando pop up de deletar emprestimo */}
-                                      {isDeleteModalOpen && (
-                                        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                          <form
-                                            onSubmit={removeObservacao}
-                                            className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                                          >
-                                            <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                              <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                                                EXCLUIR OBSERVAÇÃO
-                                              </p>
-                                              <button
-                                                onClick={closeDeleteModal}
-                                                type="button"
-                                                className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                              >
-                                                <X className=" text-[#192160]" />
-                                              </button>
-                                            </div>
-                                            <TriangleAlert className="size-16 text-red-700" />
+                                      {/* Adicionando pop up de deletar observacao */}
+                                      {isDeleteModalOpen &&
+                                        emprestimo.id ===
+                                          emprestimoSelecionado?.id && (
+                                          <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                                            <form
+                                              onSubmit={removeObservacao}
+                                              className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                                            >
+                                              <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                                                <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                                                  EXCLUIR OBSERVAÇÃO
+                                                </p>
+                                                <button
+                                                  onClick={closeDeleteModal}
+                                                  type="button"
+                                                  className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                                                >
+                                                  <X className=" text-[#192160]" />
+                                                </button>
+                                              </div>
+                                              <TriangleAlert className="size-16 text-red-700" />
 
-                                            <p className="text-center px-2">
-                                              Essa ação é{" "}
-                                              <strong className="font-semibold ">
-                                                definitiva
-                                              </strong>{" "}
-                                              e não pode ser desfeita.{" "}
-                                              <strong className="font-semibold">
-                                                Tem certeza disso?
-                                              </strong>
-                                            </p>
-                                            <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                                              <button
-                                                onClick={closeDeleteModal}
-                                                type="button"
-                                                className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                                              >
-                                                CANCELAR
-                                              </button>
-                                              <button
-                                                type="submit"
-                                                onClick={removeObservacao}
-                                                className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                                              >
-                                                EXCLUIR
-                                              </button>
-                                            </div>
-                                          </form>
-                                        </div>
-                                      )}
+                                              <p className="text-center px-2">
+                                                Essa ação é{" "}
+                                                <strong className="font-semibold ">
+                                                  definitiva
+                                                </strong>{" "}
+                                                e não pode ser desfeita.{" "}
+                                                <strong className="font-semibold">
+                                                  Tem certeza disso?
+                                                </strong>
+                                              </p>
+                                              <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                                                <button
+                                                  onClick={closeDeleteModal}
+                                                  type="button"
+                                                  className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                                                >
+                                                  CANCELAR
+                                                </button>
+                                                <button
+                                                  type="submit"
+                                                  onClick={removeObservacao}
+                                                  className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                                                >
+                                                  EXCLUIR
+                                                </button>
+                                              </div>
+                                            </form>
+                                          </div>
+                                        )}
                                     </div>
                                     <button
                                       onClick={closeDetalhesModal}
@@ -1238,7 +1385,7 @@ export function Emprestimos() {
 
                                   <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                                     <p className="text-[#192160] font-medium p-1">
-                                      {emprestimoSelecionado.observacao ||
+                                      {emprestimoSelecionado?.observacao ||
                                         "Detalhes sobre o empréstimo"}
                                     </p>
                                   </div>
@@ -1283,14 +1430,46 @@ export function Emprestimos() {
               <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
                 <thead className="bg-white  top-0 z-10">
                   <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%]">
-                      <div className="flex items-center gap-1">
-                        Nome da sala
-                        <img src="src/assets/filter_list.svg" alt="" />
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-1">
+                          Nome da sala
+                          <button onClick={() => setCampoFiltroAberto("sala")}>
+                            <img
+                              src="src/assets/filter_list.svg"
+                              alt="Filtro"
+                              className="w-4 h-4"
+                            />
+                          </button>
+                        </div>
+
+                        <FiltroModal
+                          isOpen={campoFiltroAberto === "sala"}
+                          onClose={() => setCampoFiltroAberto(null)}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            setCampoFiltroAberto(null);
+                          }}
+                          textoInformativo="Digite a sala"
+                          titulo="Filtrar por sala"
+                        >
+                          <input
+                            type="text"
+                            placeholder="Filtrar por sala"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
+                            value={filtroConcluido.sala}
+                            onChange={(e) =>
+                              setFiltroConcluido({
+                                ...filtroConcluido,
+                                sala: e.target.value,
+                              })
+                            }
+                          />
+                        </FiltroModal>
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[13%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Tipo de chave
@@ -1310,12 +1489,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR TIPO DE CHAVE"
+                          textoInformativo="Digite o tipo de chave"
+                          titulo="Filtrar por tipo de chave"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por tipo de chave"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroConcluido.chave}
                             onChange={(e) =>
                               setFiltroConcluido({
@@ -1328,7 +1508,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Solicitante
@@ -1350,12 +1530,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR SOLICITANTE"
+                          textoInformativo="Digite o solicitante"
+                          titulo="Filtrar por solicitante"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por solicitante"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroConcluido.solicitante}
                             onChange={(e) =>
                               setFiltroConcluido({
@@ -1368,7 +1549,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%] align-top">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%] align-top">
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-1">
                           Responsável
@@ -1390,12 +1571,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR RESPONSÁVEL"
+                          textoInformativo="Digite o responsável"
+                          titulo="Filtrar por responsável"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por responsável"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroConcluido.responsavel}
                             onChange={(e) =>
                               setFiltroConcluido({
@@ -1408,7 +1590,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[10%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[10%]">
                       <div className="flex items-center">
                         <svg
                           width="16"
@@ -1447,7 +1629,6 @@ export function Emprestimos() {
                         >
                           <img src="src/assets/filter_list.svg" alt="" />
                         </button>
-                        {/* Adicionando pop up de filtrar emprestimos */}
                         <FiltroModal
                           isOpen={campoFiltroAberto === "dataRetirada"}
                           onClose={() => setCampoFiltroAberto(null)}
@@ -1455,13 +1636,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR DATA"
+                          titulo="Filtrar por data de retirada"
                         >
                           <DayPicker
                             animate
                             mode="range"
-                            selected={filtroDataEmprestimo}
-                            onSelect={setFiltroDataEmprestimo}
+                            selected={filtroDataEmprestimoRetiradaConcluidos}
+                            onSelect={setFiltroDataEmprestimoRetiradaConcluidos}
                             locale={ptBR}
                             endMonth={new Date()}
                           />
@@ -1469,7 +1650,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[12%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
                       <div className="flex items-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -1504,23 +1685,25 @@ export function Emprestimos() {
                           </defs>
                         </svg>
                         Hora retirada
-                        <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
-                        <img src="src/assets/filter_list.svg" alt="" />
+                        <button
+                          onClick={() => setCampoFiltroAberto("horaRetirada")}
+                        >
+                          <img src="src/assets/filter_list.svg" alt="" />
                         </button>
                         <FiltroModal
                           isOpen={campoFiltroAberto === "horaRetirada"}
-
                           onClose={() => setCampoFiltroAberto(null)}
                           onSubmit={(e) => {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR HORA"
+                          textoInformativo="Digite a hora de retirada"
+                          titulo="Filtrar por hora de retirada"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por hora de retirada"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroConcluido.horaRetirada}
                             onChange={(e) =>
                               setFiltroConcluido({
@@ -1533,7 +1716,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[10%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[10%]">
                       <div className="flex items-center">
                         <svg
                           width="16"
@@ -1572,7 +1755,6 @@ export function Emprestimos() {
                         >
                           <img src="src/assets/filter_list.svg" alt="" />
                         </button>
-                        {/* Adicionando pop up de filtrar emprestimos */}
                         <FiltroModal
                           isOpen={campoFiltroAberto === "dataDevolucao"}
                           onClose={() => setCampoFiltroAberto(null)}
@@ -1580,13 +1762,13 @@ export function Emprestimos() {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR DATA"
+                          titulo="Filtrar por data de devolução"
                         >
                           <DayPicker
                             animate
                             mode="range"
-                            selected={filtroDataEmprestimo}
-                            onSelect={setFiltroDataEmprestimo}
+                            selected={filtroDataEmprestimoConcluidos}
+                            onSelect={setFiltroDataEmprestimoConcluidos}
                             locale={ptBR}
                             endMonth={new Date()}
                           />
@@ -1594,7 +1776,7 @@ export function Emprestimos() {
                       </div>
                     </th>
 
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[14%]">
+                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[14%]">
                       <div className="flex items-center">
                         <svg
                           width="16"
@@ -1629,23 +1811,25 @@ export function Emprestimos() {
                           </defs>
                         </svg>
                         Hora devolução
-                        <button onClick={() => setCampoFiltroAberto("horaDevolucao")}>
-                        <img src="src/assets/filter_list.svg" alt="" />
+                        <button
+                          onClick={() => setCampoFiltroAberto("horaDevolucao")}
+                        >
+                          <img src="src/assets/filter_list.svg" alt="" />
                         </button>
                         <FiltroModal
                           isOpen={campoFiltroAberto === "horaDevolucao"}
-
                           onClose={() => setCampoFiltroAberto(null)}
                           onSubmit={(e) => {
                             e.preventDefault();
                             setCampoFiltroAberto(null);
                           }}
-                          titulo="FILTRAR POR HORA"
+                          textoInformativo="Digite a hora de devolução"
+                          titulo="Filtrar por hora de devolução"
                         >
                           <input
                             type="text"
-                            placeholder="Filtrar..."
-                            className="border-[2px] px-2 py-1 rounded focus:outline-none text-sm w-full border-[#B8BCE0]"
+                            placeholder="Filtrar por hora de devolução"
+                            className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                             value={filtroConcluido.horaDevolucao}
                             onChange={(e) =>
                               setFiltroConcluido({
@@ -1668,28 +1852,37 @@ export function Emprestimos() {
                       )
                       .map((emprestimo, index) => (
                         <tr key={index}>
-                          <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                            {emprestimo.sala}
+                          <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
+                            {salas.find((sala) => sala.id === emprestimo.sala)
+                              ?.nome || "Sala não encontrada"}
                           </td>
-                          <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                            {emprestimo.chave}
+                          <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
+                            {chaves.find(
+                              (chave) => chave.id === emprestimo.chave
+                            )?.nome || "Chave não encontrada"}
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                            {emprestimo.solicitante}
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                            {solicitantes.find(
+                              (solicitante) =>
+                                solicitante.id === emprestimo.solicitante
+                            )?.nome || "Solicitante não encontrado"}
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                            {emprestimo.responsavel}
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                            {responsaveis.find(
+                              (responsavel) =>
+                                responsavel.id === emprestimo.responsavel
+                            )?.nome || "Responsavel não encontrado"}
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
                             {emprestimo.dataRetirada}
                           </td>
-                          <td className=" p-2 text-xs text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
                             {emprestimo.horaRetirada}
                           </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
                             {emprestimo.dataDevolucao}
                           </td>
-                          <td className=" p-2 text-xs text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
+                          <td className=" p-2 text-sm text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
                             {emprestimo.horaDevolucao}
                           </td>
 
@@ -1730,7 +1923,7 @@ export function Emprestimos() {
                                         Editar
                                       </button>
 
-                                      {/* Começo do pop up de editar emprestimo */}
+                                      {/* Começo do pop up de editar observacao */}
                                       {isEditModalOpen && (
                                         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                           <form
@@ -1773,7 +1966,7 @@ export function Emprestimos() {
 
                                             <div className="flex justify-center items-center mt-[10px] w-full">
                                               <button
-                                                type="submit"
+                                                type="button"
                                                 onClick={editarObservacao}
                                                 className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
                                               >
@@ -1783,7 +1976,7 @@ export function Emprestimos() {
                                           </form>
                                         </div>
                                       )}
-                                      {/* Fim do pop up de editar emprestimo */}
+                                      {/* Fim do pop up de editar observacao*/}
 
                                       <button
                                         type="button"
@@ -1803,7 +1996,7 @@ export function Emprestimos() {
                                         Excluir
                                       </button>
 
-                                      {/* Adicionando pop up de deletar emprestimo */}
+                                      {/* Adicionando pop up de deletar observacao */}
                                       {isDeleteModalOpen && (
                                         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                                           <form
@@ -1865,7 +2058,7 @@ export function Emprestimos() {
 
                                   <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
                                     <p className="text-[#192160] font-medium p-1">
-                                      {emprestimoSelecionado.observacao ||
+                                      {emprestimoSelecionado?.observacao ||
                                         "Detalhes sobre o empréstimo"}
                                     </p>
                                   </div>

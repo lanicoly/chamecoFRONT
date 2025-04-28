@@ -5,10 +5,18 @@ interface FiltroModalProps {
   onClose: () => void;
   onSubmit?: (e: React.FormEvent) => void;
   children: React.ReactNode;
+  textoInformativo?: string;
   titulo?: string;
 }
 
-export function FiltroModal({ isOpen, onClose, onSubmit, children, titulo = "FILTRAR" }: FiltroModalProps) {
+export function FiltroModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  children,
+  textoInformativo,
+  titulo = "FILTRAR",
+}: FiltroModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -30,8 +38,14 @@ export function FiltroModal({ isOpen, onClose, onSubmit, children, titulo = "FIL
           </button>
         </div>
 
-        <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-          {children}
+        <div className="justify-center items-center ml-[40px] mr-8">
+          <p className="text-[#192160] text-sm font-medium mb-1">
+            {textoInformativo}
+          </p>
+
+          <div className="space-y-10 w-full justify-center items-center mr-8">
+            {children}
+          </div>
         </div>
 
         {/* botão salvar */}
