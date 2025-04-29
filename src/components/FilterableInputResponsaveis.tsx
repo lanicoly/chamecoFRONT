@@ -58,13 +58,12 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
       <div className="flex justify-between items-center relative">
         <input
             type="text"
-            placeholder="Responsável"
-            value={reset ? "Responsável" : searchTerm}
+            placeholder={"Responsável"}
+            value={searchTerm}
             onChange={handleInputChange}
-            // className="flex-1 outline-none text-[#646999]"
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
-        {/* <Search size={50} className="text-red-400" /> */}
+
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"

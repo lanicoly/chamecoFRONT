@@ -15,7 +15,7 @@ interface IdropdownResponsavelProps {
 export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<Number | null>(null);
+  const [searchTerm, setSearchTerm] = useState<Number | null | string>("");
   const [selectedOption, setSelectedOption] = useState<Ioption | null>(null);
 
   const filterdItems = useMemo(() => {
@@ -59,7 +59,7 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
         <input
             type="text"
             placeholder="Chave"
-            value={reset ? "Chave" : (searchTerm !== null ? String(searchTerm) : "Chave")}
+            value={String(searchTerm)}
             onChange={handleInputChange}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />

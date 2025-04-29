@@ -58,7 +58,7 @@ export function FilterableInputSalas({items, onSelectItem, reset}: IdropdownResp
         <input
             type="text"
             placeholder="Salas"
-            value={reset ? "Salas": searchTerm}
+            value={searchTerm}
             onChange={handleInputChange}
             // className="flex-1 outline-none text-[#646999]"
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'

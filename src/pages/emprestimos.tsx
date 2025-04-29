@@ -3,7 +3,7 @@ import React, { useEffect, useState} from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
-import { he, ptBR } from 'date-fns/locale';
+import { he, is, ptBR } from 'date-fns/locale';
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { FiltroModal } from "../components/filtragemModal";
@@ -19,6 +19,10 @@ import { obterDataAtual } from "../utils/obterDataAtual";
 import { obterHoraAtual } from "../utils/obterHoraAtual";
 import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
 import axios from "axios";
+import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpdeDevolucao } from "../components/popups/popUpdeDevolucao";
+import { PopUpError } from "../components/popups/PopUpError";
+import { set } from "date-fns";
 
 export interface Iemprestimo {
   sala?: number | null;
@@ -54,7 +58,7 @@ const token: string | null = localStorage.getItem("authToken");
 // const responsaveisArray: Responsavel[] = [];
 
 export function Emprestimos() {
-  // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
+
   const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<DateRange | undefined>();
   const [observacao, setObservacao] = useState<string | null>(null);
   const [pesquisa, setPesquisa] = useState("");
@@ -140,7 +144,10 @@ export function Emprestimos() {
 
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(null);
 
+  const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
   const [onReset, setOnReset] = useState(false);
+  const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
   const {responsaveis} = useGetResponsaveis();
@@ -152,10 +159,6 @@ export function Emprestimos() {
   console.log("Chaves:", chaves);
   console.log("Salas:", salas);
   console.log("Usuarios:", usuarios);
-
-
-  const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
-
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -181,13 +184,14 @@ export function Emprestimos() {
           })
           setEmprestimos((prevEmprestimos) => [...prevEmprestimos, response.data]);
           console.log("Emprestimo criado!", novoEmprestimo);
+          setIsSuccesModalOpen(!isSuccesModalOpen);
 
       } catch (error) {
           console.error("Erro ao criar o empréstimo:", error.response?.data || error.message);
-          alert("Erro ao criar o empréstimo. Tente novamente mais tarde.");
+          setIsPopUpErrorOpen(!isPopUpErrorOpen);
 
       } finally {
-        setOnReset(true);
+        setOnReset(!onReset);
         setSalaSelecionadaId(null); 
         setChaveSelecionadaId(null);
         setSolicitanteSelecionadoId(null);
@@ -196,6 +200,11 @@ export function Emprestimos() {
       }
     }
   }
+
+  setTimeout(() => {
+    setIsSuccesModalOpen(false)
+    setIsPopUpErrorOpen(false)
+  }, 3000)
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = emprestimos
@@ -457,14 +466,15 @@ export function Emprestimos() {
     );
   };
 
-  const today = new Date();
-
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
       <MenuTopo text="MENU" backRoute="/menu" />
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
+        {isSuccesModalOpen && (<PopUpdeSucesso />)}
+        {isPopUpErrorOpen && (<PopUpError />)}
+  
         {/* cabeçalho tela de empréstimo*/}
         <div className="flex w-full">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
@@ -642,6 +652,8 @@ export function Emprestimos() {
               <hr className="text-[#646999] p-2 border-t-2 font-extrabold" />
             </div>
             {/* fim tabela de criacao de emprestimo */}
+
+
 
             <div className=" flex gap-2 flex-wrap justify-between items-center">
               <div className="flex items-center gap-4">
