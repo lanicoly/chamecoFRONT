@@ -1,39 +1,39 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 
 interface Ioption {
-  id: number;
-  sala: number;
+  superusuario: number;
+  nome: string;
 }
 
 interface IdropdownResponsavelProps {
   items: Ioption[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
-  reset: boolean
+  reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
 
-export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownResponsavelProps) {
+export function FilterableInputResponsaveis({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<Number | null | string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedOption, setSelectedOption] = useState<Ioption | null>(null);
 
   const filterdItems = useMemo(() => {
-    // const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.sala);
+    const lowerSearch = searchTerm.toLowerCase();
+    return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (option: Ioption) => {
     setSelectedOption(option);
-    setSearchTerm(option.sala);
+    setSearchTerm(option.nome);
     setIsOpen(false);
-    onSelectItem(option.id); // Chama o callback com o ID do item selecionado
+    onSelectItem(option.superusuario); // Chama o callback com o ID do item selecionado
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(Number(e.target.value));
+    setSearchTerm(e.target.value);
     setIsOpen(true); // Sempre abrir o dropdown ao digitar
   };
 
@@ -51,18 +51,19 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
     };
   }, []);
 
-  console.log('items no filtro:', selectedOption?.sala);
+  console.log('items no filtro:', selectedOption?.nome);
 
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">
         <input
             type="text"
-            placeholder="Chave"
-            value={String(searchTerm)}
+            placeholder={"Responsável"}
+            value={reset ? "" : searchTerm}
             onChange={handleInputChange}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
+
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
@@ -79,11 +80,11 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
         <div className="absolute mt-1 w-full bg-white rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
           {filterdItems.map((option) => (
             <div
-              key={option.id}
+              key={option.superusuario}
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {option.sala}
+              {option.nome}
             </div>
           ))}
         </div>

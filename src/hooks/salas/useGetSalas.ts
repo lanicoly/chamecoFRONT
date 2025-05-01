@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 
 const url_base = "https://chamecoapi.pythonanywhere.com/";
 
+const CACHE_TTL = 60 * 5; // 5 minutes
+
 console.log("useGetSalas.ts");
 
 const useGetSalas = () => {
@@ -10,11 +12,12 @@ const useGetSalas = () => {
     const [salas, setSalas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-    const [salasLocalStorage, setSalasLocalStorage] = useState<string | null>(localStorage.getItem("salas"));
    
     useEffect(() => {
         const fetchResponsaveis = async () => {
             const token = localStorage.getItem("authToken");
+            const cache = localStorage.getItem("salas");
+            const cachTimestamp = localStorage.getItem("salasTimestamp");
     
             if (!token) {
                 setError(new Error("Token não encontrado"));
@@ -22,8 +25,10 @@ const useGetSalas = () => {
                 return;
             }
 
-            if (salasLocalStorage) {
-                setSalas(JSON.parse(salasLocalStorage));
+            const isCacheValid = cachTimestamp && (Date.now() - parseInt(cachTimestamp)) < CACHE_TTL;
+
+            if (isCacheValid) {
+                setSalas(JSON.parse(cache || "[]"));
                 setLoading(false);
                 return; 
 
@@ -43,6 +48,7 @@ const useGetSalas = () => {
             
                     setSalas(response.data.results || []);
                     localStorage.setItem("salas", JSON.stringify(response.data.results || []));
+                    localStorage.setItem("salasTimestamp", Date.now().toString());
 
                 } catch (err) {
                     console.error("Erro na requisição:", err);

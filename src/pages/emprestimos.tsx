@@ -7,10 +7,10 @@ import { he, is, ptBR } from 'date-fns/locale';
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { FiltroModal } from "../components/filtragemModal";
-import { FilterableInputSalas } from "../components/FilterableInputSalas"
-import { FilterableInputResponsaveis } from "../components/FilterableInputResponsaveis";
-import { FilterableInputSolicitantes } from "../components/FilterableInputSolicitantes";
-import { FilterableInputChaves } from "../components/FilterableInputChaves";
+import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas"
+import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
+import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
+import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
 import useGetChaves from "../hooks/chaves/useGetChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";

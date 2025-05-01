@@ -1,7 +1,10 @@
 import axios from "axios";
+import { ca } from "date-fns/locale";
 import { useEffect, useState } from "react";
 
 const url_base = "https://chamecoapi.pythonanywhere.com/";
+
+const CACHE_TTL = 60 * 5; // 5 minutes
 
 console.log("useGetUsuarios.ts");
 
@@ -10,11 +13,12 @@ const useGetUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-    const [usuariosLocalStorage, setUsuariosLocalStorage] = useState<string | null>(localStorage.getItem("usuarios"));
     
     useEffect(() => {
         const fetchResponsaveis = async () => {
           const token = localStorage.getItem("authToken");
+          const cache = localStorage.getItem("usuarios");
+          const cachTimestamp = localStorage.getItem("usuariosTimestamp");
     
           if (!token) {
             setError(new Error("Token não encontrado"));
@@ -22,27 +26,25 @@ const useGetUsuarios = () => {
             return;
           }
 
-          if (usuariosLocalStorage) {
-            setUsuarios(JSON.parse(usuariosLocalStorage));
+          const isCacheValid = cachTimestamp && (Date.now() - parseInt(cachTimestamp)) < CACHE_TTL;
+
+          if (isCacheValid) {
+            setUsuarios(JSON.parse(cache || "[]"));
             setLoading(false);
             return; 
 
           } else {
-
             const params = new URLSearchParams({ token });
             const url = `${url_base}/chameco/api/v1/usuarios/?${params.toString()}`;
       
             try {
-              const response = await axios.get(url, {
-                headers: {
-                  "Content-Type": "application/json"
-                }
-              });
+              const response = await axios.get(url);
       
               if (!response) throw new Error("Erro ao puxar os usuários");
       
               setUsuarios(response.data.results || []);
               localStorage.setItem("usuarios", JSON.stringify(response.data.results || []));
+              localStorage.setItem("usuariosTimestamp", Date.now().toString());
 
             } catch (err) {
               console.error("Erro na requisição:", err);
