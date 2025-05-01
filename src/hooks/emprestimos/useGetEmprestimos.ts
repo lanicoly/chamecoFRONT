@@ -5,19 +5,19 @@ const url_base = "https://chamecoapi.pythonanywhere.com/";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
-console.log("useGetChaves.ts");
+console.log("useGetEmprestimos.ts");
 
-const useGetChaves = () => {
+const useGetEmprestimos = () => {
 
-    const [chaves, setChaves] = useState([]);
+    const [emprestimos, setChaves] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     
     useEffect(() => {
-        const fetchChaves = async () => {
+        const fetchEmprestimos = async () => {
           const token = localStorage.getItem("authToken");
-          const cache = localStorage.getItem("chaves");
-          const cachTimestamp = localStorage.getItem("chavesTimestamp");
+          const cache = localStorage.getItem("emprestimos");
+          const cachTimestamp = localStorage.getItem("emprestimosTimestamp");
     
           if (!token) {
             setError(new Error("Token não encontrado"));
@@ -34,7 +34,7 @@ const useGetChaves = () => {
 
           } else {
             const params = new URLSearchParams({ token });
-            const url = `${url_base}/chameco/api/v1/chaves/?${params.toString()}`;
+            const url = `${url_base}/chameco/api/v1/emprestimos/?${params.toString()}`;
     
             try {
               const response = await axios.get(url);
@@ -43,8 +43,8 @@ const useGetChaves = () => {
     
               setChaves(response.data.results || []);
     
-              localStorage.setItem("chaves", JSON.stringify(response.data.results || []));
-              localStorage.setItem("chavesTimestamp", Date.now().toString());
+              localStorage.setItem("emprestimos", JSON.stringify(response.data.results || []));
+              localStorage.setItem("emprestimosTimestamp", Date.now().toString());
     
             } catch (err) {
               console.error("Erro na requisição:", err);
@@ -55,10 +55,10 @@ const useGetChaves = () => {
           }
         };
     
-        fetchChaves();
+        fetchEmprestimos();
       }, []);
     
-      return { chaves, loading, error };
+      return { new_emprestimos: emprestimos, loading, error };
 }
 
-export default useGetChaves
+export default useGetEmprestimos

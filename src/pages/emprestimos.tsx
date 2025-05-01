@@ -15,6 +15,7 @@ import useGetChaves from "../hooks/chaves/useGetChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import { obterDataAtual } from "../utils/obterDataAtual";
 import { obterHoraAtual } from "../utils/obterHoraAtual";
 import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
@@ -44,18 +45,6 @@ export interface FiltroEmprestimo {
 
 const url_base = "https://chamecoapi.pythonanywhere.com/";
 const token: string | null = localStorage.getItem("authToken");
-//   id: number;
-//   nome: string;
-// }
-
-// const solicitantesArray: Solicitante[] = [
-//   { id: 1, nome: "Joao" },
-//   { id: 2, nome: "Jose" },
-//   { id: 3, nome: "Chico" },
-// ];
-
-
-// const responsaveisArray: Responsavel[] = [];
 
 export function Emprestimos() {
 
@@ -154,11 +143,13 @@ export function Emprestimos() {
   const {chaves} = useGetChaves();
   const {salas} = useGetSalas();
   const {usuarios} = useGetUsuarios();
+  const {new_emprestimos} = useGetEmprestimos();
 
   console.log("Responsaveis:", responsaveis);
   console.log("Chaves:", chaves);
   console.log("Salas:", salas);
   console.log("Usuarios:", usuarios);
+  console.log("Emprestimos:", new_emprestimos);
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -468,12 +459,13 @@ export function Emprestimos() {
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
+        {isSuccesModalOpen && (<PopUpdeSucesso />)}
+        {isPopUpErrorOpen && (<PopUpError />)}
+
       <MenuTopo text="MENU" backRoute="/menu" />
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
-        {isSuccesModalOpen && (<PopUpdeSucesso />)}
-        {isPopUpErrorOpen && (<PopUpError />)}
   
         {/* cabeçalho tela de empréstimo*/}
         <div className="flex w-full">
@@ -521,7 +513,7 @@ export function Emprestimos() {
           {/* conteudo central tabela*/}
           <div>
             <div className="flex items-center justify-between mt-2">
-              <h2 className="text-[#16C34D] items-center font-semibold text-xl shadow-none">
+              <h2 className="text-primary-green items-center font-semibold text-xl shadow-none">
                 Criar novo empréstimo
               </h2>
             </div>
@@ -580,7 +572,7 @@ export function Emprestimos() {
 
                     <td
                       onClick={openObservacaoModal}
-                      className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-blue  p-0.5 font-semibold break-words cursor-pointer"
                     >
                       <div className=" flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
@@ -591,7 +583,7 @@ export function Emprestimos() {
                     </td>
                     <td
                       onClick={criarEmprestimo}
-                      className="border-2 border-[#B8BCE0] border-solid bg-[#18C64F]  p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green  p-0.5 font-semibold break-words cursor-pointer"
                     >
                       <div className=" flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
