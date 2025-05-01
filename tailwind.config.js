@@ -10,6 +10,10 @@ export default {
         sans: 'Montserrat',
       },
 
+      colors: {
+        "primary-green": "#0ebb44", // verde dos botões
+        "primary-blue": "#007bff", // azul dos botões
+      },
 
       backgroundImage: {
         'tijolos': "url('/public/fundo_tijolos.svg')",

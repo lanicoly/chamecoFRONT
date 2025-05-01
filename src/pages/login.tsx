@@ -1,13 +1,13 @@
-import axios from "axios";
+import axios, { formToJSON } from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+// import Cookies from "js-cookie";
 
 export function Login() {
   const navigate = useNavigate();
 
-  const url =
-    "https://chamecoapi.pythonanywhere.com//chameco/api/v1/login/";
+  const url_base = "https://chamecoapi.pythonanywhere.com/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
@@ -45,25 +45,29 @@ export function Login() {
     setErrorSenha("");
 
     try {
-      const response = await axios.post(url, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+        const response = await axios.post(url_base + "/chameco/api/v1/login/", body, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+        });
 
-      const statusResponse = response.status;
-      const data = response.data;
+        const statusResponse = response.status;
+        const data = response.data;
 
-         // Adicionar o console.log para exibir os dados da resposta(obter token)
-         console.log("Resposta do backend:", response);
+        // Adicionar o console.log para exibir os dados da resposta(obter token)
+        console.log("Resposta do backend:", response);
 
-      if (statusResponse === 200) {
-        if ("usuario" in data) {
-          navigate("/menu");
-        } else {
-          setErrorSenha("Usuário não registrado no sistema!");
-          return;
-        }
+        if (statusResponse === 200) {
+          if ("usuario" in data) {
+            // Cookies.set("authToken", data, {expires: 0.0208, path: "/"})
+            localStorage.setItem("authToken", response.data.token)
+            let resp = JSON.stringify(response.data)
+            localStorage.setItem("user", resp)
+            navigate("/menu");
+          } else {
+            setErrorSenha("Usuário não registrado no sistema!");
+            return;
+          }
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
