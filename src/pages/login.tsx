@@ -7,7 +7,7 @@ export function Login() {
   const navigate = useNavigate();
 
   const url =
-    "https://chamecoapi.pythonanywhere.com//chameco/api/v1/login/";
+    "https://chamecoapi.pythonanywhere.com/chameco/api/v1/login/";
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
@@ -30,19 +30,19 @@ export function Login() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
+    if(!usuario.trim() || !senha.trim()) {
+      setErrorUsuario(!usuario.trim() ? "Por favor, insira o seu CPF!": "");
+      setErrorSenha(!senha.trim() ? "Por favor, insira a sua senha!" : "");
+      return;
+    }
+    setErrorUsuario("");
+    setErrorSenha("");
+
     const body = {
       cpf: limparCPF(usuario),
       password: senha,
     };
 
-
-    if (!usuario && !senha) {
-      setErrorUsuario("Por favor, insira o seu CPF!");
-      setErrorSenha("Por favor, insira a sua senha!");
-      return;
-    }
-    setErrorUsuario("");
-    setErrorSenha("");
 
     try {
       const response = await axios.post(url, body, {
@@ -52,20 +52,27 @@ export function Login() {
       });
 
       const statusResponse = response.status;
-      const data = response.data;
 
          // Adicionar o console.log para exibir os dados da resposta(obter token)
          console.log("Resposta do backend:", response);
 
-      if (statusResponse === 200) {
-        if ("usuario" in data) {
-          navigate("/menu");
+      if (statusResponse === 200 && response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+        if(response.data.usuario) {
+          localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+        }
+        if (response.data.tipo) {
+          localStorage.setItem("userType", response.data.tipo);
+        }
+        // Força atualização do estado de autenticação
+        window.dispatchEvent(new Event('storage'));
+        navigate("/menu");
         } else {
           setErrorSenha("Usuário não registrado no sistema!");
           return;
         }
       }
-    } catch (error: unknown) {
+     catch (error) {
       if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
 

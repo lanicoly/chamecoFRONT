@@ -8,6 +8,18 @@ interface MenuTopoProps {
 export function MenuTopo({ text, backRoute }:MenuTopoProps) {
   const navigate = useNavigate();
 
+  const handleLogout = () => {
+    // Limpar o token e os dados do usuário
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
+    
+    // Disparar evento para notificar a mudança no estado de autenticação
+    window.dispatchEvent(new Event('storage'));
+    
+    // Redirecionar para a página de login
+    navigate("/login");
+  };
+
   return (
     <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
       <div className="w-[150px]">
@@ -57,7 +69,7 @@ export function MenuTopo({ text, backRoute }:MenuTopoProps) {
           Usuário
         </button>
         <button
-          onClick={() => navigate("/login")}
+          onClick={handleLogout}
           className="text-white flex justify-center items-center gap-1.5 w-max font-medium text-base bg-[#565D8F] rounded-r-md p-2 h-max"
         >
           Sair
