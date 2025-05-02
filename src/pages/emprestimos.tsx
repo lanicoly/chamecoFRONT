@@ -1,28 +1,41 @@
 import { Info, Check, Plus, X, TriangleAlert } from "lucide-react";
-import React, { useState} from "react";
+import React, { useEffect, useState} from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
-import { ptBR } from "date-fns/locale";
+import { he, is, ptBR } from 'date-fns/locale';
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { FiltroModal } from "../components/filtragemModal";
-import { FilterableInput } from "../components/FilterableInput"
-// import { set } from "date-fns";
+import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas"
+import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
+import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
+import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
+import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
+import { obterDataAtual } from "../utils/obterDataAtual";
+import { obterHoraAtual } from "../utils/obterHoraAtual";
+import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
+import axios from "axios";
+import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpdeDevolucao } from "../components/popups/popUpdeDevolucao";
+import { PopUpError } from "../components/popups/PopUpError";
+import { set } from "date-fns";
 
-// deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
-
-export interface Emprestimo {
-  id: number;
-  sala: number;
-  chave: number;
-  solicitante: number;
-  responsavel: number;
-  observacao: string | null;
-  dataRetirada: string; //não coloquei Date para facilitar a estilização inicial
-  horaRetirada: string;
-  dataDevolucao: string | null;
-  horaDevolucao: string | null;
+export interface Iemprestimo {
+  sala?: number | null;
+  chave: number | null;
+  usuario_solicitante: number | null;
+  usuario_responsavel: number | null;
+  token?: string | null;
+  observacao?: string | null;
+  dataRetirada?: string; //não coloquei Date para facilitar a estilização inicial
+  horaRetirada?: string;
+  dataDevolucao?: string | null;
+  horaDevolucao?: string | null;
 }
 
 export interface FiltroEmprestimo {
@@ -30,59 +43,22 @@ export interface FiltroEmprestimo {
   filtroDataEmprestimo: DateRange | undefined;
 }
 
-const salas = [
-  { id: 1, nome: "Sala A" },
-  { id: 2, nome: "Sala B" },
-  { id: 3, nome: "Sala C" },
-  { id: 4, nome: "Sala E9" },
-];
-
-interface Chave {
-  id: number;
-  nome: string;
-}
-
-const chaves: Chave[] = [
-  { id: 1, nome: "Chave 101" },
-  { id: 2, nome: "Chave 202" },
-  { id: 3, nome: "Chave 303" },
-];
-
-interface Solicitante {
-  id: number;
-  nome: string;
-}
-
-const solicitantes: Solicitante[] = [
-  { id: 1, nome: "Joao" },
-  { id: 2, nome: "Jose" },
-  { id: 3, nome: "Chico" },
-];
-
-interface Responsavel {
-  id: number;
-  nome: string;
-}
-
-const responsaveis: Responsavel[] = [
-  { id: 1, nome: "Joao" },
-  { id: 2, nome: "Jose" },
-  { id: 3, nome: "Chico" },
-];
-
+const url_base = "https://chamecoapi.pythonanywhere.com/";
+const token: string | null = localStorage.getItem("authToken");
 
 export function Emprestimos() {
-  // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
-  const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<
-    DateRange | undefined
-  >();
-  const [emprestimosConcluidos] = useState<Emprestimo[]>([
+
+  const [filtroDataEmprestimo, setFiltroDataEmprestimo] = useState<DateRange | undefined>();
+  const [observacao, setObservacao] = useState<string | null>(null);
+  const [pesquisa, setPesquisa] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [emprestimosConcluidos] = useState<Iemprestimo[]>([
     {
       id: 1,
       sala: "Sala e09",
       chave: "Chave 19",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      usuario_solicitante: "Emilia Nunes",
+      usuario_responsavel: "Zezinho",
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -93,8 +69,8 @@ export function Emprestimos() {
       id: 3,
       sala: "Sala e09",
       chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      usuario_solicitante: "Emilia Nunes",
+      usuario_responsavel: "Zezinho",
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -105,8 +81,8 @@ export function Emprestimos() {
       id: 5,
       sala: "Sala e09",
       chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      usuario_solicitante: "Emilia Nunes",
+      usuario_responsavel: "Zezinho",
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -117,8 +93,8 @@ export function Emprestimos() {
       id: 2,
       sala: "Sala e09",
       chave: "Chave x",
-      solicitante: "Emilia Nunes",
-      responsavel: "Zezinho",
+      usuario_solicitante: "Emilia Nunes",
+      usuario_responsavel: "Zezinho",
       observacao: null,
       dataRetirada: "02/03/2025",
       horaRetirada: "07:02",
@@ -126,60 +102,9 @@ export function Emprestimos() {
       horaDevolucao: "07:02",
     },
   ]);
-
-  //data atual
-  function obterDataAtual(): string {
-    const dataAtual = new Date();
-    const dia = String(dataAtual.getDate()).padStart(2, "0");
-    const mes = String(dataAtual.getMonth() + 1).padStart(2, "0");
-    const ano = dataAtual.getFullYear();
-    const dataFormatada = `${dia}/${mes}/${ano}`;
-    return dataFormatada;
-  }
-  //hora atual
-  function obterHoraAtual(): string {
-    const dataAtual = new Date();
-    const hora = String(dataAtual.getHours()).padStart(2, "0");
-    const minutos = String(dataAtual.getMinutes()).padStart(2, "0");
-    const horaFormatada = `${hora}:${minutos}`;
-    return horaFormatada;
-  }
-
-  const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
-
-
-  function criarEmprestimo() {
-    const novoEmprestimo: Emprestimo = {
-      id: Math.floor(Math.random() * 10000),
-      sala: salaSelecionadaId,
-      chave: chaveSelecionadaId,
-      solicitante: solicitanteSelecionadoId,
-      responsavel: responsavelSelecionadoId,
-      observacao: observacao,
-      dataRetirada: obterDataAtual(),
-      horaRetirada: obterHoraAtual(),
-      horaDevolucao: null,
-      dataDevolucao: null,
-    };
-    setEmprestimos([...emprestimos, novoEmprestimo]);
-    console.log("Emprestimo criado!", novoEmprestimo);
-
-    setSalaSelecionadaId(0); 
-    setChaveSelecionadaId(0);
-    setSolicitanteSelecionadoId(0);
-    setResponsavelSelecionadoId(0);
-    setSolicitante("");
-    setResponsavel(""); 
-    setObservacao("");
-  }
-
-  const [solicitante, setSolicitante] = useState("");
-  const [responsavel, setResponsavel] = useState("");
-  const [observacao, setObservacao] = useState<string | null>(null);
-  const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-
-  // Adicionando funcionalidade de filtragem para emprestimos pendentes e concluidos
+  const [isFiltroPendente, setIsFiltroPendente] = useState(true);
+  const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
+    // Adicionando funcionalidade de filtragem para emprestimos pendentes e concluidos
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
     chave: "",
@@ -188,7 +113,6 @@ export function Emprestimos() {
     dataRetirada: "",
     horaRetirada: "",
   });
-
   const [filtroConcluido, setFiltroConcluido] = useState({
     sala: "",
     chave: "",
@@ -199,24 +123,90 @@ export function Emprestimos() {
     dataDevolucao: "",
     horaDevolucao: "",
   });
-  const [isFiltroPendente, setIsFiltroPendente] = useState(true);
-  const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
 
-  function converterDataBRparaDate(dataStr: string): Date {
-    const [dia, mes, ano] = dataStr.split("/");
-    return new Date(Number(ano), Number(mes) - 1, Number(dia));
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
+
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
+
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
+
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(null);
+
+  const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
+  const [onReset, setOnReset] = useState(false);
+  const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+
+  // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
+  const {responsaveis} = useGetResponsaveis();
+  const {chaves} = useGetChaves();
+  const {salas} = useGetSalas();
+  const {usuarios} = useGetUsuarios();
+  const {new_emprestimos} = useGetEmprestimos();
+
+  console.log("Responsaveis:", responsaveis);
+  console.log("Chaves:", chaves);
+  console.log("Salas:", salas);
+  console.log("Usuarios:", usuarios);
+  console.log("Emprestimos:", new_emprestimos);
+
+  async function criarEmprestimo() {
+    const novoEmprestimo: Iemprestimo = {
+      chave: chaveSelecionadaId,
+      usuario_responsavel: responsavelSelecionadoId,
+      usuario_solicitante: solicitanteSelecionadoId,
+      token: token,
+    }
+
+    console.log("Dados do novo empréstimo:", novoEmprestimo);
+
+    if (novoEmprestimo.chave === null || novoEmprestimo.usuario_responsavel === null || novoEmprestimo.usuario_solicitante === null) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
+
+    } else {
+        try {
+          const response = await axios.post(url_base + "/chameco/api/v1/realizar-emprestimo/", novoEmprestimo, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            }
+          })
+          setEmprestimos((prevEmprestimos) => [...prevEmprestimos, response.data]);
+          console.log("Emprestimo criado!", novoEmprestimo);
+          setIsSuccesModalOpen(!isSuccesModalOpen);
+
+      } catch (error) {
+          console.error("Erro ao criar o empréstimo:", error.response?.data || error.message);
+          setIsPopUpErrorOpen(!isPopUpErrorOpen);
+
+      } finally {
+        setOnReset(!onReset);
+        setSalaSelecionadaId(null); 
+        setChaveSelecionadaId(null);
+        setSolicitanteSelecionadoId(null);
+        setResponsavelSelecionadoId(null);
+        setObservacao("");
+      }
+    }
   }
+
+  setTimeout(() => {
+    setIsSuccesModalOpen(false)
+    setIsPopUpErrorOpen(false)
+  }, 3000)
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = emprestimos
     .filter((emprestimo) => {
       if (!isSearching) return true;
       return (
-        emprestimo.solicitante
+        emprestimo.usuario_solicitante
           ?.toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
         emprestimo.chave?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emprestimo.responsavel
+        emprestimo.usuario_responsavel
           ?.toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
         emprestimo.dataRetirada
@@ -238,11 +228,11 @@ export function Emprestimos() {
             ?.toLowerCase()
             .includes(filtroPendente.chave.toLowerCase())) &&
         (filtroPendente.solicitante === "" ||
-          emprestimo.solicitante
+          emprestimo.usuario_solicitante
             ?.toLowerCase()
             .includes(filtroPendente.solicitante.toLowerCase())) &&
         (filtroPendente.responsavel === "" ||
-          emprestimo.responsavel
+          emprestimo.usuario_responsavel
             ?.toLowerCase()
             .includes(filtroPendente.responsavel.toLowerCase())) &&
         (filtroPendente.horaRetirada === "" ||
@@ -277,10 +267,10 @@ export function Emprestimos() {
         //   .toLowerCase()
         //   .includes(pesquisa.toLowerCase()) ||
         emprestimos.chave.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emprestimos.solicitante
+        emprestimos.usuario_solicitante
           .toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
-        emprestimos.responsavel
+        emprestimos.usuario_responsavel
           .toLowerCase()
           .includes(pesquisa.toLowerCase()) ||
         emprestimos.dataRetirada
@@ -304,11 +294,11 @@ export function Emprestimos() {
             ?.toLowerCase()
             .includes(filtroConcluido.chave.toLowerCase())) &&
         (filtroConcluido.solicitante === "" ||
-          emprestimo.solicitante
+          emprestimo.usuario_solicitante
             ?.toLowerCase()
             .includes(filtroConcluido.solicitante.toLowerCase())) &&
         (filtroConcluido.responsavel === "" ||
-          emprestimo.responsavel
+          emprestimo.usuario_responsavel
             ?.toLowerCase()
             .includes(filtroConcluido.responsavel.toLowerCase())) &&
         (filtroConcluido.dataRetirada === "" ||
@@ -388,22 +378,6 @@ export function Emprestimos() {
   }
   //fim passador p seção concluídos
 
-  // function openFiltroModal() {
-  //   setIsFiltroModalOpen(true);
-  // }
-
-  // function closeFiltroModal() {
-  //   setIsFiltroModalOpen(false);
-  // }
-
-  // function openInputFiltroModal() {
-  //   setIsInputFiltroModalOpen(true);
-  // }
-
-  // function closeInputFiltroModal() {
-  //   setIsInputFiltroModalOpen(false);
-  // }
-
   const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
   function openObservacaoModal() {
@@ -417,9 +391,9 @@ export function Emprestimos() {
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false);
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
-    useState<Emprestimo | null>(null);
+    useState<Iemprestimo | null>(null);
 
-  function openDetalhesModal(emprestimos: Emprestimo) {
+  function openDetalhesModal(emprestimos: Iemprestimo) {
     setEmprestimoSelecionado(emprestimos);
     setIsDetalhesModalOpen(true);
   }
@@ -483,26 +457,16 @@ export function Emprestimos() {
     );
   };
 
-  const today = new Date();
-
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number>(0);
-
-  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number>(0);
-
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number>(0);
-
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number>(0);
-
-  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-    null
-  );
-
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
+        {isSuccesModalOpen && (<PopUpdeSucesso />)}
+        {isPopUpErrorOpen && (<PopUpError />)}
+
       <MenuTopo text="MENU" backRoute="/menu" />
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
+  
         {/* cabeçalho tela de empréstimo*/}
         <div className="flex w-full">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
@@ -549,7 +513,7 @@ export function Emprestimos() {
           {/* conteudo central tabela*/}
           <div>
             <div className="flex items-center justify-between mt-2">
-              <h2 className="text-[#16C34D] items-center font-semibold text-xl shadow-none">
+              <h2 className="text-primary-green items-center font-semibold text-xl shadow-none">
                 Criar novo empréstimo
               </h2>
             </div>
@@ -578,41 +542,37 @@ export function Emprestimos() {
                 <tbody>
                   <tr>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                    <FilterableInput
-                      items={salas}
-                      placeholder="Sala"
-                      selectedItemId={salaSelecionadaId}
-                      onSelectItem={setSalaSelecionadaId}
-                    />
+                      <FilterableInputSalas
+                        items={salas}
+                        onSelectItem={(idSelecionado) => {setSalaSelecionadaId(idSelecionado)}}
+                        reset={onReset}
+                      />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                    <FilterableInput
-                      items={chaves}
-                      placeholder="Chave"
-                      selectedItemId={chaveSelecionadaId}
-                      onSelectItem={setChaveSelecionadaId}
-                    />
+                      <FilterableInputChaves
+                        items={chaves}
+                        onSelectItem={(idSelecionado) => {setChaveSelecionadaId(idSelecionado)}}
+                        reset={onReset}
+                      />
                     </td>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] min-w-10 w-24 break-words flex-1 text-center">
-                    <FilterableInput
-                      items={solicitantes}
-                      placeholder="Solicitante"
-                      selectedItemId={solicitanteSelecionadoId}
-                      onSelectItem={setSolicitanteSelecionadoId}
-                    />
+                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                      <FilterableInputSolicitantes
+                        items={usuarios}
+                        onSelectItem={(idSelecionado) => {setSolicitanteSelecionadoId(idSelecionado)}}
+                        reset={onReset}
+                      />
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                    <FilterableInput
-                      items={responsaveis}
-                      placeholder="Responsavel"
-                      selectedItemId={responsavelSelecionadoId}
-                      onSelectItem={setResponsavelSelecionadoId}
-                    />
+                      <FilterableInputResponsaveis
+                        items={responsaveis}
+                        onSelectItem={(idSelecionado) => {setResponsavelSelecionadoId(idSelecionado)}}
+                        reset={onReset}
+                      />
                     </td>
 
                     <td
                       onClick={openObservacaoModal}
-                      className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-blue  p-0.5 font-semibold break-words cursor-pointer"
                     >
                       <div className=" flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
@@ -623,7 +583,7 @@ export function Emprestimos() {
                     </td>
                     <td
                       onClick={criarEmprestimo}
-                      className="border-2 border-[#B8BCE0] border-solid bg-[#18C64F]  p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green  p-0.5 font-semibold break-words cursor-pointer"
                     >
                       <div className=" flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
@@ -684,6 +644,8 @@ export function Emprestimos() {
               <hr className="text-[#646999] p-2 border-t-2 font-extrabold" />
             </div>
             {/* fim tabela de criacao de emprestimo */}
+
+
 
             <div className=" flex gap-2 flex-wrap justify-between items-center">
               <div className="flex items-center gap-4">
@@ -1029,24 +991,24 @@ export function Emprestimos() {
                               {emprestimo.chave
                               ? chaves.find(
                                 (chave) => chave.id === emprestimo.chave
+                              )?.sala
+                            : "Selecione uma sala"}
+                            </p>
+                          </td>
+                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
+                              {emprestimo.usuario_solicitante
+                              ? usuarios.find(
+                                (solicitante) => solicitante.id === emprestimo.usuario_solicitante
                               )?.nome
                             : "Selecione uma sala"}
                             </p>
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                             <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                              {emprestimo.solicitante
-                              ? solicitantes.find(
-                                (solicitante) => solicitante.id === emprestimo.solicitante
-                              )?.nome
-                            : "Selecione uma sala"}
-                            </p>
-                          </td>
-                          <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                            <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                              {emprestimo.responsavel
+                              {emprestimo.usuario_responsavel
                               ? responsaveis.find(
-                                (responsavel) => responsavel.id === emprestimo.responsavel
+                                (responsavel) => responsavel.id === emprestimo.usuario_responsavel
                               )?.nome
                             : "Selecione uma sala"}
                             </p>
@@ -1675,10 +1637,10 @@ export function Emprestimos() {
                             {emprestimo.chave}
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                            {emprestimo.solicitante}
+                            {emprestimo.usuario_solicitante}
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                            {emprestimo.responsavel}
+                            {emprestimo.usuario_responsavel}
                           </td>
                           <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
                             {emprestimo.dataRetirada}

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../components/menuTopo";
 import axios from "axios";
+import api from '../services/api';
 export interface Sala {
   id: number;
   nome: string;
