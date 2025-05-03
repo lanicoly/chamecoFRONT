@@ -30,7 +30,7 @@ const Private = ({ element }: { element: JSX.Element }) => { //está alinhado co
 
 
 const AuthListener = ({ children }: { children: React.ReactNode }) => {
-  const [, forceUpdate] = useState({});// Força uma atualização do componente
+  const [, forceUpdate] = useState({});// força uma atualização do componente
   
   useEffect(() => {
     //usando forceUpdate para forçar atualização quando o storage mudar
@@ -39,7 +39,6 @@ const AuthListener = ({ children }: { children: React.ReactNode }) => {
   };
     
     window.addEventListener('storage', handleStorageChange); //ouve mudanças no storage
-    window.addEventListener('storage', handleStorageChange); 
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);

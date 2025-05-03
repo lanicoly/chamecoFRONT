@@ -56,7 +56,7 @@ export function Login() {
         console.log("Resposta do backend:", response);
 
         
-      if (statusResponse === 200 && response.data?.token) {
+      if (statusResponse === 200 && response.data?.token) { //testar sem status response
         localStorage.setItem("token", response.data.token);
         if(response.data.usuario) {
           localStorage.setItem("userData", JSON.stringify(response.data.usuario));
@@ -64,7 +64,7 @@ export function Login() {
         if (response.data.tipo) {
           localStorage.setItem("userType", response.data.tipo);
         }
-        // Força atualização do estado de autenticação
+        // Força atualização do estado de autenticação para outros componentes
         window.dispatchEvent(new Event('storage'));
         navigate("/menu");
         } else {
