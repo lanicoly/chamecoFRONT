@@ -43,15 +43,6 @@ export function Login() {
       password: senha,
     };
 
-
-    if (!usuario && !senha) {
-      setErrorUsuario("Por favor, insira o seu CPF!");
-      setErrorSenha("Por favor, insira a sua senha!");
-      return;
-    }
-    setErrorUsuario("");
-    setErrorSenha("");
-
     try {
         const response = await axios.post(url_base + "/chameco/api/v1/login/", body, {
             headers: {
@@ -60,22 +51,26 @@ export function Login() {
         });
 
         const statusResponse = response.status;
-        const data = response.data;
 
         // Adicionar o console.log para exibir os dados da resposta(obter token)
         console.log("Resposta do backend:", response);
 
-        if (statusResponse === 200) {
-          if ("usuario" in data) {
-            // Cookies.set("authToken", data, {expires: 0.0208, path: "/"})
-            localStorage.setItem("authToken", response.data.token)
-            let resp = JSON.stringify(response.data)
-            localStorage.setItem("user", resp)
-            navigate("/menu");
-          } else {
-            setErrorSenha("Usuário não registrado no sistema!");
-            return;
-          }
+        
+      if (statusResponse === 200 && response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+        if(response.data.usuario) {
+          localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+        }
+        if (response.data.tipo) {
+          localStorage.setItem("userType", response.data.tipo);
+        }
+        // Força atualização do estado de autenticação
+        window.dispatchEvent(new Event('storage'));
+        navigate("/menu");
+        } else {
+          setErrorSenha("Usuário não registrado no sistema!");
+          return;
+        }
       }
      catch (error) {
       if (axios.isAxiosError(error)) {
