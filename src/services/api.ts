@@ -4,6 +4,7 @@ const api = axios.create({
     baseURL: 'https://chamecoapi.pythonanywhere.com/',
     headers: {
         'Content-Type': 'Application/json',
+        Authorization : 'Bearer {token}'
     },
 });
 
