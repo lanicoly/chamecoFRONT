@@ -41,7 +41,7 @@ export function Chaves() {
   //Funcao para a requisicao GET
   async function obterChaves() {
     try {
-      const response = await axios.get(`${API_URL}?token=${token}`, {
+      const response = await api.get(`${API_URL}?token=${token}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -79,7 +79,7 @@ export function Chaves() {
   async function adicionarChaveAPI(novaChave: Chaves) {
     console.log("Chave", novaChave);
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${API_URL}?token=${token}`,
         novaChave,
         {
@@ -125,7 +125,7 @@ export function Chaves() {
   // Função para realizar a requisição PATCH
   async function atualizarChaveAPI(chaveAtualizada: Chaves) {
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `${API_URL}${chaveAtualizada.id}/`,
         {
           sala: chaveAtualizada.sala,                         
@@ -161,7 +161,7 @@ export function Chaves() {
     usuarios: number[]
   ) {
     try {
-      const response = await axios.delete(
+      const response = await api.delete(
         `${API_URL}${chaveId}/`,
         {
           headers: {

@@ -47,7 +47,7 @@ export interface FiltroEmprestimo {
   filtroDataEmprestimo: DateRange | undefined;
 }
 
-const url_base = "https://chamecoapi.pythonanywhere.com/";
+
 const token: string | null = localStorage.getItem("authToken");
 
 export function Emprestimos() {
@@ -109,7 +109,7 @@ export function Emprestimos() {
       return;
     } else {
       try {
-        const response = await axios.post(
+        const response = await api.post(
           url_base + "/chameco/api/v1/realizar-emprestimo/",
           novoEmprestimo,
           {

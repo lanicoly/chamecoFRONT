@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const url_base = "https://chamecoapi.pythonanywhere.com/";
+
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
@@ -38,7 +38,7 @@ const useGetResponsaveis = () => {
         const url = `${url_base}/chameco/api/v1/responsaveis/?${params.toString()}`;
 
         try {
-          const response = await axios.get(url);
+          const response = await api.get(url);
 
           if (!response) throw new Error("Erro ao puxar os responsáveis");
 

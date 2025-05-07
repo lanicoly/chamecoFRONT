@@ -30,7 +30,7 @@ export function Salas() {
   async function obterSalas() {
     try {
       const url = `${URL}?token=${token}`;
-      const response = await axios.get(url, {
+      const response = await api.get(url, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -107,7 +107,7 @@ export function Salas() {
   // função para requisição do método post
     async function adicionarSalaAPI(sala: Sala) {
       try {
-        const response = await axios.post(`${URL}?token=${token}`, sala, {
+        const response = await api.post(`${URL}?token=${token}`, sala, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -141,7 +141,7 @@ export function Salas() {
   //Adicionando função de excluir sala + função para requisição delete
     async function excluirSalaAPI(id: number, nome: string, bloco:number) {
       try {
-        const response = await axios.delete(`${URL}${id}/`, {
+        const response = await api.delete(`${URL}${id}/`, {
           headers: {
             "Content-Type": "application/json"
           },
@@ -186,7 +186,7 @@ export function Salas() {
   // adicionando função de editar informações de uma sala + função para requisição PUT
     async function editarSalaAPI(salaSelecionada: Sala) {
       try {
-        const response = await axios.put(
+        const response = await api.put(
           `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, token: token, bloco: salaSelecionada.bloco},
           {
             headers: {

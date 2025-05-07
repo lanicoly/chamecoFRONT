@@ -13,7 +13,7 @@ export function PrivateRoute({ children, allowedTypes }: PrivateRouteProps) {
   const token = localStorage.getItem("token");
   const userType = localStorage.getItem("userType");
 
-  const url_base = "https://chamecoapi.pythonanywhere.com/";
+  
 
   //criando estado para validar o token
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
@@ -27,13 +27,13 @@ export function PrivateRoute({ children, allowedTypes }: PrivateRouteProps) {
     //validar token
     const validateToken = async () => {
       try {
-        const response =await axios.get(url_base + "/chameco/api/v1/login/", {
+        const response =await api.get(url_base + "/chameco/api/v1/login/", {
           headers: {Authorization: 'Bearer ${token}'},
         });
         setIsValidToken(response.status === 200);
       } catch(error){
         // Tratamento seguro com TypeScript
-        if (axios.isAxiosError(error)) {
+        if (api.isAxiosError(error)) {
           // Erro específico do Axios
           console.error('Erro na validação do token:', error.response?.data);
         } else {

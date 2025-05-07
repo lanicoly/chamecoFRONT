@@ -2,12 +2,13 @@ import axios, { formToJSON } from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import api from "../services/api";
 // import Cookies from "js-cookie";
 
 export function Login() {
   const navigate = useNavigate();
 
-  const url_base = "https://chamecoapi.pythonanywhere.com/";
+  
   // Adicionando validação de usuário e senha
   const [usuario, setUsuario] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
@@ -44,11 +45,7 @@ export function Login() {
     };
 
     try {
-        const response = await axios.post(url_base + "/chameco/api/v1/login/", body, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-        });
+        const response = await api.post("/chameco/api/v1/login/", body)
 
         const statusResponse = response.status;
 
@@ -57,23 +54,28 @@ export function Login() {
 
         
       if (statusResponse === 200 && response.data?.token) { //testar sem status response
-        localStorage.setItem("token", response.data.token);
+
+        localStorage.setItem("authToken", response.data.token);
+
         if(response.data.usuario) {
           localStorage.setItem("userData", JSON.stringify(response.data.usuario));
         }
+
         if (response.data.tipo) {
           localStorage.setItem("userType", response.data.tipo);
         }
+        
         // Força atualização do estado de autenticação para outros componentes
         window.dispatchEvent(new Event('storage'));
         navigate("/menu");
+
         } else {
           setErrorSenha("Usuário não registrado no sistema!");
           return;
         }
       }
      catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (api.isAxiosError(error)) {
         const statusResponse = error.response?.status;
 
         if (statusResponse === 400) {
@@ -201,11 +203,15 @@ export function Login() {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
-              {errorSenha && (
+              {/* {errorSenha && (
                 <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
                   {errorSenha}
                 </div>
-              )}
+              )} */}
+
+              <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
+                  {"Erro: " + errorSenha}
+              </div>
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[15px] text-center items-center ml-[60px]">

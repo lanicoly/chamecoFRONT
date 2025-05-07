@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate,useLocation} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation} from "react-router-dom";
 import { useState,useEffect } from "react";
 
 //separei as outras telas em um arquivo de componentes e a única diferença delas pro app é o nome que exporto no arquivo e que eu tenho que chamar elas aqui para mexer com elas, pois a navegação ocorre inicializando o que tem no app
@@ -13,7 +13,7 @@ import { Emprestimos } from "./pages/emprestimos";
 import { PrivateRoute } from "./components/PrivateRoutes";
 
 const isTokenValid = () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   return !!token && token !== "undefined" && token !== "null";
 }; //verificando se o token não é inválido
 

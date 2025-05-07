@@ -1,21 +1,20 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://chamecoapi.pythonanywhere.com/',
+    baseURL: 'https://chamecoapi2.pythonanywhere.com',
     headers: {
         'Content-Type': 'Application/json',
-        Authorization : 'Bearer {token}'
     },
 });
 
 api.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
 
       if (token) {
         const method = config.method?.toLowerCase();
 
-        if (method === "get"){
+        if (method === "get" || method === "delete") {
             config.params = {
                 ...(config.params || {}),
                 token: token,

@@ -34,7 +34,7 @@ export function Blocos() {
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
-      const response = await axios.get(`${URL}?token=${token}`, {
+      const response = await api.get(`${URL}?token=${token}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -66,7 +66,7 @@ export function Blocos() {
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBlocoAPI(novoBloco: Blocos) {
     try {
-      const response = await axios.post(`${URL}?token=${token}`, novoBloco, {
+      const response = await api.post(`${URL}?token=${token}`, novoBloco, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -176,7 +176,7 @@ export function Blocos() {
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `${URL}${blocoSelecionado.id}/`,
         { nome: blocoSelecionado.nome, token: token },
         {
@@ -221,7 +221,7 @@ export function Blocos() {
   //Adicionando função de excluir bloco + função para requisição delete
   async function excluirBlocoAPI(id: number, nome: string) {
     try {
-      const response = await axios.delete(`${URL}${id}/`, {
+      const response = await api.delete(`${URL}${id}/`, {
         headers: {
           "Content-Type": "application/json",
         },

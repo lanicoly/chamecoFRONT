@@ -1,7 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import api from "../../services/api";
+import { set } from "date-fns";
 
-const url_base = "https://chamecoapi.pythonanywhere.com/";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
@@ -33,16 +34,14 @@ const useGetChaves = () => {
             return; 
 
           } else {
-            const params = new URLSearchParams({ token });
-            const url = `${url_base}/chameco/api/v1/chaves/?${params.toString()}`;
     
             try {
-              const response = await axios.get(url);
+              const response = await api.get(`/chameco/api/v1/chaves/`);
     
               if (!response) throw new Error("Erro ao puxar as chaves");
     
               setChaves(response.data.results || []);
-    
+
               localStorage.setItem("chaves", JSON.stringify(response.data.results || []));
               localStorage.setItem("chavesTimestamp", Date.now().toString());
     
@@ -56,9 +55,9 @@ const useGetChaves = () => {
         };
     
         fetchChaves();
-      }, []);
+    }, []);
     
-      return { chaves, loading, error };
+    return { chaves, loading, error };
 }
 
 export default useGetChaves
