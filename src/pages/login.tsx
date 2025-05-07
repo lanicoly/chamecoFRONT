@@ -75,7 +75,7 @@ export function Login() {
         }
       }
      catch (error) {
-      if (api.isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
 
         if (statusResponse === 400) {
