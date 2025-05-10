@@ -15,71 +15,26 @@ interface EmprestimosConcluidosProps {
   chaves: IoptionChaves[];
   responsaveis: IoptionResponsaveis[];
   solicitantes: IoptionSolicitantes[];
-  emprestimos: Iemprestimo[];
+  new_emprestimos: Iemprestimo[];
   observacao: string | null;
   dataRetirada: string;
-  horaRetirada: string;
+  horario_emprestimo: string;
   dataDevolucao: string | null;
-  horaDevolucao: string | null;
+  horario_devolucao: string | null;
   pesquisa: string;
 }
 
 export function EmprestimosConcluidos({
+  new_emprestimos,
   salas,
   responsaveis,
   solicitantes,
   pesquisa,
 }: EmprestimosConcluidosProps) {
-  const [emprestimosConcluidos] = useState<Iemprestimo[]>([
-    {
-      sala: 1,
-      chave: 1,
-      usuario_solicitante: 1,
-      usuario_responsavel: 1,
-      observacao: null,
-      dataRetirada: "02/03/2025",
-      horaRetirada: "07:02",
-      dataDevolucao: "02/03/2025",
-      horaDevolucao: "07:02",
-    },
-    {
-      sala: 2,
-      chave: 2,
-      usuario_solicitante: 2,
-      usuario_responsavel: 2,
-      observacao: null,
-      dataRetirada: "02/03/2025",
-      horaRetirada: "07:02",
-      dataDevolucao: "02/03/2025",
-      horaDevolucao: "07:02",
-    },
-    {
-      sala: 3,
-      chave: 3,
-      usuario_solicitante: 3,
-      usuario_responsavel: 3,
-      observacao: null,
-      dataRetirada: "02/03/2025",
-      horaRetirada: "07:02",
-      dataDevolucao: "02/03/2025",
-      horaDevolucao: "07:02",
-    },
-    {
-      sala: 1,
-      chave: 1,
-      usuario_solicitante: 1,
-      usuario_responsavel: 1,
-      observacao: null,
-      dataRetirada: "02/03/2025",
-      horaRetirada: "07:02",
-      dataDevolucao: "02/03/2025",
-      horaDevolucao: "07:02",
-    },
-  ]);
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
-  const [observacao, setObservacao] = useState<string | null>(null);
+
 
   //constantes para filtrar data de devolução/retirada
   const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
@@ -125,92 +80,109 @@ export function EmprestimosConcluidos({
       ? responsaveis.find((r) => r.superusuario === idResponsavel)?.nome || ""
       : "";
 
-  // Filtragem dos empréstimos concluídos
-  const emprestimosFiltradosConcluidos = emprestimosConcluidos
-    .filter((emp) => {
-      const salaNome = getNomeSala(emp.sala);
-      // const chaveNome = getNomeChave(emp.chave);
-      const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+  //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
+  function formatarDataHora(dataFormatada: string) {
+  const data = new Date(dataFormatada);
+  const dataBr = data.toLocaleDateString("pt-BR");
+  const horaBr = data.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-      return (
-        salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        // chaveNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        solicitanteNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emp.dataRetirada?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emp.horaRetirada?.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        emp.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
-      );
-    })
-    .filter((emp) => {
-      const salaNome = getNomeSala(emp.sala);
-      // const chaveNome = getNomeChave(emp.chave);
-      const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+  return {
+    data: dataBr,
+    hora: horaBr,
+  };
+}
 
-      return (
-        (filtroConcluido.sala === "" ||
-          salaNome
-            .toLowerCase()
-            .includes(filtroConcluido.sala.toLowerCase())) &&
-        // (filtroConcluido.chave === "" || chaveNome.toLowerCase().includes(filtroConcluido.chave.toLowerCase())) &&
-        (filtroConcluido.solicitante === "" ||
-          solicitanteNome
-            .toLowerCase()
-            .includes(filtroConcluido.solicitante.toLowerCase())) &&
-        (filtroConcluido.responsavel === "" ||
-          responsavelNome
-            .toLowerCase()
-            .includes(filtroConcluido.responsavel.toLowerCase())) &&
-        (filtroConcluido.horaRetirada === "" ||
-          emp.horaRetirada
-            ?.toLowerCase()
-            .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
-        (filtroConcluido.horaDevolucao === "" ||
-          emp.horaDevolucao
-            ?.toLowerCase()
-            .includes(filtroConcluido.horaDevolucao.toLowerCase()))
-      );
-    })
-    .filter((emp) => {
-      if (
-        !isFiltroConcluido ||
-        !filtroDataDevolucao?.from ||
-        !filtroDataDevolucao?.to
-      )
-        return true;
+  const emprestimosFiltradosConcluidos = new_emprestimos
+  .filter((emp) => {
+    const salaNome = getNomeSala(emp.sala);
+    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
+    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+    const dataHoraRetirada = emp.dataRetirada
+      ? formatarDataHora(emp.dataRetirada)
+      : { data: '', hora: '' };
+      
+    const dataHoraEmprestimoDevolucao = emp.horario_devolucao
+      ? formatarDataHora(emp.horario_devolucao)
+      : { data: '', hora: '' };
 
-      const data = emp.dataRetirada
-        ? converterDataBRparaDate(emp.dataRetirada)
-        : null;
-      return (
-        data &&
-        data >= filtroDataDevolucao.from &&
-        data <= filtroDataDevolucao.to
-      );
-    })
-    .filter((emp) => {
-      if (
-        !isFiltroConcluido ||
-        !filtroDataEmprestimoRetiradaConcluidos?.from ||
-        !filtroDataEmprestimoRetiradaConcluidos?.to
-      )
-        return true;
+    return (
+      salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+      solicitanteNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+      responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+      dataHoraRetirada.data.includes(pesquisa) ||
+      dataHoraRetirada.hora.includes(pesquisa) ||
+      dataHoraEmprestimoDevolucao.data.includes(pesquisa) ||
+      dataHoraEmprestimoDevolucao.hora.includes(pesquisa) ||
+      emp.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
+    );
+  })
+  .filter((emp) => {
+    const salaNome = getNomeSala(emp.sala);
+    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
+    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
 
-      const data = emp.dataDevolucao
-        ? converterDataBRparaDate(emp.dataDevolucao)
-        : null;
-      return (
-        data &&
-        data >= filtroDataEmprestimoRetiradaConcluidos.from &&
-        data <= filtroDataEmprestimoRetiradaConcluidos.to
-      );
-    });
+    return (
+      (filtroConcluido.sala === "" ||
+        salaNome.toLowerCase().includes(filtroConcluido.sala.toLowerCase())) &&
+      (filtroConcluido.solicitante === "" ||
+        solicitanteNome
+          .toLowerCase()
+          .includes(filtroConcluido.solicitante.toLowerCase())) &&
+      (filtroConcluido.responsavel === "" ||
+        responsavelNome
+          .toLowerCase()
+          .includes(filtroConcluido.responsavel.toLowerCase())) &&
+      (filtroConcluido.horaRetirada === "" ||
+        emp.horario_emprestimo
+          ?.toLowerCase()
+          .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
+      (filtroConcluido.horaDevolucao === "" ||
+        emp.horario_devolucao
+          ?.toLowerCase()
+          .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+    );
+  })
+  .filter((emp) => {
+    if (
+      !isFiltroConcluido ||
+      !filtroDataDevolucao?.from ||
+      !filtroDataDevolucao?.to
+    )
+      return true;
 
-  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-    null
-  );
+    const dataDevolucao = emp.dataDevolucao
+      ? converterDataBRparaDate(emp.dataDevolucao)
+      : null;
+    return (
+      dataDevolucao &&
+      dataDevolucao >= filtroDataDevolucao.from &&
+      dataDevolucao <= filtroDataDevolucao.to
+    );
+  })
+  .filter((emp) => {
+    if (
+      !isFiltroConcluido ||
+      !filtroDataEmprestimoRetiradaConcluidos?.from ||
+      !filtroDataEmprestimoRetiradaConcluidos?.to
+    )
+      return true;
+
+    const dataEmprestimoRetirada = emp.dataRetirada
+      ? converterDataBRparaDate(emp.dataRetirada)
+      : null;
+    return (
+      dataEmprestimoRetirada &&
+      dataEmprestimoRetirada >= filtroDataEmprestimoRetiradaConcluidos.from &&
+      dataEmprestimoRetirada <= filtroDataEmprestimoRetiradaConcluidos.to
+    );
+  });
+
+    const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+      null
+    );
 
   //paginação para emprestimos concluidos
   const itensAtuaisConcluidos = emprestimosFiltradosConcluidos.slice();
@@ -218,7 +190,7 @@ export function EmprestimosConcluidos({
   const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
   const totalPaginasConcluidos = Math.max(
     1,
-    Math.ceil(emprestimosConcluidos.length / itensPorPaginaConcluidos)
+    Math.ceil(new_emprestimos.length / itensPorPaginaConcluidos)
   );
 
   function avancarPaginaConcluidos() {
@@ -256,6 +228,8 @@ export function EmprestimosConcluidos({
   }
 
   //funcao para editarObservacao
+  const [observacao, setObservacao] = useState<string | null>(null);
+
   function editarObservacao(e: React.FormEvent) {
     e.preventDefault();
     if (emprestimoSelecionado && observacao) {
@@ -715,16 +689,16 @@ export function EmprestimosConcluidos({
                       "Responsavel não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.dataRetirada}
+                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horaRetirada}
+                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.dataDevolucao}
+                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horaDevolucao}
+                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).hora}
                   </td>
 
                   <td className="pl-2">

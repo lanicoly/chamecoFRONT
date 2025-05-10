@@ -51,25 +51,39 @@ const AuthListener = ({ children }: { children: React.ReactNode }) => {
 
 export function App() {
   return (
+    // <BrowserRouter>
+    //  <AuthListener>
+    //   <Routes>
+    //     <Route path="/" element={<Navigate to="/login" />} />
+    //     <Route path="/login" element={<Login />} />
+    //     <Route path="/menu" element={
+    //       <PrivateRoute allowedTypes={["adm", "professor", "aluno"]}>
+    //         <Menu />
+    //       </PrivateRoute>
+    //     } />
+    //     <Route path="/blocos" element={<Private element={<Blocos />} />} />
+    //     <Route path="/salas" element={<Private element={<Salas />} />} />
+    //     <Route path="/chaves" element={<Private element={<Chaves />} />} />
+    //     <Route path="/usuarios" element={<Private element={<Usuarios />} />} />
+    //     <Route path="/statusChaves" element={<Private element={<StatusChaves />} />} />
+    //     <Route path="/emprestimos" element={<Private element={<Emprestimos />} />} />
+    //     <Route path="*" element={<Login />} />
+    //   </Routes>
+    //  </AuthListener>
+    // </BrowserRouter>
+
     <BrowserRouter>
-     <AuthListener>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/menu" />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/menu" element={
-          <PrivateRoute allowedTypes={["adm", "professor", "aluno"]}>
-            <Menu />
-          </PrivateRoute>
-        } />
-        <Route path="/blocos" element={<Private element={<Blocos />} />} />
-        <Route path="/salas" element={<Private element={<Salas />} />} />
-        <Route path="/chaves" element={<Private element={<Chaves />} />} />
-        <Route path="/usuarios" element={<Private element={<Usuarios />} />} />
-        <Route path="/statusChaves" element={<Private element={<StatusChaves />} />} />
-        <Route path="/emprestimos" element={<Private element={<Emprestimos />} />} />
-        <Route path="*" element={<Login />} />
+        <Route path="/menu" element={<Menu />} />
+        <Route path="/blocos" element={<Blocos />} />
+        <Route path="/salas" element={<Salas />} />
+        <Route path="/chaves" element={<Chaves />} />
+        <Route path="/usuarios" element={<Usuarios />} />
+        <Route path="/statusChaves" element={<StatusChaves />} />
+        <Route path="/emprestimos" element={<Emprestimos />} />
       </Routes>
-     </AuthListener>
     </BrowserRouter>
   );
 }

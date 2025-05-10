@@ -1,6 +1,7 @@
-import axios from "axios";
+// import axios from "axios";
 import { ca } from "date-fns/locale";
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 
 
@@ -35,7 +36,7 @@ const useGetUsuarios = () => {
 
           } else {
             const params = new URLSearchParams({ token });
-            const url = `${url_base}/chameco/api/v1/usuarios/?${params.toString()}`;
+            const url = `/chameco/api/v1/usuarios/?${params.toString()}`;
       
             try {
               const response = await api.get(url);

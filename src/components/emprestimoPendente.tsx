@@ -9,37 +9,32 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
+// import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 
 interface EmprestimosPendentesProps {
-  emprestimos: Iemprestimo[];
+  new_emprestimos: Iemprestimo[];
   salas: IoptionSalas[];
   chaves: IoptionChaves[];
   responsaveis: IoptionResponsaveis[];
   solicitantes: IoptionSolicitantes[];
   observacao: string | null;
   dataRetirada: string;
-  horaRetirada: string;
+  horario_emprestimo: string;
   pesquisa: string;
 }
 
 export function EmprestimosPendentes({
-  emprestimos,
+  new_emprestimos,
   salas,
   solicitantes,
   responsaveis,
   pesquisa,
 }: EmprestimosPendentesProps) {
-  const [observacao, setObservacao] = useState<string | null>(null);
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
 
   const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] =
     useState<DateRange | undefined>();
-
-  function converterDataBRparaDate(dataStr: string): Date {
-    const [dia, mes, ano] = dataStr.split("/");
-    return new Date(Number(ano), Number(mes) - 1, Number(dia));
-  }
 
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
@@ -51,7 +46,7 @@ export function EmprestimosPendentes({
   });
   const [isFiltroPendente, setIsFiltroPendente] = useState(true);
 
-  //pegando o nome através do id (foi necessário criar isso, pois o tipo de desses 4 é number)
+  //pegando o nome através do id (foi necessário criar isso, pois o tipo desses 4 é number)
 
   // const getNomeChave = (idChave: number | null | undefined) =>
   //   idChave != null ? chaves.find((chave) => chave.id === idChave)?.nome || "" : "";
@@ -71,99 +66,85 @@ export function EmprestimosPendentes({
       ? responsaveis.find((r) => r.superusuario === idResponsavel)?.nome || ""
       : "";
 
+  //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
+  function formatarDataHora(dataFormatada: string) {
+  const data = new Date(dataFormatada);
+  const dataBr = data.toLocaleDateString("pt-BR");
+  const horaBr = data.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return {
+    data: dataBr,
+    hora: horaBr,
+  };
+}
+
   //filtrando emprestimos pendentes
-  const emprestimosFiltradosPendentes = emprestimos
-    .filter((emprestimos) => {
-      const salaNomePendentes = getNomeSala(emprestimos.sala);
-      // const chaveNomePendentes = getNomeChave(emprestimos.chave);
-      const responsavelNomePendentes = getNomeResponsavel(
-        emprestimos.usuario_responsavel
-      );
-      const solicitanteNomePendetes = getNomeSolicitante(
-        emprestimos.usuario_solicitante
-      );
-      return (
-        salaNomePendentes.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        // chaveNomePendentes.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        solicitanteNomePendetes
-          ?.toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        responsavelNomePendentes
-          .toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimos.dataRetirada
-          ?.toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimos.horaRetirada
-          ?.toLowerCase()
-          .includes(pesquisa.toLowerCase()) ||
-        emprestimos.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
-      );
-    })
+  const emprestimosFiltradosPendentes = new_emprestimos
+  .filter((emprestimos) => {
+    const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
+    const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
+    const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
+    const observacao = emprestimos.observacao?.toLowerCase() ?? "";
 
-    .filter((emprestimos) => {
-      const salaNome = getNomeSala(emprestimos.sala);
-      // const chaveNome = getNomeChave(emprestimos.chave);
-      const responsavelNome = getNomeResponsavel(
-        emprestimos.usuario_responsavel
-      );
-      const solicitanteNome = getNomeSolicitante(
-        emprestimos.usuario_solicitante
-      );
 
-      return (
-        (filtroPendente.sala === "" ||
-          salaNome
-            ?.toLowerCase()
-            .includes(filtroPendente.sala.toLowerCase())) &&
-        // (filtroPendente.chave === "" ||
-        //   chaveNome
-        //     ?.toLowerCase()
-        //     .includes(filtroPendente.chave.toLowerCase())) &&
-        (filtroPendente.solicitante === "" ||
-          solicitanteNome
-            ?.toLowerCase()
-            .includes(filtroPendente.solicitante.toLowerCase())) &&
-        (filtroPendente.responsavel === "" ||
-          responsavelNome
-            ?.toLowerCase()
-            .includes(filtroPendente.responsavel.toLowerCase())) &&
-        (filtroPendente.horaRetirada === "" ||
-          emprestimos.horaRetirada
-            ?.toLowerCase()
-            .includes(filtroPendente.horaRetirada.toLowerCase()))
-      );
-    })
+    const { data: dataRetirada, hora: horaEmprestimo } = emprestimos.horario_emprestimo
+      ? formatarDataHora(emprestimos.horario_emprestimo)
+      : { data: "", hora: "" };
 
-    .filter((emprestimos) => {
-      if (
-        !isFiltroPendente ||
-        !filtroDataEmprestimoRetirada?.from ||
-        !filtroDataEmprestimoRetirada?.to
-      )
-        return true;
+    return (
+      sala.includes(pesquisa.toLowerCase()) ||
+      solicitante.includes(pesquisa.toLowerCase()) ||
+      responsavel.includes(pesquisa.toLowerCase()) ||
+      dataRetirada.includes(pesquisa) ||
+      horaEmprestimo.includes(pesquisa) ||
+      observacao.includes(pesquisa)
+    );
+  })
+  .filter((emprestimos) => {
+    const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
+    const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
+    const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
+    const horaEmprestimo = emprestimos.horario_emprestimo
+      ? formatarDataHora(emprestimos.horario_emprestimo).hora
+      : "";
 
-      const dataEmprestimo = converterDataBRparaDate(
-        emprestimos.dataRetirada ?? ""
-      );
+    return (
+      (filtroPendente.sala === "" || sala.includes(filtroPendente.sala.toLowerCase())) &&
+      (filtroPendente.solicitante === "" || solicitante.includes(filtroPendente.solicitante.toLowerCase())) &&
+      (filtroPendente.responsavel === "" || responsavel.includes(filtroPendente.responsavel.toLowerCase())) &&
+      (filtroPendente.horaRetirada === "" || horaEmprestimo.includes(filtroPendente.horaRetirada))
+    );
+  })
+  .filter((emprestimos) => {
+    if (
+      !isFiltroPendente ||
+      !filtroDataEmprestimoRetirada?.from ||
+      !filtroDataEmprestimoRetirada?.to
+    ) return true;
 
-      return (
-        dataEmprestimo >= filtroDataEmprestimoRetirada.from &&
-        dataEmprestimo <= filtroDataEmprestimoRetirada.to
-      );
-    });
+    if (!emprestimos.dataRetirada) return false;
 
-  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-    null
-  );
+    const data = new Date(emprestimos.dataRetirada);
+    return (
+      data >= filtroDataEmprestimoRetirada.from &&
+      data <= filtroDataEmprestimoRetirada.to
+    );
+  });
+
+    const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+      null
+    );
 
   //paginação para emprestimos pendentes
   const itensAtuaisPendentes = emprestimosFiltradosPendentes.slice();
-  const itensPorPaginaPendente = 5;
   const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
+  const itensPorPaginaPendente = 5;
   const totalPaginasPendentes = Math.max(
     1,
-    Math.ceil(emprestimos.length / itensPorPaginaPendente)
+    Math.ceil(new_emprestimos.length / itensPorPaginaPendente)
   );
 
   function avancarPaginaPendente() {
@@ -201,6 +182,8 @@ export function EmprestimosPendentes({
   }
 
   //funcao para editarObservacao
+  const [observacao, setObservacao] = useState<string | null>(null);
+
   function editarObservacao(e: React.FormEvent) {
     e.preventDefault();
     if (emprestimoSelecionado && observacao) {
@@ -547,10 +530,10 @@ export function EmprestimosPendentes({
                     </p>
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    {emprestimo.dataRetirada}
+                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
-                    {emprestimo.horaRetirada}
+                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
                   </td>
                   <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
                     <div className=" flex justify-center items-center mr-1 gap-2 p-1">

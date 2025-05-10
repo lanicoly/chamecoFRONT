@@ -19,7 +19,7 @@ import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 // import { obterDataAtual } from "../utils/obterDataAtual";
 // import { obterHoraAtual } from "../utils/obterHoraAtual";
 // import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
-import axios from "axios";
+import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
 // import { PopUpdeDevolucao } from "../components/popups/popUpdeDevolucao";
 import { PopUpError } from "../components/popups/PopUpError";
@@ -37,9 +37,9 @@ export interface Iemprestimo {
   token?: string | null;
   observacao?: string | null;
   dataRetirada?: string;
-  horaRetirada?: string;
+  horario_emprestimo?: string;
   dataDevolucao?: string | null;
-  horaDevolucao?: string | null;
+  horario_devolucao?: string | null;
 }
 
 export interface FiltroEmprestimo {
@@ -47,12 +47,11 @@ export interface FiltroEmprestimo {
   filtroDataEmprestimo: DateRange | undefined;
 }
 
-
 const token: string | null = localStorage.getItem("authToken");
 
 export function Emprestimos() {
   // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
-  const [observacao, setObservacao] = useState<string | null>(null);
+
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -95,6 +94,7 @@ export function Emprestimos() {
       chave: chaveSelecionadaId,
       usuario_responsavel: responsavelSelecionadoId,
       usuario_solicitante: solicitanteSelecionadoId,
+      observacao: observacao,
       token: token,
     };
 
@@ -110,7 +110,7 @@ export function Emprestimos() {
     } else {
       try {
         const response = await api.post(
-          url_base + "/chameco/api/v1/realizar-emprestimo/",
+          "/chameco/api/v1/realizar-emprestimo/",
           novoEmprestimo,
           {
             headers: {
@@ -169,6 +169,7 @@ export function Emprestimos() {
   }
 
   const [editarObservacao, setEditarObservacao] = useState("");
+  const [observacao, setObservacao] = useState<string | null>(null);
 
   function editarObservacaoCriacao(e: React.FormEvent) {
     e.preventDefault();
@@ -185,6 +186,12 @@ export function Emprestimos() {
       (exibirEmprestimoAtual) => !exibirEmprestimoAtual
     );
   };
+
+  // Ainda está faltando o loading e o error
+  const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(false); 
+  const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(true); 
+  console.log("Emprestimos pendentes:", emprestimosPendentes);
+  console.log("Emprestimos concluidos:", emprestimosConcluidos);
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
@@ -503,13 +510,13 @@ export function Emprestimos() {
               }`}
             >
               <EmprestimosPendentes
-                emprestimos={new_emprestimos}
+                new_emprestimos={emprestimosPendentes}
                 salas={salas}
                 chaves={chaves}
                 solicitantes={usuarios}
                 responsaveis={usuarios}
                 dataRetirada=""
-                horaRetirada=""
+                horario_emprestimo=""
                 observacao={observacao}
                 pesquisa={pesquisa}
               />
@@ -517,26 +524,28 @@ export function Emprestimos() {
             {/* fim tabela de emprestimo pendente */}
 
             {/* tabela com emprestimo concluido */}
+            {!exibirEmprestimosPendentes && (
             <div
-              className={`overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96 ${
-                !exibirEmprestimosPendentes ? "block" : "hidden"
-              }`}
+              className={'overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96'
+              
+            }
             >
               <EmprestimosConcluidos
+                new_emprestimos={emprestimosConcluidos}
                 salas={salas}
                 chaves={chaves}
                 responsaveis={usuarios}
                 solicitantes={usuarios}
-                emprestimos={new_emprestimos}
                 observacao={observacao}
                 dataRetirada=""
-                horaRetirada=""
+                horario_emprestimo=""
                 dataDevolucao=""
-                horaDevolucao=""
+                horario_devolucao=""
                 pesquisa={pesquisa}
               />
               {/* fim tabela com emprestimo concluido */}
             </div>
+            )}
             {/* fim tabela de emprestimo concluido */}
           </div>
           {/* fim conteudo central tabela*/}

@@ -1,5 +1,6 @@
-import axios from "axios";
+// import axios from "axios";
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 
 
@@ -35,7 +36,7 @@ const useGetSalas = () => {
             } else {
                 
                 const params = new URLSearchParams({ token });
-                const url = `${url_base}/chameco/api/v1/salas/?${params.toString()}`;
+                const url = `/chameco/api/v1/salas/?${params.toString()}`;
         
                 try {
                     const response = await api.get(url, {
