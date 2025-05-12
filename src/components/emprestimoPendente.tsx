@@ -9,6 +9,14 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
+import api from "../services/api";
+import { set } from "date-fns";
+import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
+import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
+import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+
 // import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 
 interface EmprestimosPendentesProps {
@@ -21,6 +29,12 @@ interface EmprestimosPendentesProps {
   dataRetirada: string;
   horario_emprestimo: string;
   pesquisa: string;
+}
+
+interface IusuarioResponsavel {
+  id: number;
+  nome: string;
+  superusuario: number;
 }
 
 export function EmprestimosPendentes({
@@ -36,6 +50,10 @@ export function EmprestimosPendentes({
   const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] =
     useState<DateRange | undefined>();
 
+  const {usuarios} = useGetUsuarios();
+  const {salas: salasData} = useGetSalas();
+  const {chaves: chavesData} = useGetChaves();
+
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
     chave: "",
@@ -45,6 +63,7 @@ export function EmprestimosPendentes({
     horaRetirada: "",
   });
   const [isFiltroPendente, setIsFiltroPendente] = useState(true);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   //pegando o nome através do id (foi necessário criar isso, pois o tipo desses 4 é number)
 
@@ -68,18 +87,32 @@ export function EmprestimosPendentes({
 
   //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
   function formatarDataHora(dataFormatada: string) {
-  const data = new Date(dataFormatada);
-  const dataBr = data.toLocaleDateString("pt-BR");
-  const horaBr = data.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+    const data = new Date(dataFormatada);
+    const dataBr = data.toLocaleDateString("pt-BR");
+    const horaBr = data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  return {
-    data: dataBr,
-    hora: horaBr,
-  };
-}
+    return {
+      data: dataBr,
+      hora: horaBr,
+    };
+  }
+
+  //função para buscar o nome do usuario responsável pelo id
+  function buscarNomeUsuarioPorId(id: number | null, listaUsuarios: IusuarioResponsavel[]) {
+    const usuario = listaUsuarios.find(usuario => usuario.id === id);
+    return usuario ? usuario.nome : 'Responsável não encontrado';
+  }
+  
+  function buscarNomeSalaPorIdChave(idChave: number | null, listaChaves: any[], listaSalas: any[]) {
+    const chave = listaChaves.find(chave => chave.id === idChave);
+    if (!chave) return 'Chave não encontrada';
+  
+    const sala = listaSalas.find(sala => sala.id === chave.sala);
+    return sala ? sala.nome : 'Sala não encontrada';
+  }
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
@@ -167,8 +200,9 @@ export function EmprestimosPendentes({
     setIsDetalhesModalOpen(true);
   }
 
-  function closeDetalhesModal() {
+  const closeDetalhesModal = () => {
     setIsDetalhesModalOpen(false);
+    console.log("fechou");
   }
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -213,9 +247,59 @@ export function EmprestimosPendentes({
     closeDeleteModal();
   }
 
+  async function finalizarEmprestimo(emprestimo: number | undefined | null) {
+
+      try {
+
+        const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {id_emprestimo : emprestimo});
+
+        if (!response) {
+          console.error("Erro ao finalizar o empréstimo");
+          return;
+        }
+
+        console.log("Empréstimo finalizado com sucesso!", response.data);
+
+        setIsSuccessModalOpen(true);
+
+
+      } catch (error) {
+        const statusResponse = error.response?.status;
+
+        if (statusResponse === 400) {
+          console.log("Emprestimo já finalizado!", error.response.data);
+          return;
+        }
+        if (statusResponse === 401) {
+          console.log("Emprestimo não encontrado!");  
+          return;
+        }
+        if (statusResponse === 403) {
+          console.log("Você não tem permissão para finalizar este empréstimo!");
+          return;
+        }
+        if (statusResponse === 500) {
+          console.log("Erro interno do servidor! Contate o suporte.");
+          return;
+        }
+      } finally {
+        handleCloseModalAndReload();
+      }
+  }
+
+  const handleCloseModalAndReload = () => {
+    setTimeout(() => { 
+      setIsSuccessModalOpen(false) 
+      window.location.reload();
+    }, 5000);
+  }
+
   return (
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
+
+        {isSuccessModalOpen && (<PopUpdeDevolucao/>)}
+
         <thead className="bg-white top-0 ">
           <tr>
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%]">
@@ -509,7 +593,7 @@ export function EmprestimosPendentes({
                 <tr key={index}>
                   <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {getNomeSala(emprestimo.sala) || "Sala não encontrada"}
+                      {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salasData)}
                     </p>
                   </td>
                   <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
@@ -525,8 +609,7 @@ export function EmprestimosPendentes({
                   </td>
                   <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {getNomeResponsavel(emprestimo.usuario_responsavel) ||
-                        "Responsavel não encontrado"}
+                      {buscarNomeUsuarioPorId(emprestimo.usuario_responsavel, usuarios)}
                     </p>
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
@@ -536,7 +619,7 @@ export function EmprestimosPendentes({
                     {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
                   </td>
                   <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
-                    <div className=" flex justify-center items-center mr-1 gap-2 p-1">
+                    <div onClick={() => finalizarEmprestimo(emprestimo.id)} className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer">
                       <Check color="white" size={18} />
                       <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
                         DEVOLVER
@@ -555,173 +638,183 @@ export function EmprestimosPendentes({
                   {/* Adicionando pop up de detalhes do empréstimo */}
                   {isDetalhesModalOpen && (
                     // emprestimo.id === emprestimoSelecionado?.id &&
-                    <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                      <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
-                        <div className="flex justify-between w-full px-3">
-                          <p className="text-[#192160] text-left text-[20px] font-semibold pr-6">
-                            DETALHES
-                          </p>
-                          <div className="flex justify-center items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={openEditModal}
-                              className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                fill="#646999"
-                                className="bi bi-pen"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                              </svg>
-                              Editar
-                            </button>
+                    // <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                    //   <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
+                    //     <div className="flex justify-between w-full px-3">
+                    //       <p className="text-[#192160] text-left text-[20px] font-semibold pr-6">
+                    //         DETALHES
+                    //       </p>
+                    //       <div className="flex justify-center items-center gap-3">
+                    //         <button
+                    //           type="button"
+                    //           onClick={openEditModal}
+                    //           className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
+                    //         >
+                    //           <svg
+                    //             xmlns="http://www.w3.org/2000/svg"
+                    //             width="12"
+                    //             height="12"
+                    //             fill="#646999"
+                    //             className="bi bi-pen"
+                    //             viewBox="0 0 16 16"
+                    //           >
+                    //             <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                    //           </svg>
+                    //           Editar
+                    //         </button>
 
-                            {/* Começo do pop up de editar observacao*/}
-                            {isEditModalOpen && (
-                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                <form
-                                  // onSubmit={editarObservacao}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                                >
-                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                      EDITAR OBSERVAÇÃO
-                                    </p>
+                    //         {/* Começo do pop up de editar observacao*/}
+                    //         {isEditModalOpen && (
+                    //           <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                    //             <form
+                    //               // onSubmit={editarObservacao}
+                    //               className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                    //             >
+                    //               <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                    //                 <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                    //                   EDITAR OBSERVAÇÃO
+                    //                 </p>
 
-                                    <button
-                                      onClick={closeEditModal}
-                                      type="button"
-                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                    >
-                                      <X className=" mb-[5px] text-[#192160]" />
-                                    </button>
-                                  </div>
+                    //                 <button
+                    //                   onClick={closeEditModal}
+                    //                   type="button"
+                    //                   className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                    //                 >
+                    //                   <X className=" mb-[5px] text-[#192160]" />
+                    //                 </button>
+                    //               </div>
 
-                                  <div className="justify-center items-center ml-[40px] mr-8">
-                                    <p className="text-[#192160] text-sm font-medium mb-1">
-                                      Digite a nova observação
-                                    </p>
+                    //               <div className="justify-center items-center ml-[40px] mr-8">
+                    //                 <p className="text-[#192160] text-sm font-medium mb-1">
+                    //                   Digite a nova observação
+                    //                 </p>
 
-                                    <input
-                                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                                      type="text"
-                                      placeholder="Observação"
-                                      value={
-                                        observacao !== null ? observacao : ""
-                                      }
-                                      onChange={(e) =>
-                                        setObservacao(e.target.value)
-                                      }
-                                    />
-                                  </div>
+                    //                 <input
+                    //                   className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                    //                   type="text"
+                    //                   placeholder="Observação"
+                    //                   value={
+                    //                     observacao !== null ? observacao : ""
+                    //                   }
+                    //                   onChange={(e) =>
+                    //                     setObservacao(e.target.value)
+                    //                   }
+                    //                 />
+                    //               </div>
 
-                                  <div className="flex justify-center items-center mt-[10px] w-full">
-                                    <button
-                                      type="submit"
-                                      onClick={editarObservacao}
-                                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                                    >
-                                      SALVAR ALTERAÇÕES
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
-                            {/* Fim do pop up de editar observacao */}
+                    //               <div className="flex justify-center items-center mt-[10px] w-full">
+                    //                 <button
+                    //                   type="submit"
+                    //                   onClick={editarObservacao}
+                    //                   className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                    //                 >
+                    //                   SALVAR ALTERAÇÕES
+                    //                 </button>
+                    //               </div>
+                    //             </form>
+                    //           </div>
+                    //         )}
+                    //         {/* Fim do pop up de editar observacao */}
 
-                            <button
-                              type="button"
-                              onClick={openDeleteModal}
-                              className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                fill="#e11d48"
-                                className="bi bi-x-lg"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                              </svg>
-                              Excluir
-                            </button>
+                    //         <button
+                    //           type="button"
+                    //           onClick={openDeleteModal}
+                    //           className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
+                    //         >
+                    //           <svg
+                    //             xmlns="http://www.w3.org/2000/svg"
+                    //             width="12"
+                    //             height="12"
+                    //             fill="#e11d48"
+                    //             className="bi bi-x-lg"
+                    //             viewBox="0 0 16 16"
+                    //           >
+                    //             <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                    //           </svg>
+                    //           Excluir
+                    //         </button>
 
-                            {/* Adicionando pop up de deletar observacao */}
-                            {isDeleteModalOpen && (
-                              // emprestimo.id === emprestimoSelecionado?.id &&
-                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                <form
-                                  onSubmit={removeObservacao}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                                >
-                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                                      EXCLUIR OBSERVAÇÃO
-                                    </p>
-                                    <button
-                                      onClick={closeDeleteModal}
-                                      type="button"
-                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                    >
-                                      <X className=" text-[#192160]" />
-                                    </button>
-                                  </div>
-                                  <TriangleAlert className="size-16 text-red-700" />
+                    //         {/* Adicionando pop up de deletar observacao */}
+                    //         {isDeleteModalOpen && (
+                    //           // emprestimo.id === emprestimoSelecionado?.id &&
+                    //           <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                    //             <form
+                    //               onSubmit={removeObservacao}
+                    //               className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                    //             >
+                    //               <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                    //                 <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                    //                   EXCLUIR OBSERVAÇÃO
+                    //                 </p>
+                    //                 <button
+                    //                   onClick={closeDeleteModal}
+                    //                   type="button"
+                    //                   className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                    //                 >
+                    //                   <X className=" text-[#192160]" />
+                    //                 </button>
+                    //               </div>
+                    //               <TriangleAlert className="size-16 text-red-700" />
 
-                                  <p className="text-center px-2">
-                                    Essa ação é{" "}
-                                    <strong className="font-semibold ">
-                                      definitiva
-                                    </strong>{" "}
-                                    e não pode ser desfeita.{" "}
-                                    <strong className="font-semibold">
-                                      Tem certeza disso?
-                                    </strong>
-                                  </p>
-                                  <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                                    <button
-                                      onClick={closeDeleteModal}
-                                      type="button"
-                                      className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                                    >
-                                      CANCELAR
-                                    </button>
-                                    <button
-                                      type="submit"
-                                      onClick={removeObservacao}
-                                      className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                                    >
-                                      EXCLUIR
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            onClick={closeDetalhesModal}
-                            type="button"
-                            className="px-2 py-1 rounded flex-shrink-0 "
-                          >
-                            <X className=" mb-[5px] text-[#192160]" />
-                          </button>
-                        </div>
+                    //               <p className="text-center px-2">
+                    //                 Essa ação é{" "}
+                    //                 <strong className="font-semibold ">
+                    //                   definitiva
+                    //                 </strong>{" "}
+                    //                 e não pode ser desfeita.{" "}
+                    //                 <strong className="font-semibold">
+                    //                   Tem certeza disso?
+                    //                 </strong>
+                    //               </p>
+                    //               <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                    //                 <button
+                    //                   onClick={closeDeleteModal}
+                    //                   type="button"
+                    //                   className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                    //                 >
+                    //                   CANCELAR
+                    //                 </button>
+                    //                 <button
+                    //                   type="submit"
+                    //                   onClick={removeObservacao}
+                    //                   className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                    //                 >
+                    //                   EXCLUIR
+                    //                 </button>
+                    //               </div>
+                    //             </form>
+                    //           </div>
+                    //         )}
+                    //       </div>
+                    //       <button
+                    //         onClick={closeDetalhesModal}
+                    //         type="button"
+                    //         className="px-2 py-1 rounded flex-shrink-0 "
+                    //       >
+                    //         <X className=" mb-[5px] text-[#192160]" />
+                    //       </button>
+                    //     </div>
 
-                        <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
-                          <p className="text-[#192160] font-medium p-1">
-                            {emprestimoSelecionado?.observacao ||
-                              "Detalhes sobre o empréstimo"}
-                          </p>
-                        </div>
-                      </form>
-                    </div>
+                    //     <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
+                    //       <p className="text-[#192160] font-medium p-1">
+                    //         {emprestimoSelecionado?.observacao ||
+                    //           "Detalhes sobre o empréstimo"}
+                    //       </p>
+                    //     </div>
+                    //   </form>
+                    // </div>
+                    <IsDetalhesModal
+                      observacao={observacao}
+                      setObservacao={setObservacao}
+                      emprestimoSelecionado={emprestimoSelecionado}
+                      removeObservacao={removeObservacao}
+                      closeDetalhesModal={closeDetalhesModal}
+                      editarObservacao={editarObservacao}
+                      openDeleteModal={openDeleteModal}
+                      closeDeleteModal={closeDeleteModal}
+                      isDeleteModalOpen={isDeleteModalOpen}
+                    />
                   )}
-                  {/* Fim adicionando pop up de detalhes do emprestimo */}
                 </tr>
               ))
           ) : (

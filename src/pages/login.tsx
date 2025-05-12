@@ -203,15 +203,12 @@ export function Login() {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
-              {/* {errorSenha && (
+              {errorSenha && (
                 <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
                   {errorSenha}
                 </div>
-              )} */}
+              )}
 
-              <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
-                  {"Erro: " + errorSenha}
-              </div>
 
               {/* Adicionando botão de entrar */}
               <div className="mt-[15px] text-center items-center ml-[60px]">

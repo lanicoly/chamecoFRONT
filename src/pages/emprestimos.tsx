@@ -30,6 +30,7 @@ import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
 export interface Iemprestimo {
+  id?: number | null;
   sala?: number | null;
   chave: number | null;
   usuario_solicitante: number | null;
@@ -55,21 +56,11 @@ export function Emprestimos() {
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
-    null
-  );
-
-  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
-    null
-  );
-
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<
-    number | null
-  >(null);
-
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<
-    number | null
-  >(null);
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
+  const [observacao, setObservacao] = useState<string | null>(null);
 
   const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
   const [onReset, setOnReset] = useState(false);
@@ -109,16 +100,8 @@ export function Emprestimos() {
       return;
     } else {
       try {
-        const response = await api.post(
-          "/chameco/api/v1/realizar-emprestimo/",
-          novoEmprestimo,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.post("/chameco/api/v1/realizar-emprestimo/", novoEmprestimo)
+
         setEmprestimos((prevEmprestimos) => [
           ...prevEmprestimos,
           response.data,
@@ -138,14 +121,18 @@ export function Emprestimos() {
         setSolicitanteSelecionadoId(null);
         setResponsavelSelecionadoId(null);
         setObservacao("");
+        handleCloseMOdalAndReload();
       }
     }
   }
 
-  setTimeout(() => {
-    setIsSuccesModalOpen(false);
-    setIsPopUpErrorOpen(false);
-  }, 3000);
+  const handleCloseMOdalAndReload = () => {
+    setTimeout(() => {  
+        setIsSuccesModalOpen(false);
+        setIsPopUpErrorOpen(false); 
+        window.location.reload();
+    }, 5000);
+  }
 
   const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
@@ -169,7 +156,6 @@ export function Emprestimos() {
   }
 
   const [editarObservacao, setEditarObservacao] = useState("");
-  const [observacao, setObservacao] = useState<string | null>(null);
 
   function editarObservacaoCriacao(e: React.FormEvent) {
     e.preventDefault();
@@ -325,7 +311,7 @@ export function Emprestimos() {
                       </div>
                     </td>
                     <td
-                      onClick={criarEmprestimo}
+                      onClick={() => criarEmprestimo()}
                       className="border-2 border-[#B8BCE0] border-solid bg-primary-green  p-0.5 font-semibold break-words cursor-pointer"
                     >
                       <div className=" flex justify-center items-center mr-1 gap-2">

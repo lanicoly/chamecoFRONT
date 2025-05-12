@@ -10,11 +10,13 @@ export function MenuTopo({ text, backRoute }:MenuTopoProps) {
 
   const handleLogout = () => {
     // Limpar o token e os dados do usuário
-    localStorage.removeItem("token");
-    localStorage.removeItem("userData");
+    // localStorage.removeItem("token");
+    // localStorage.removeItem("userData");
     
-    // Disparar evento para notificar a mudança no estado de autenticação
-    window.dispatchEvent(new Event('storage'));
+    // // Disparar evento para notificar a mudança no estado de autenticação
+    // window.dispatchEvent(new Event('storage'));
+    
+    localStorage.clear();
     
     // Redirecionar para a página de login
     navigate("/login");
