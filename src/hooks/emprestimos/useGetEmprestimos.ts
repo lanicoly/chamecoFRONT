@@ -36,7 +36,6 @@ const useGetEmprestimos = (finalizados?: boolean) => {
         }
 
         const url = `/chameco/api/v1/emprestimos/?${params.toString()}`;
-        console.log("URL da requisição:", url); 
 
         try {
           const response = await api.get(url);

@@ -1,8 +1,19 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { buscarNomeChavePorIdSala } from '../../utils/buscarNomeChavePorIdSala';
+import useGetSalas from '../../hooks/salas/useGetSalas';
+
 
 export interface IoptionChaves {
   id: number;
   sala: number;
+  disponivel: boolean;
+  usuarios: any[]; // Ou o tipo mais adequado para usuários
+}
+
+interface IoptionSalas {
+  id: number;
+  bloco: number;
+  nome: string;
 }
 
 interface IdropdownResponsavelProps {
@@ -14,22 +25,26 @@ interface IdropdownResponsavelProps {
 
 export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
+  const {salas} = useGetSalas();
+
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<number | null | string>("");
-  const [selectedOption, setSelectedOption] = useState<IoptionChaves | null>(null);
+  const [searchTerm, setSearchTerm] = useState<number>(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  // const [selectedOption, setSelectedOption] = useState<IoptionChaves | null>(null);
 
   const filterdItems = useMemo(() => {
     // const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.sala);
+    // return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
+    return items.filter((item) => item.id);
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (option: IoptionChaves) => {
-    setSelectedOption(option);
-    setSearchTerm(option.sala);
+    setSelectedOption(option.sala);
+    setSearchTerm(option.id);
     setIsOpen(false);
-    onSelectItem(option.id); // Chama o callback com o ID do item selecionado
+    onSelectItem(option.id); // Chama o callback com o ID da chave selecionada
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +66,7 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
     };
   }, []);
 
-  console.log('items no filtro:', selectedOption?.sala);
+  console.log('items no filtro:', selectedOption);
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -59,7 +74,7 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
         <input
             type="text"
             placeholder="Chave"
-            value={reset ? "" : String(searchTerm)}
+            value={searchTerm}
             onChange={handleInputChange}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
@@ -83,7 +98,8 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {option.sala}
+              {/* {option.sala} */}
+              {buscarNomeChavePorIdSala(option.sala, items, salas)}
             </div>
           ))}
         </div>

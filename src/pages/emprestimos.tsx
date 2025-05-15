@@ -3,10 +3,7 @@ import React, { useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
-// import { he, is, ptBR } from 'date-fns/locale';
 import { Pesquisa } from "../components/pesquisa";
-// import { PassadorPagina } from "../components/passadorPagina";
-// import { FiltroModal } from "../components/filtragemModal";
 import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
@@ -16,14 +13,9 @@ import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
-// import { obterDataAtual } from "../utils/obterDataAtual";
-// import { obterHoraAtual } from "../utils/obterHoraAtual";
-// import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
-// import { PopUpdeDevolucao } from "../components/popups/popUpdeDevolucao";
 import { PopUpError } from "../components/popups/PopUpError";
-// import { set } from "date-fns";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 
@@ -244,9 +236,9 @@ export function Emprestimos() {
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
                 <thead className="bg-white sticky top-0 z-11">
                   <tr>
-                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
+                    {/* <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a sala
-                    </th>
+                    </th> */}
                     <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a chave
                     </th>
@@ -262,7 +254,7 @@ export function Emprestimos() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                    {/* <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputSalas
                         items={salas}
                         onSelectItem={(idSelecionado) => {
@@ -270,12 +262,12 @@ export function Emprestimos() {
                         }}
                         reset={onReset}
                       />
-                    </td>
+                    </td> */}
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputChaves
                         items={chaves}
                         onSelectItem={(idSelecionado) => {
-                          setChaveSelecionadaId(idSelecionado);
+                          setChaveSelecionadaId(Number(idSelecionado) || null);
                         }}
                         reset={onReset}
                       />
@@ -477,16 +469,6 @@ export function Emprestimos() {
                   </p>
                 </button>
               </div>
-
-              {/* input de pesquisa */}
-              <div>
-                <Pesquisa
-                  pesquisa={pesquisa}
-                  setIsSearching={setIsSearching}
-                  setPesquisa={setPesquisa}
-                />
-              </div>
-              {/* fim input de pesquisa */}
             </div>
 
             {/* tabela com emprestimo pendente */}
@@ -511,26 +493,22 @@ export function Emprestimos() {
 
             {/* tabela com emprestimo concluido */}
             {!exibirEmprestimosPendentes && (
-            <div
-              className={'overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96'
-              
-            }
-            >
-              <EmprestimosConcluidos
-                new_emprestimos={emprestimosConcluidos}
-                salas={salas}
-                chaves={chaves}
-                responsaveis={usuarios}
-                solicitantes={usuarios}
-                observacao={observacao}
-                dataRetirada=""
-                horario_emprestimo=""
-                dataDevolucao=""
-                horario_devolucao=""
-                pesquisa={pesquisa}
-              />
-              {/* fim tabela com emprestimo concluido */}
-            </div>
+              <div className={'overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96'}>
+                <EmprestimosConcluidos
+                  new_emprestimos={emprestimosConcluidos}
+                  salas={salas}
+                  chaves={chaves}
+                  responsaveis={usuarios}
+                  solicitantes={usuarios}
+                  observacao={observacao}
+                  dataRetirada=""
+                  horario_emprestimo=""
+                  dataDevolucao=""
+                  horario_devolucao=""
+                  pesquisa={pesquisa}
+                />
+                {/* fim tabela com emprestimo concluido */}
+              </div>
             )}
             {/* fim tabela de emprestimo concluido */}
           </div>
