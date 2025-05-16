@@ -100,6 +100,7 @@ export function Emprestimos() {
         ]);
         console.log("Emprestimo criado!", novoEmprestimo);
         setIsSuccesModalOpen(!isSuccesModalOpen);
+        window.location.reload();
       } catch (error) {
         console.error(
           "Erro ao criar o empréstimo:",
@@ -122,8 +123,7 @@ export function Emprestimos() {
     setTimeout(() => {  
         setIsSuccesModalOpen(false);
         setIsPopUpErrorOpen(false); 
-        window.location.reload();
-    }, 5000);
+    }, 2000);
   }
 
   const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);

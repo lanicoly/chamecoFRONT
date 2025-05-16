@@ -547,7 +547,7 @@ export function EmprestimosPendentes({
                   </td>
                   <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {emprestimo.chave || "Chave não encontrada"}
+                      {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salasData)}`}
                     </p>
                   </td>
                   <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">

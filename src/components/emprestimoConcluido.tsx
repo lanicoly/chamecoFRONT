@@ -9,6 +9,9 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
+import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 
 interface EmprestimosConcluidosProps {
   salas: IoptionSalas[];
@@ -31,6 +34,8 @@ export function EmprestimosConcluidos({
   solicitantes,
   pesquisa,
 }: EmprestimosConcluidosProps) {
+
+  const {chaves} = useGetChaves();
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -675,10 +680,10 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {getNomeSala(emprestimo.sala) || "Sala não encontrada"}
+                    {buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {emprestimo.chave || "Chave não encontrada"}
+                    {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {getNomeSolicitante(emprestimo.usuario_solicitante) ||
