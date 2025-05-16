@@ -23,32 +23,34 @@ interface IdropdownResponsavelProps {
 }
 
 
-export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownResponsavelProps) {
+export function FilterableInputChaves({items, onSelectItem}: IdropdownResponsavelProps) {
 
   const {salas} = useGetSalas();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<number>(0);
+  // const [searchTerm, setSearchTerm] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   // const [selectedOption, setSelectedOption] = useState<IoptionChaves | null>(null);
 
   const filterdItems = useMemo(() => {
     // const lowerSearch = searchTerm.toLowerCase();
     // return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
-    return items.filter((item) => item.id);
+    return items.filter((item) => buscarNomeChavePorIdSala(item.sala, items, salas).toLowerCase().includes(searchTerm.toLowerCase()));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (option: IoptionChaves) => {
-    setSelectedOption(option.sala);
-    setSearchTerm(option.id);
+    setSelectedOption(option.id);
+    setSearchTerm(buscarNomeChavePorIdSala(option.sala, items, salas));
     setIsOpen(false);
     onSelectItem(option.id); // Chama o callback com o ID da chave selecionada
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(Number(e.target.value));
+    // setSearchTerm(Number(e.target.value));
+    setSearchTerm(e.target.value);
     setIsOpen(true); // Sempre abrir o dropdown ao digitar
   };
 
@@ -66,7 +68,7 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
     };
   }, []);
 
-  console.log('items no filtro:', selectedOption);
+  console.log('item no filtro de chave:', selectedOption);
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -98,7 +100,6 @@ export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownRes
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {/* {option.sala} */}
               {buscarNomeChavePorIdSala(option.sala, items, salas)}
             </div>
           ))}
