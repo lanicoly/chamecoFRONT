@@ -7,7 +7,6 @@ import api from "../../services/api";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
-console.log("useGetUsuarios.ts");
 
 const useGetUsuarios = () => {
 

@@ -68,8 +68,7 @@ export function FilterableInputChaves({items, onSelectItem}: IdropdownResponsave
     };
   }, []);
 
-  console.log('item no filtro de chave:', selectedOption);
-
+  
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">

@@ -50,8 +50,7 @@ export function Login() {
         const statusResponse = response.status;
 
         // Adicionar o console.log para exibir os dados da resposta(obter token)
-        console.log("Resposta do backend:", response);
-
+        
         
       if (statusResponse === 200 && response.data?.token) { //testar sem status response
 

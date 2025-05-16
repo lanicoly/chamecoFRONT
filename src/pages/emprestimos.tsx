@@ -66,12 +66,7 @@ export function Emprestimos() {
   const { usuarios } = useGetUsuarios();
   const { new_emprestimos } = useGetEmprestimos();
 
-  console.log("Responsaveis:", responsaveis);
-  console.log("Chaves:", chaves);
-  console.log("Salas:", salas);
-  console.log("Usuarios:", usuarios);
-  console.log("Emprestimos:", new_emprestimos);
-
+          
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,
@@ -81,8 +76,7 @@ export function Emprestimos() {
       token: token,
     };
 
-    console.log("Dados do novo empréstimo:", novoEmprestimo);
-
+    
     if (
       novoEmprestimo.chave === null ||
       novoEmprestimo.usuario_responsavel === null ||
@@ -98,7 +92,6 @@ export function Emprestimos() {
           ...prevEmprestimos,
           response.data,
         ]);
-        console.log("Emprestimo criado!", novoEmprestimo);
         setIsSuccesModalOpen(!isSuccesModalOpen);
         window.location.reload();
       } catch (error) {
@@ -168,9 +161,7 @@ export function Emprestimos() {
   // Ainda está faltando o loading e o error
   const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(false); 
   const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(true); 
-  console.log("Emprestimos pendentes:", emprestimosPendentes);
-  console.log("Emprestimos concluidos:", emprestimosConcluidos);
-
+    
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
       {isSuccesModalOpen && <PopUpdeSucesso />}

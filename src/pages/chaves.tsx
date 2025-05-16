@@ -6,6 +6,7 @@ import { Pesquisa } from "../components/pesquisa";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
 import axios from "axios";
 import { MenuTopo } from "../components/menuTopo";
+import api from "../services/api";
 
 export interface Chaves {
   id: number;
@@ -50,9 +51,7 @@ export function Chaves() {
       const data = response.data;
 
       if (statusResponse === 200) {
-        console.log("Get de chaves realizada ");
-        console.log(data.results);
-
+                
         const chaves = [];
 
         if (Array.isArray(data.results)) {
@@ -77,7 +76,6 @@ export function Chaves() {
 
   //Adicionando integracao entre chaves locais e api (POST)
   async function adicionarChaveAPI(novaChave: Chaves) {
-    console.log("Chave", novaChave);
     try {
       const response = await api.post(
         `${API_URL}?token=${token}`,
@@ -89,7 +87,6 @@ export function Chaves() {
         }
       );
 
-      console.log("Chave adicionada com sucesso:", response.data);
       // Atualiza a lista de chaves após adicionar e mostra na tela
       obterChaves();
     } catch (error: unknown) {
@@ -142,7 +139,6 @@ export function Chaves() {
       );
   
       if (response.status === 200) {
-        console.log("Chave editada com sucesso na API:", response.data);
         return response.data;
       }
     } catch (error: unknown) {
@@ -178,8 +174,7 @@ export function Chaves() {
       );
 
       if (response.status === 200 || response.status === 204) {
-        console.log("Chave excluída com sucesso");
-      }
+        ""      }
     } catch (error: unknown) {
       console.error("Erro ao excluir chave:", error);
     }

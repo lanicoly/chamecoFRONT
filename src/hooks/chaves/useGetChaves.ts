@@ -6,7 +6,6 @@ import { set } from "date-fns";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
-console.log("useGetChaves.ts");
 
 const useGetChaves = () => {
 

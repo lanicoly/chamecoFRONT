@@ -56,8 +56,7 @@ export function EmprestimosPendentes({
   const {salas: salasData} = useGetSalas();
   const {chaves: chavesData} = useGetChaves();
 
-  console.log("Resultado: ", buscarNomeChavePorIdSala(3, chavesData, salasData));
-
+  
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
     chave: "",
@@ -152,8 +151,7 @@ export function EmprestimosPendentes({
 
   const closeDetalhesModal = () => {
     setIsDetalhesModalOpen(false);
-    console.log("fechou");
-  }
+    ""  }
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -208,8 +206,7 @@ export function EmprestimosPendentes({
           return;
         }
 
-        console.log("Empréstimo finalizado com sucesso!", response.data);
-
+        
         setIsSuccessModalOpen(true);
 
       } catch (error) {

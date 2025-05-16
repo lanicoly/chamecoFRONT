@@ -6,7 +6,6 @@ import api from "../../services/api";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
-console.log("useGetResponsaveis.ts");
 
 
 const useGetResponsaveis = () => {

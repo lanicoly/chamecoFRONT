@@ -4,7 +4,6 @@ import api from "../../services/api";
 
 const CACHE_TTL = 60 * 5; // 5 minutes
 
-console.log("useGetEmprestimos.ts");
 
 const useGetEmprestimos = (finalizados?: boolean) => {
   const [emprestimos, setChaves] = useState([]);
@@ -47,8 +46,7 @@ const useGetEmprestimos = (finalizados?: boolean) => {
 
           localStorage.setItem("emprestimos", JSON.stringify(response.data.results || []));
           localStorage.setItem("emprestimosTimestamp", Date.now().toString());
-          console.log("Resposta da API:", response.data);
-        } catch (err) {
+          ""        } catch (err) {
           console.error("Erro na requisição:", err);
           setError(err as Error);
         } finally {

@@ -112,7 +112,7 @@ export function Salas() {
             "Content-Type": "application/json",
           },
         });
-        console.log("Sala adicionada com sucesso!", response.data);
+                
         obterSalas();
       } catch (error: unknown) {
         console.log("Erro ao adicionar sala", error);
@@ -148,7 +148,7 @@ export function Salas() {
           data: { nome, token, bloco }
         });
     
-        console.log("Sala excluído com sucesso!", response.data);
+              
       } catch (error: unknown) {
         console.error("Erro ao excluir sala:", error);
       }
@@ -197,7 +197,7 @@ export function Salas() {
         );
   
         if (response.status === 200) {
-          console.log("Sala editada com sucesso!", response.data);
+                    
           return response.data;
         }
       } catch (error: unknown) {
