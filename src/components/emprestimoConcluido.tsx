@@ -4,11 +4,14 @@ import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { Info, X, TriangleAlert } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
+// import { data } from "autoprefixer";
 
 interface EmprestimosConcluidosProps {
   salas: IoptionSalas[];
@@ -24,17 +27,22 @@ interface EmprestimosConcluidosProps {
   pesquisa: string;
 }
 
+interface IusuarioResponsavel {
+  id: number;
+  nome: string;
+  superusuario: number;
+}
+
 export function EmprestimosConcluidos({
   new_emprestimos,
   salas,
-  responsaveis,
   solicitantes,
-  pesquisa,
 }: EmprestimosConcluidosProps) {
+  const { chaves } = useGetChaves();
+  const { responsaveis } = useGetResponsaveis();
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
-
 
   //constantes para filtrar data de devolução/retirada
   const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
@@ -44,11 +52,6 @@ export function EmprestimosConcluidos({
     filtroDataEmprestimoRetiradaConcluidos,
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
-
-  function converterDataBRparaDate(dataStr: string): Date {
-    const [dia, mes, ano] = dataStr.split("/");
-    return new Date(Number(ano), Number(mes) - 1, Number(dia));
-  }
 
   const [filtroConcluido, setFiltroConcluido] = useState({
     sala: "",
@@ -62,127 +65,164 @@ export function EmprestimosConcluidos({
   });
   const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
 
-  // const getNomeChave = (idChave: number | null | undefined) =>
-  //   idChave != null ? chaves.find((chave) => chave.id === idChave)?.nome || "" : "";
-
   const getNomeSolicitante = (idSolicitante: number | null | undefined) =>
     idSolicitante != null
       ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
       : "";
 
-  const getNomeSala = (idSala: number | null | undefined) =>
-    idSala != null
-      ? salas.find((sala) => sala.superusuario === idSala)?.nome || ""
-      : "";
-
-  const getNomeResponsavel = (idResponsavel: number | null | undefined) =>
-    idResponsavel != null
-      ? responsaveis.find((r) => r.superusuario === idResponsavel)?.nome || ""
-      : "";
-
   //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
   function formatarDataHora(dataFormatada: string) {
-  const data = new Date(dataFormatada);
-  const dataBr = data.toLocaleDateString("pt-BR");
-  const horaBr = data.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+    const data = new Date(dataFormatada);
+    const dataBr = data.toLocaleDateString("pt-BR");
+    const horaBr = data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  return {
-    data: dataBr,
-    hora: horaBr,
-  };
-}
+    return {
+      data: dataBr,
+      hora: horaBr,
+    };
+  }
+
+  //função para buscar o nome do usuario responsável pelo id
+  function buscarNomeUsuarioPorId(
+    id: number | null,
+    listaUsuarios: IusuarioResponsavel[]
+  ) {
+    const usuario = listaUsuarios.find((usuario) => usuario.id === id);
+    return usuario ? usuario.nome : "Responsável não encontrado";
+  }
+
+  function buscarNomeSalaPorIdChave(
+    idChave: number | null,
+    listaChaves: any[],
+    listaSalas: any[]
+  ) {
+    const chave = listaChaves.find((chave) => chave.id === idChave);
+    if (!chave) return "Chave não encontrada";
+
+    const sala = listaSalas.find((sala) => sala.id === chave.sala);
+    return sala ? sala.nome : "Sala não encontrada";
+  }
 
   const emprestimosFiltradosConcluidos = new_emprestimos
-  .filter((emp) => {
-    const salaNome = getNomeSala(emp.sala);
-    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
-    const dataHoraRetirada = emp.dataRetirada
-      ? formatarDataHora(emp.dataRetirada)
-      : { data: '', hora: '' };
-      
-    const dataHoraEmprestimoDevolucao = emp.horario_devolucao
-      ? formatarDataHora(emp.horario_devolucao)
-      : { data: '', hora: '' };
+    .filter((emp) => {
+      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chaves, salas);
+      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
+        emp.chave,
+        chaves,
+        salas
+      )}`;
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emp.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+      const dataHoraRetirada = emp.horario_emprestimo
+        ? formatarDataHora(emp.horario_emprestimo)
+        : { data: "", hora: "" };
 
-    return (
-      salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      solicitanteNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      dataHoraRetirada.data.includes(pesquisa) ||
-      dataHoraRetirada.hora.includes(pesquisa) ||
-      dataHoraEmprestimoDevolucao.data.includes(pesquisa) ||
-      dataHoraEmprestimoDevolucao.hora.includes(pesquisa) ||
-      emp.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-  })
-  .filter((emp) => {
-    const salaNome = getNomeSala(emp.sala);
-    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+      const dataHoraEmprestimoDevolucao = emp.horario_devolucao
+        ? formatarDataHora(emp.horario_devolucao)
+        : { data: "", hora: "" };
 
-    return (
-      (filtroConcluido.sala === "" ||
-        salaNome.toLowerCase().includes(filtroConcluido.sala.toLowerCase())) &&
-      (filtroConcluido.solicitante === "" ||
-        solicitanteNome
-          .toLowerCase()
-          .includes(filtroConcluido.solicitante.toLowerCase())) &&
-      (filtroConcluido.responsavel === "" ||
-        responsavelNome
-          .toLowerCase()
-          .includes(filtroConcluido.responsavel.toLowerCase())) &&
-      (filtroConcluido.horaRetirada === "" ||
-        emp.horario_emprestimo
-          ?.toLowerCase()
-          .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
-      (filtroConcluido.horaDevolucao === "" ||
-        emp.horario_devolucao
-          ?.toLowerCase()
-          .includes(filtroConcluido.horaDevolucao.toLowerCase()))
-    );
-  })
-  .filter((emp) => {
-    if (
-      !isFiltroConcluido ||
-      !filtroDataDevolucao?.from ||
-      !filtroDataDevolucao?.to
-    )
-      return true;
+      return (
+        (filtroConcluido.sala === "" ||
+          salaNome
+            .toLowerCase()
+            .includes(filtroConcluido.sala.toLowerCase())) &&
+        (filtroConcluido.chave === "" ||
+          chaveNome
+            .toLowerCase()
+            .includes(filtroConcluido.chave.toLowerCase())) &&
+        (filtroConcluido.solicitante === "" ||
+          solicitanteNome
+            .toLowerCase()
+            .includes(filtroConcluido.solicitante.toLowerCase())) &&
+        (filtroConcluido.responsavel === "" ||
+          responsavelNome
+            .toLowerCase()
+            .includes(filtroConcluido.responsavel.toLowerCase())) &&
+        (filtroConcluido.horaRetirada === "" ||
+          dataHoraRetirada.hora
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
+        (filtroConcluido.horaDevolucao === "" ||
+          dataHoraEmprestimoDevolucao.hora
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+      );
+    })
+    .filter((emp) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataDevolucao?.from ||
+        !filtroDataDevolucao?.to
+      )
+        return true;
 
-    const dataDevolucao = emp.dataDevolucao
-      ? converterDataBRparaDate(emp.dataDevolucao)
-      : null;
-    return (
-      dataDevolucao &&
-      dataDevolucao >= filtroDataDevolucao.from &&
-      dataDevolucao <= filtroDataDevolucao.to
-    );
-  })
-  .filter((emp) => {
-    if (
-      !isFiltroConcluido ||
-      !filtroDataEmprestimoRetiradaConcluidos?.from ||
-      !filtroDataEmprestimoRetiradaConcluidos?.to
-    )
-      return true;
+      if (!emp.horario_devolucao) return false;
 
-    const dataEmprestimoRetirada = emp.dataRetirada
-      ? converterDataBRparaDate(emp.dataRetirada)
-      : null;
-    return (
-      dataEmprestimoRetirada &&
-      dataEmprestimoRetirada >= filtroDataEmprestimoRetiradaConcluidos.from &&
-      dataEmprestimoRetirada <= filtroDataEmprestimoRetiradaConcluidos.to
-    );
-  });
+      const dataDevolucao = new Date(emp.horario_devolucao);
 
-    const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-      null
-    );
+      const dataDevolucaoSemHora = new Date(
+        dataDevolucao.getFullYear(),
+        dataDevolucao.getMonth(),
+        dataDevolucao.getDate()
+      );
+
+      const from = new Date(
+        filtroDataDevolucao.from.getFullYear(),
+        filtroDataDevolucao.from.getMonth(),
+        filtroDataDevolucao.from.getDate()
+      );
+
+      const to = new Date(
+        filtroDataDevolucao.to.getFullYear(),
+        filtroDataDevolucao.to.getMonth(),
+        filtroDataDevolucao.to.getDate()
+      );
+
+      return dataDevolucaoSemHora >= from && dataDevolucaoSemHora <= to;
+    })
+    .filter((emp) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataEmprestimoRetiradaConcluidos?.from ||
+        !filtroDataEmprestimoRetiradaConcluidos?.to
+      )
+        return true;
+
+      if (!emp.horario_emprestimo) return false;
+
+      const dataDevolucao = new Date(emp.horario_emprestimo);
+
+      const dataRetiradaSemHora = new Date(
+        dataDevolucao.getFullYear(),
+        dataDevolucao.getMonth(),
+        dataDevolucao.getDate()
+      );
+
+      const from = new Date(
+        filtroDataEmprestimoRetiradaConcluidos.from.getFullYear(),
+        filtroDataEmprestimoRetiradaConcluidos.from.getMonth(),
+        filtroDataEmprestimoRetiradaConcluidos.from.getDate()
+      );
+
+      const to = new Date(
+        filtroDataEmprestimoRetiradaConcluidos.to.getFullYear(),
+        filtroDataEmprestimoRetiradaConcluidos.to.getMonth(),
+        filtroDataEmprestimoRetiradaConcluidos.to.getDate()
+      );
+
+      return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
+
+    });
+
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+    null
+  );
 
   //paginação para emprestimos concluidos
   const itensAtuaisConcluidos = emprestimosFiltradosConcluidos.slice();
@@ -675,30 +715,42 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {getNomeSala(emprestimo.sala) || "Sala não encontrada"}
+                    {buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {emprestimo.chave || "Chave não encontrada"}
+                    {`Chave ${buscarNomeSalaPorIdChave(
+                      emprestimo.chave,
+                      chaves,
+                      salas
+                    )}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {getNomeSolicitante(emprestimo.usuario_solicitante) ||
                       "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeResponsavel(emprestimo.usuario_responsavel) ||
-                      "Responsavel não encontrado"}
+                    {buscarNomeUsuarioPorId(
+                      emprestimo.usuario_responsavel,
+                      responsaveis
+                    ) || "Responsavel não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).data
+                      : ""}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                      : ""}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).data}
+                    {emprestimo.horario_devolucao &&
+                      formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).hora}
+                    {emprestimo.horario_devolucao &&
+                      formatarDataHora(emprestimo.horario_devolucao).hora}
                   </td>
 
                   <td className="pl-2">

@@ -4,19 +4,20 @@ import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
-import { Info, Check, X, TriangleAlert } from "lucide-react";
+import { Info, Check } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
 import api from "../services/api";
-import { set } from "date-fns";
+// import { set } from "date-fns";
 import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+// import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetChaves from "../hooks/chaves/useGetChaves";
-
+import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
+// import { Chaves } from "../pages/chaves";
 // import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 
 interface EmprestimosPendentesProps {
@@ -41,8 +42,6 @@ export function EmprestimosPendentes({
   new_emprestimos,
   salas,
   solicitantes,
-  responsaveis,
-  pesquisa,
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -50,9 +49,9 @@ export function EmprestimosPendentes({
   const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] =
     useState<DateRange | undefined>();
 
-  const {usuarios} = useGetUsuarios();
-  const {salas: salasData} = useGetSalas();
-  const {chaves: chavesData} = useGetChaves();
+  const { salas: salasData } = useGetSalas();
+  const { chaves: chavesData } = useGetChaves();
+  const { responsaveis } = useGetResponsaveis();
 
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
@@ -67,22 +66,9 @@ export function EmprestimosPendentes({
 
   //pegando o nome através do id (foi necessário criar isso, pois o tipo desses 4 é number)
 
-  // const getNomeChave = (idChave: number | null | undefined) =>
-  //   idChave != null ? chaves.find((chave) => chave.id === idChave)?.nome || "" : "";
-
   const getNomeSolicitante = (idSolicitante: number | null | undefined) =>
     idSolicitante != null
       ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
-      : "";
-
-  const getNomeSala = (idSala: number | null | undefined) =>
-    idSala != null
-      ? salas.find((sala) => sala.superusuario === idSala)?.nome || ""
-      : "";
-
-  const getNomeResponsavel = (idResponsavel: number | null | undefined) =>
-    idResponsavel != null
-      ? responsaveis.find((r) => r.superusuario === idResponsavel)?.nome || ""
       : "";
 
   //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
@@ -101,75 +87,82 @@ export function EmprestimosPendentes({
   }
 
   //função para buscar o nome do usuario responsável pelo id
-  function buscarNomeUsuarioPorId(id: number | null, listaUsuarios: IusuarioResponsavel[]) {
-    const usuario = listaUsuarios.find(usuario => usuario.id === id);
-    return usuario ? usuario.nome : 'Responsável não encontrado';
+  function buscarNomeUsuarioPorId(
+    id: number | null,
+    listaUsuarios: IusuarioResponsavel[]
+  ) {
+    const usuario = listaUsuarios.find((usuario) => usuario.id === id);
+    return usuario ? usuario.nome : "Responsável não encontrado";
   }
-  
-  function buscarNomeSalaPorIdChave(idChave: number | null, listaChaves: any[], listaSalas: any[]) {
-    const chave = listaChaves.find(chave => chave.id === idChave);
-    if (!chave) return 'Chave não encontrada';
-  
-    const sala = listaSalas.find(sala => sala.id === chave.sala);
-    return sala ? sala.nome : 'Sala não encontrada';
+
+  function buscarNomeSalaPorIdChave(
+    idChave: number | null,
+    listaChaves: any[],
+    listaSalas: any[]
+  ) {
+    const chave = listaChaves.find((chave) => chave.id === idChave);
+    if (!chave) return "Chave não encontrada";
+
+    const sala = listaSalas.find((sala) => sala.id === chave.sala);
+    return sala ? sala.nome : "Sala não encontrada";
   }
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
-  .filter((emprestimos) => {
-    const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
-    const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
-    const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
-    const observacao = emprestimos.observacao?.toLowerCase() ?? "";
+    .filter((emprestimos) => {
+      const salaNome = buscarNomeSalaPorIdChave(
+        emprestimos.chave,
+        chavesData,
+        salas
+      );
+      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
+        emprestimos.chave,
+        chavesData,
+        salas
+      )}`;
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emprestimos.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = getNomeSolicitante(
+        emprestimos.usuario_solicitante
+      );
+      const dataHoraRetirada = emprestimos.horario_emprestimo
+        ? formatarDataHora(emprestimos.horario_emprestimo)
+        : { data: "", hora: "" };
 
+      return (
+        (filtroPendente.sala === "" ||
+          salaNome.includes(filtroPendente.sala.toLowerCase())) &&
+        (filtroPendente.chave === "" ||
+          chaveNome.includes(filtroPendente.chave.toLowerCase())) &&
+        (filtroPendente.solicitante === "" ||
+          solicitanteNome.includes(filtroPendente.solicitante.toLowerCase())) &&
+        (filtroPendente.responsavel === "" ||
+          responsavelNome.includes(filtroPendente.responsavel.toLowerCase())) &&
+        (filtroPendente.horaRetirada === "" || dataHoraRetirada.hora?.toLowerCase().includes(filtroPendente.horaRetirada.toLowerCase()))
+      );
+    })
+    .filter((emprestimos) => {
+      if (
+        !isFiltroPendente ||
+        !filtroDataEmprestimoRetirada?.from ||
+        !filtroDataEmprestimoRetirada?.to
+      )
+        return true;
 
-    const { data: dataRetirada, hora: horaEmprestimo } = emprestimos.horario_emprestimo
-      ? formatarDataHora(emprestimos.horario_emprestimo)
-      : { data: "", hora: "" };
+      if (!emprestimos.dataRetirada) return false;
 
-    return (
-      sala.includes(pesquisa.toLowerCase()) ||
-      solicitante.includes(pesquisa.toLowerCase()) ||
-      responsavel.includes(pesquisa.toLowerCase()) ||
-      dataRetirada.includes(pesquisa) ||
-      horaEmprestimo.includes(pesquisa) ||
-      observacao.includes(pesquisa)
-    );
-  })
-  .filter((emprestimos) => {
-    const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
-    const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
-    const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
-    const horaEmprestimo = emprestimos.horario_emprestimo
-      ? formatarDataHora(emprestimos.horario_emprestimo).hora
-      : "";
+      const data = new Date(emprestimos.dataRetirada);
+      return (
+        data >= filtroDataEmprestimoRetirada.from &&
+        data <= filtroDataEmprestimoRetirada.to
+      );
+    });
 
-    return (
-      (filtroPendente.sala === "" || sala.includes(filtroPendente.sala.toLowerCase())) &&
-      (filtroPendente.solicitante === "" || solicitante.includes(filtroPendente.solicitante.toLowerCase())) &&
-      (filtroPendente.responsavel === "" || responsavel.includes(filtroPendente.responsavel.toLowerCase())) &&
-      (filtroPendente.horaRetirada === "" || horaEmprestimo.includes(filtroPendente.horaRetirada))
-    );
-  })
-  .filter((emprestimos) => {
-    if (
-      !isFiltroPendente ||
-      !filtroDataEmprestimoRetirada?.from ||
-      !filtroDataEmprestimoRetirada?.to
-    ) return true;
-
-    if (!emprestimos.dataRetirada) return false;
-
-    const data = new Date(emprestimos.dataRetirada);
-    return (
-      data >= filtroDataEmprestimoRetirada.from &&
-      data <= filtroDataEmprestimoRetirada.to
-    );
-  });
-
-    const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-      null
-    );
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+    null
+  );
 
   //paginação para emprestimos pendentes
   const itensAtuaisPendentes = emprestimosFiltradosPendentes.slice();
@@ -203,13 +196,13 @@ export function EmprestimosPendentes({
   const closeDetalhesModal = () => {
     setIsDetalhesModalOpen(false);
     console.log("fechou");
-  }
+  };
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  function openEditModal() {
-    setIsEditModalOpen(true);
-  }
+  // function openEditModal() {
+  //   setIsEditModalOpen(true);
+  // }
 
   function closeEditModal() {
     setIsEditModalOpen(false);
@@ -248,57 +241,54 @@ export function EmprestimosPendentes({
   }
 
   async function finalizarEmprestimo(emprestimo: number | undefined | null) {
+    try {
+      const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {
+        id_emprestimo: emprestimo,
+      });
 
-      try {
-
-        const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {id_emprestimo : emprestimo});
-
-        if (!response) {
-          console.error("Erro ao finalizar o empréstimo");
-          return;
-        }
-
-        console.log("Empréstimo finalizado com sucesso!", response.data);
-
-        setIsSuccessModalOpen(true);
-
-
-      } catch (error) {
-        const statusResponse = error.response?.status;
-
-        if (statusResponse === 400) {
-          console.log("Emprestimo já finalizado!", error.response.data);
-          return;
-        }
-        if (statusResponse === 401) {
-          console.log("Emprestimo não encontrado!");  
-          return;
-        }
-        if (statusResponse === 403) {
-          console.log("Você não tem permissão para finalizar este empréstimo!");
-          return;
-        }
-        if (statusResponse === 500) {
-          console.log("Erro interno do servidor! Contate o suporte.");
-          return;
-        }
-      } finally {
-        handleCloseModalAndReload();
+      if (!response) {
+        console.error("Erro ao finalizar o empréstimo");
+        return;
       }
+
+      console.log("Empréstimo finalizado com sucesso!", response.data);
+
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      const statusResponse = error.response?.status;
+
+      if (statusResponse === 400) {
+        console.log("Emprestimo já finalizado!", error.response.data);
+        return;
+      }
+      if (statusResponse === 401) {
+        console.log("Emprestimo não encontrado!");
+        return;
+      }
+      if (statusResponse === 403) {
+        console.log("Você não tem permissão para finalizar este empréstimo!");
+        return;
+      }
+      if (statusResponse === 500) {
+        console.log("Erro interno do servidor! Contate o suporte.");
+        return;
+      }
+    } finally {
+      handleCloseModalAndReload();
+    }
   }
 
   const handleCloseModalAndReload = () => {
-    setTimeout(() => { 
-      setIsSuccessModalOpen(false) 
+    setTimeout(() => {
+      setIsSuccessModalOpen(false);
       window.location.reload();
     }, 5000);
-  }
+  };
 
   return (
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
-
-        {isSuccessModalOpen && (<PopUpdeDevolucao/>)}
+        {isSuccessModalOpen && <PopUpdeDevolucao />}
 
         <thead className="bg-white top-0 ">
           <tr>
@@ -593,33 +583,51 @@ export function EmprestimosPendentes({
                 <tr key={index}>
                   <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salasData)}
+                      {buscarNomeSalaPorIdChave(
+                        emprestimo.chave,
+                        chavesData,
+                        salasData
+                      )}
                     </p>
                   </td>
                   <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {emprestimo.chave || "Chave não encontrada"}
+                     {`Chave ${buscarNomeSalaPorIdChave(
+                      emprestimo.chave,
+                      chavesData,
+                      salas
+                    )}`}
                     </p>
                   </td>
                   <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {getNomeSolicitante(emprestimo.usuario_solicitante) ||
-                        "Solicitante não encontrado"}
+                      "Solicitante não encontrado"}
                     </p>
                   </td>
                   <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeUsuarioPorId(emprestimo.usuario_responsavel, usuarios)}
+                      {buscarNomeUsuarioPorId(
+                      emprestimo.usuario_responsavel,
+                      responsaveis
+                    ) || "Responsavel não encontrado"}
                     </p>
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).data
+                      : ""}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                      : ""}
                   </td>
                   <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
-                    <div onClick={() => finalizarEmprestimo(emprestimo.id)} className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer">
+                    <div
+                      onClick={() => finalizarEmprestimo(emprestimo.id)}
+                      className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
+                    >
                       <Check color="white" size={18} />
                       <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
                         DEVOLVER
