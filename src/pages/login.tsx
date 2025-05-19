@@ -60,7 +60,7 @@ export function Login() {
         
       if (statusResponse === 200 && response.data?.token) { //testar sem status response
 
-        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("token", response.data.token);
 
         if(response.data.usuario) {
           localStorage.setItem("userData", JSON.stringify(response.data.usuario));
