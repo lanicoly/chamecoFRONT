@@ -6,6 +6,7 @@ import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../services/api";
 
 export interface Blocos {
   id: number;
@@ -29,19 +30,17 @@ export function Blocos() {
     obterBlocos();
   }, []);
 
-  const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/blocos/";
-  const token = "bdff79d6edbbde980a0f232ef0ff35bdede31457ab3c733a0c6fe0e6274ee4f5";
+
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
-      const response = await api.get(`${URL}?token=${token}`, {
+      const response = await api.get("/chameco/api/v1/blocos/", {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
       if (response.status === 200) {
-        console.log("Ebaaa!!!");
         const data = response.data;
 
         if (data.results && Array.isArray(data.results)) {
@@ -71,7 +70,7 @@ export function Blocos() {
           "Content-Type": "application/json",
         },
       });
-      console.log("Bloco adicionado com sucesso!", response.data);
+      
       obterBlocos();
     } catch (error: unknown) {
       console.log("Erro ao adicionar bloco", error);
@@ -178,18 +177,11 @@ export function Blocos() {
     try {
       const response = await api.put(
         `${URL}${blocoSelecionado.id}/`,
-        { nome: blocoSelecionado.nome, token: token },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { nome: blocoSelecionado.nome},
       );
 
       if (response.status === 200) {
-        console.log("Bloco editado com sucesso!", response.data);
-        return response.data;
+          return response.data;
       }
     } catch (error: unknown) {
       console.error("Erro ao editar bloco.", error);
@@ -222,13 +214,9 @@ export function Blocos() {
   async function excluirBlocoAPI(id: number, nome: string) {
     try {
       const response = await api.delete(`${URL}${id}/`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: { nome, token },
+        data: { nome },
       });
 
-      console.log("Bloco excluído com sucesso!", response.data);
     } catch (error: unknown) {
       console.error("Erro ao excluir bloco:", error);
     }

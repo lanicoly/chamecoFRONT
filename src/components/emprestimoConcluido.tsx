@@ -11,7 +11,11 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-// import { data } from "autoprefixer";
+// import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
+import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
+import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
+import { formatarDataHora } from "../utils/formatarDarahora";
+import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 
 interface EmprestimosConcluidosProps {
   salas: IoptionSalas[];
@@ -27,19 +31,12 @@ interface EmprestimosConcluidosProps {
   pesquisa: string;
 }
 
-interface IusuarioResponsavel {
-  id: number;
-  nome: string;
-  superusuario: number;
-}
 
 export function EmprestimosConcluidos({
   new_emprestimos,
-  salas,
   solicitantes,
+  salas,
 }: EmprestimosConcluidosProps) {
-  const { chaves } = useGetChaves();
-  const { responsaveis } = useGetResponsaveis();
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -53,6 +50,9 @@ export function EmprestimosConcluidos({
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
+  const {chaves} = useGetChaves();
+  const {responsaveis} = useGetResponsaveis();
+
   const [filtroConcluido, setFiltroConcluido] = useState({
     sala: "",
     chave: "",
@@ -64,47 +64,6 @@ export function EmprestimosConcluidos({
     horaDevolucao: "",
   });
   const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
-
-  const getNomeSolicitante = (idSolicitante: number | null | undefined) =>
-    idSolicitante != null
-      ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
-      : "";
-
-  //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
-  function formatarDataHora(dataFormatada: string) {
-    const data = new Date(dataFormatada);
-    const dataBr = data.toLocaleDateString("pt-BR");
-    const horaBr = data.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    return {
-      data: dataBr,
-      hora: horaBr,
-    };
-  }
-
-  //função para buscar o nome do usuario responsável pelo id
-  function buscarNomeUsuarioPorId(
-    id: number | null,
-    listaUsuarios: IusuarioResponsavel[]
-  ) {
-    const usuario = listaUsuarios.find((usuario) => usuario.id === id);
-    return usuario ? usuario.nome : "Responsável não encontrado";
-  }
-
-  function buscarNomeSalaPorIdChave(
-    idChave: number | null,
-    listaChaves: any[],
-    listaSalas: any[]
-  ) {
-    const chave = listaChaves.find((chave) => chave.id === idChave);
-    if (!chave) return "Chave não encontrada";
-
-    const sala = listaSalas.find((sala) => sala.id === chave.sala);
-    return sala ? sala.nome : "Sala não encontrada";
-  }
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
@@ -118,7 +77,7 @@ export function EmprestimosConcluidos({
         emp.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante, solicitantes);
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
         : { data: "", hora: "" };
@@ -718,14 +677,10 @@ export function EmprestimosConcluidos({
                     {buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {`Chave ${buscarNomeSalaPorIdChave(
-                      emprestimo.chave,
-                      chaves,
-                      salas
-                    )}`}
+                    {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeSolicitante(emprestimo.usuario_solicitante) ||
+                    {getNomeSolicitante(emprestimo.usuario_solicitante, solicitantes) ||
                       "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">

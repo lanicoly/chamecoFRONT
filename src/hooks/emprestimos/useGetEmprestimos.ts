@@ -2,11 +2,10 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 
-const CACHE_TTL = 60 * 5; // 5 minutes
+const CACHE_TTL = 60 * 1; // 5 minutes
 
-console.log("useGetEmprestimos.ts");
 
-const useGetEmprestimos = (finalizados?: boolean) => {
+const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
   const [emprestimos, setChaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -36,7 +35,6 @@ const useGetEmprestimos = (finalizados?: boolean) => {
         }
 
         const url = `/chameco/api/v1/emprestimos/?${params.toString()}`;
-        console.log("URL da requisição:", url); 
 
         try {
           const response = await api.get(url);
@@ -48,8 +46,7 @@ const useGetEmprestimos = (finalizados?: boolean) => {
 
           localStorage.setItem("emprestimos", JSON.stringify(response.data.results || []));
           localStorage.setItem("emprestimosTimestamp", Date.now().toString());
-          console.log("Resposta da API:", response.data);
-        } catch (err) {
+          ""        } catch (err) {
           console.error("Erro na requisição:", err);
           setError(err as Error);
         } finally {
@@ -59,7 +56,7 @@ const useGetEmprestimos = (finalizados?: boolean) => {
     };
 
     fetchEmprestimos();
-  }, [finalizados]); 
+  }, [finalizados, refreshTrigger]); 
 
   return { new_emprestimos: emprestimos, loading, error };
 }

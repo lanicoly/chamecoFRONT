@@ -101,7 +101,7 @@ export function Usuarios() {
       email,
       tipo,
     };
-    console.log(tipo);
+        
     setListaUsers([...listaUsers, usuario]);
     setNextId(nextId + 1);
     setNome("");

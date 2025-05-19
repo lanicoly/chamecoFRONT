@@ -175,7 +175,6 @@ export function IsDetalhesModal (
                     </div>
                     <button
                         onClick={() => {
-                            console.log("Clicou e vai fechar modal");
                             closeDetalhesModal()
                         }}
                         type="button"

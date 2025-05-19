@@ -1,13 +1,10 @@
 import { Plus, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
-// import { he, is, ptBR } from 'date-fns/locale';
-import { Pesquisa } from "../components/pesquisa";
-// import { PassadorPagina } from "../components/passadorPagina";
-// import { FiltroModal } from "../components/filtragemModal";
-import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas";
+// import { Pesquisa } from "../components/pesquisa";
+// import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
@@ -16,14 +13,9 @@ import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
-// import { obterDataAtual } from "../utils/obterDataAtual";
-// import { obterHoraAtual } from "../utils/obterHoraAtual";
-// import { converterDataBRparaDate } from "../utils/converterDataBRparaDate";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
-// import { PopUpdeDevolucao } from "../components/popups/popUpdeDevolucao";
 import { PopUpError } from "../components/popups/PopUpError";
-// import { set } from "date-fns";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 
@@ -54,12 +46,20 @@ export function Emprestimos() {
   // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
 
   const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  // const [isSearching, setIsSearching] = useState(false);
 
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
-  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
+    null
+  );
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
+    null
+  );
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<
+    number | null
+  >(null);
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<
+    number | null
+  >(null);
   const [observacao, setObservacao] = useState<string | null>(null);
 
   const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
@@ -72,13 +72,7 @@ export function Emprestimos() {
   const { chaves } = useGetChaves();
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
-  const { new_emprestimos } = useGetEmprestimos();
-
-  console.log("Responsaveis:", responsaveis);
-  console.log("Chaves:", chaves);
-  console.log("Salas:", salas);
-  console.log("Usuarios:", usuarios);
-  console.log("Emprestimos:", new_emprestimos);
+  // const { new_emprestimos } = useGetEmprestimos();
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -89,8 +83,6 @@ export function Emprestimos() {
       token: token,
     };
 
-    console.log("Dados do novo empréstimo:", novoEmprestimo);
-
     if (
       novoEmprestimo.chave === null ||
       novoEmprestimo.usuario_responsavel === null ||
@@ -100,14 +92,17 @@ export function Emprestimos() {
       return;
     } else {
       try {
-        const response = await api.post("/chameco/api/v1/realizar-emprestimo/", novoEmprestimo)
+        const response = await api.post(
+          "/chameco/api/v1/realizar-emprestimo/",
+          novoEmprestimo
+        );
 
         setEmprestimos((prevEmprestimos) => [
           ...prevEmprestimos,
           response.data,
         ]);
-        console.log("Emprestimo criado!", novoEmprestimo);
         setIsSuccesModalOpen(!isSuccesModalOpen);
+        // window.location.reload();
       } catch (error) {
         console.error(
           "Erro ao criar o empréstimo:",
@@ -127,12 +122,11 @@ export function Emprestimos() {
   }
 
   const handleCloseMOdalAndReload = () => {
-    setTimeout(() => {  
-        setIsSuccesModalOpen(false);
-        setIsPopUpErrorOpen(false); 
-        window.location.reload();
-    }, 5000);
-  }
+    setTimeout(() => {
+      setIsSuccesModalOpen(false);
+      setIsPopUpErrorOpen(false);
+    }, 2000);
+  };
 
   const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
@@ -174,10 +168,18 @@ export function Emprestimos() {
   };
 
   // Ainda está faltando o loading e o error
-  const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(false); 
-  const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(true); 
-  console.log("Emprestimos pendentes:", emprestimosPendentes);
-  console.log("Emprestimos concluidos:", emprestimosConcluidos);
+ const [refreshCounter, setRefreshCounter] = useState(0);
+
+    const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(false, refreshCounter);
+    const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(true, refreshCounter);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setRefreshCounter((qtdMinutos) => qtdMinutos + 1);
+        }, 60000);
+
+        return () => clearInterval(intervalId);
+    }, []);
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
@@ -244,9 +246,9 @@ export function Emprestimos() {
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-2 bg-white">
                 <thead className="bg-white sticky top-0 z-11">
                   <tr>
-                    <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
+                    {/* <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a sala
-                    </th>
+                    </th> */}
                     <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
                       Informe a chave
                     </th>
@@ -262,7 +264,7 @@ export function Emprestimos() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                    {/* <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputSalas
                         items={salas}
                         onSelectItem={(idSelecionado) => {
@@ -270,12 +272,12 @@ export function Emprestimos() {
                         }}
                         reset={onReset}
                       />
-                    </td>
+                    </td> */}
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputChaves
                         items={chaves}
                         onSelectItem={(idSelecionado) => {
-                          setChaveSelecionadaId(idSelecionado);
+                          setChaveSelecionadaId(Number(idSelecionado) || null);
                         }}
                         reset={onReset}
                       />
@@ -477,16 +479,6 @@ export function Emprestimos() {
                   </p>
                 </button>
               </div>
-
-              {/* input de pesquisa */}
-              <div>
-                <Pesquisa
-                  pesquisa={pesquisa}
-                  setIsSearching={setIsSearching}
-                  setPesquisa={setPesquisa}
-                />
-              </div>
-              {/* fim input de pesquisa */}
             </div>
 
             {/* tabela com emprestimo pendente */}
@@ -511,26 +503,26 @@ export function Emprestimos() {
 
             {/* tabela com emprestimo concluido */}
             {!exibirEmprestimosPendentes && (
-            <div
-              className={'overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96'
-              
-            }
-            >
-              <EmprestimosConcluidos
-                new_emprestimos={emprestimosConcluidos}
-                salas={salas}
-                chaves={chaves}
-                responsaveis={usuarios}
-                solicitantes={usuarios}
-                observacao={observacao}
-                dataRetirada=""
-                horario_emprestimo=""
-                dataDevolucao=""
-                horario_devolucao=""
-                pesquisa={pesquisa}
-              />
-              {/* fim tabela com emprestimo concluido */}
-            </div>
+              <div
+                className={
+                  "overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96"
+                }
+              >
+                <EmprestimosConcluidos
+                  new_emprestimos={emprestimosConcluidos}
+                  salas={salas}
+                  chaves={chaves}
+                  responsaveis={usuarios}
+                  solicitantes={usuarios}
+                  observacao={observacao}
+                  dataRetirada=""
+                  horario_emprestimo=""
+                  dataDevolucao=""
+                  horario_devolucao=""
+                  pesquisa={pesquisa}
+                />
+                {/* fim tabela com emprestimo concluido */}
+              </div>
             )}
             {/* fim tabela de emprestimo concluido */}
           </div>

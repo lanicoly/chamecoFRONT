@@ -50,8 +50,7 @@ export function FilterableInputSalas({items, onSelectItem, reset}: IdropdownResp
     };
   }, []);
 
-  console.log('items no filtro:', selectedOption?.nome);
-
+  
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">
