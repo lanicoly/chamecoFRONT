@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 
 interface PrivateRouteProps {
-  children: JSX.Element;
-  allowedTypes: string[];
+  children: JSX.Element; //será exibido se o acesso for permitido
+  //allowedTypes: string[]; //lista de tipos usuários que podem acessar
 }
 
 
@@ -19,7 +19,7 @@ export function PrivateRoute({ children, allowedTypes }: PrivateRouteProps) {
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if(!token){
+    if(!token){ //se não tiver token seta falso
       setIsValidToken(false);
       return;
     }
@@ -27,7 +27,7 @@ export function PrivateRoute({ children, allowedTypes }: PrivateRouteProps) {
     //validar token
     const validateToken = async () => {
       try {
-        const response =await api.get(url_base + "/chameco/api/v1/login/", {
+        const response = await api.get(url_base + "/chameco/api/v1/login/", {
           headers: {Authorization: 'Bearer ${token}'},
         });
         setIsValidToken(response.status === 200);

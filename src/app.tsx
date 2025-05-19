@@ -10,6 +10,7 @@ import { Login } from "./pages/login";
 import { Usuarios } from "./pages/usuarios";
 import { StatusChaves } from "./pages/statusChaves";
 import { Emprestimos } from "./pages/emprestimos";
+import { PrivateRoute } from "./components/PrivateRoutes";
 
 export function App() {
   return (
@@ -17,13 +18,27 @@ export function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/menu" />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/blocos" element={<Blocos />} />
-        <Route path="/salas" element={<Salas />} />
-        <Route path="/chaves" element={<Chaves />} />
-        <Route path="/usuarios" element={<Usuarios />} />
-        <Route path="/statusChaves" element={<StatusChaves />} />
-        <Route path="/emprestimos" element={<Emprestimos />} />
+        <Route path="/menu" element={
+              <Menu />
+        }/>
+        <Route path="/blocos" element={<PrivateRoute>
+              <Blocos />
+            </PrivateRoute>} />
+        <Route path="/salas" element={<PrivateRoute>
+              <Salas />
+            </PrivateRoute>} />
+        <Route path="/chaves" element={<PrivateRoute>
+              <Chaves />
+            </PrivateRoute>} />
+        <Route path="/usuarios" element={<PrivateRoute>
+              <Usuarios />
+            </PrivateRoute>} />
+        <Route path="/statusChaves" element={<PrivateRoute>
+              <StatusChaves />
+            </PrivateRoute>} />
+        <Route path="/emprestimos" element={<PrivateRoute>
+              <Emprestimos />
+            </PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );
