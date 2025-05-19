@@ -63,9 +63,19 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
 
   // sem = redireciona para login
    // verifica lista de tipo(se não corresponde) e redireciona para login
-    if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+     
+    if (isValidToken &&
+      userType === "serv.terceirizado" &&
+      location.pathname !== "/emprestimos" //só se ainda não estiver em emprestimos
+    ) {
+      return <Navigate to="/emprestimos" state={{ from: location }} replace />;
+    }
+      else{ 
+        if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
+          return <Navigate to="/login" state={{ from: location }} replace />;
+        }
+      }
+   
   // se o tipo existir renderiza o componente
   return children;
 }
