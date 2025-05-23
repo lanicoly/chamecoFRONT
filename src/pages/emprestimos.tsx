@@ -73,6 +73,7 @@ export function Emprestimos() {
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   // const { new_emprestimos } = useGetEmprestimos();
+  // const [emprestimosPendentes, setEmprestimosPendentes] = useState<Iemprestimo[]>([]);
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -102,7 +103,17 @@ export function Emprestimos() {
           response.data,
         ]);
         setIsSuccesModalOpen(!isSuccesModalOpen);
-        // window.location.reload();
+
+        //Colocando aqui para guardar os valores caso o usuário cometa algum erro.
+        setOnReset(!onReset);
+        setSalaSelecionadaId(null);
+        setChaveSelecionadaId(null);
+        setSolicitanteSelecionadoId(null);
+        setResponsavelSelecionadoId(null);
+        setObservacao("");
+        
+        //Colocando esse incremento no lugar do reload
+        setRefreshCounter((contadorAtual) => contadorAtual + 1);
       } catch (error) {
         console.error(
           "Erro ao criar o empréstimo:",
@@ -110,12 +121,6 @@ export function Emprestimos() {
         );
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
       } finally {
-        setOnReset(!onReset);
-        setSalaSelecionadaId(null);
-        setChaveSelecionadaId(null);
-        setSolicitanteSelecionadoId(null);
-        setResponsavelSelecionadoId(null);
-        setObservacao("");
         handleCloseMOdalAndReload();
       }
     }

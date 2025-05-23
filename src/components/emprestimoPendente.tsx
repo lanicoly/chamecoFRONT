@@ -183,27 +183,18 @@ export function EmprestimosPendentes({
     console.log("fechou");
   };
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // function openEditModal() {
   //   setIsEditModalOpen(true);
   // }
 
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
+  // function closeEditModal() {
+  //   setIsEditModalOpen(false);
+  // }
 
   //funcao para editarObservacao
   const [observacao, setObservacao] = useState<string | null>(null);
-
-  function editarObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado && observacao) {
-      emprestimoSelecionado.observacao = observacao;
-    }
-    setObservacao("");
-    closeEditModal();
-  }
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -213,16 +204,6 @@ export function EmprestimosPendentes({
 
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
-  }
-
-  //criando função de excluir observação de emprestimos
-  function removeObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado) {
-      emprestimoSelecionado.observacao = "";
-    }
-    setObservacao("");
-    closeDeleteModal();
   }
 
   async function finalizarEmprestimo(emprestimo: number | undefined | null) {
@@ -581,9 +562,9 @@ export function EmprestimosPendentes({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td
-                    className={`p-2 text-xs font-semibold border-2 border-solid break-words w-[15%] ${
+                    className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500 border-l-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -596,9 +577,9 @@ export function EmprestimosPendentes({
                     </p>
                   </td>
                   <td
-                    className={`p-2 text-xs font-semibold border-2 border-solid break-words w-[15%] ${
+                    className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -611,9 +592,9 @@ export function EmprestimosPendentes({
                     </p>
                   </td>
                   <td
-                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid w-[15%] break-words flex-1 text-center ${
+                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0] "
                     }`}
                   >
@@ -627,7 +608,7 @@ export function EmprestimosPendentes({
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -641,7 +622,7 @@ export function EmprestimosPendentes({
                   <td
                     className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -652,7 +633,7 @@ export function EmprestimosPendentes({
                   <td
                     className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -661,9 +642,9 @@ export function EmprestimosPendentes({
                       : ""}
                   </td>
                   <td
-                    className={`border-2 border-solid bg-[#0240E1]  p-0.5 font-semibold break-words ${
+                    className={`border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words ${
                       emprestimoPendenteAlerta(emprestimo)
-                        ? "border-red-600"
+                        ? " border-r-red-500 border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
                     }`}
                   >
@@ -693,9 +674,9 @@ export function EmprestimosPendentes({
                       observacao={observacao}
                       setObservacao={setObservacao}
                       emprestimoSelecionado={emprestimoSelecionado}
-                      removeObservacao={removeObservacao}
+                      // removeObservacao={() => removeObservacao}
                       closeDetalhesModal={closeDetalhesModal}
-                      editarObservacao={editarObservacao}
+                      // editarObservacao={editarObservacao}
                       openDeleteModal={openDeleteModal}
                       closeDeleteModal={closeDeleteModal}
                       isDeleteModalOpen={isDeleteModalOpen}
