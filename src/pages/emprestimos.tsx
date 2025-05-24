@@ -66,7 +66,6 @@ export function Emprestimos() {
   const { usuarios } = useGetUsuarios();
   const { new_emprestimos } = useGetEmprestimos();
 
-          
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,

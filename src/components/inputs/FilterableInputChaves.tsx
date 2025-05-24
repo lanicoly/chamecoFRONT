@@ -36,7 +36,8 @@ export function FilterableInputChaves({items, onSelectItem}: IdropdownResponsave
   const filterdItems = useMemo(() => {
     // const lowerSearch = searchTerm.toLowerCase();
     // return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
-    return items.filter((item) => buscarNomeChavePorIdSala(item.sala, items, salas).toLowerCase().includes(searchTerm.toLowerCase()));
+    // return items.filter((item) => buscarNomeChavePorIdSala(item.sala, items, salas).toLowerCase().includes(searchTerm.toLowerCase()));
+    return items.filter((item) => item.disponivel && buscarNomeChavePorIdSala(item.sala, items, salas).toLowerCase().includes(searchTerm.toLowerCase()));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
