@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
 import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
@@ -32,6 +32,8 @@ interface EmprestimosPendentesProps {
   dataRetirada: string;
   horario_emprestimo: string;
   pesquisa: string;
+  refreshCounter: number;
+  setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export interface IusuarioResponsavel {
@@ -43,6 +45,7 @@ export interface IusuarioResponsavel {
 export function EmprestimosPendentes({
   new_emprestimos,
   solicitantes,
+  setRefreshCounter
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -219,6 +222,8 @@ export function EmprestimosPendentes({
 
       console.log("Empréstimo finalizado com sucesso!", response.data);
 
+      //Colocando esse incremento no lugar do reload
+      setRefreshCounter((contadorAtual) => contadorAtual + 1);
       setIsSuccessModalOpen(true);
     } catch (error) {
       const statusResponse = error.response?.status;
@@ -247,9 +252,10 @@ export function EmprestimosPendentes({
   const handleCloseModalAndReload = () => {
     setTimeout(() => {
       setIsSuccessModalOpen(false);
-      window.location.reload();
+      // window.location.reload();
     }, 5000);
   };
+
 
   function emprestimoPendenteAlerta(emprestimo: {
     horario_emprestimo?: string;

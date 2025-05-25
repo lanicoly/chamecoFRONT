@@ -173,18 +173,24 @@ export function Emprestimos() {
   };
 
   // Ainda está faltando o loading e o error
- const [refreshCounter, setRefreshCounter] = useState(0);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
-    const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(false, refreshCounter);
-    const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(true, refreshCounter);
+  const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(
+    false,
+    refreshCounter
+  );
+  const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(
+    true,
+    refreshCounter
+  );
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setRefreshCounter((qtdMinutos) => qtdMinutos + 1);
-        }, 60000);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setRefreshCounter((qtdMinutos) => qtdMinutos + 1);
+    }, 60000);
 
-        return () => clearInterval(intervalId);
-    }, []);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
@@ -502,6 +508,8 @@ export function Emprestimos() {
                 horario_emprestimo=""
                 observacao={observacao}
                 pesquisa={pesquisa}
+                refreshCounter={refreshCounter}
+                setRefreshCounter={setRefreshCounter}
               />
             </div>
             {/* fim tabela de emprestimo pendente */}
