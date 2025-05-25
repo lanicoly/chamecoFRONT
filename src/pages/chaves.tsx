@@ -1,673 +1,419 @@
 import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
-import axios from "axios";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
+import { useNavigate } from "react-router-dom";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import { PopUpdeSucess } from "../components/popups/PopUpSucess";
+import { PopUpdeErro } from "../components/popups/PopUpErro";
+import Spinner from "../components/spinner";
 
-export interface Chaves {
-  id: number;
-  sala: number;
-  disponivel: boolean;
-  token: string;
-  usuarios: number[];
-}
-
-interface Sala {
+export interface IUsuario {
   id: number;
   nome: string;
+}
+export interface IChave {
+  id: number;
+  sala: number | null;
+  disponivel: boolean;
+  usuarios: IUsuario[];
+  descricao?: string | null;
+}
+export interface ISala {
+  id: number;
+  nome: string;
+  bloco?: string | number; 
 }
 
 export function Chaves() {
   const navigate = useNavigate();
+  
+  // Estado para verificar se o token existe antes de prosseguir
+  const [hasCheckedToken, setHasCheckedToken] = useState(false);
+  const [tokenExists, setTokenExists] = useState(false);
+
+  // Verifica o token na montagem
   useEffect(() => {
-    obterChaves();
-  }, []);
-
-  //integracao
-
-  const API_URL =
-    "https://chamecoapi.pythonanywhere.com/chameco/api/v1/chaves/";
-  const token =
-    "b0cc46ac70bed2584a425bfb318d2aa96cc0bd1d3d205a1947188c31493aaf2d";
-
-  const [chaves, setChaves] = useState<Chaves[]>([]);
-  const [nextId, setNextId] = useState(1);
-  const [selectedSala, setSelectedSala] = useState<number | null>(null);
-  const [chaveSelecionada, setChaveSelecionada] = useState<Chaves | null>(null);
-
-  //Funcao para a requisicao GET
-  async function obterChaves() {
-    try {
-      const response = await api.get(`${API_URL}?token=${token}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const statusResponse = response.status;
-      const data = response.data;
-
-      if (statusResponse === 200) {
-                
-        const chaves = [];
-
-        if (Array.isArray(data.results)) {
-          for (const chave of data.results) {
-            chaves.push({
-              sala: chave.sala,
-              id: chave.id,
-              disponivel: chave.disponivel,
-              usuarios: chave.usuarios || [],
-              token: chave.token,
-            });
-          }
-          setChaves(chaves);
-          setItensAtuais(response.data.results);
-        }
-      }
-    } catch (error: unknown) {
-      console.error("Erro ao obter chaves:", error);
-      setChaves([]);
+    const currentToken = localStorage.getItem("authToken"); 
+    if (currentToken) {
+      setTokenExists(true);
+    } else {
+      // Se não houver token, pode redirecionar para login ou mostrar mensagem
+      console.error("Token não encontrado no localStorage ao montar o componente Chaves.");
+      <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>; 
     }
+    setHasCheckedToken(true);
+  }, [navigate]);
+
+
+  // Se ainda não verificou ou se o token não existe, mostra estado de carregamento/erro
+  if (!hasCheckedToken) {
+    return <Spinner></Spinner>;
   }
 
-  //Adicionando integracao entre chaves locais e api (POST)
-  async function adicionarChaveAPI(novaChave: Chaves) {
-    try {
-      const response = await api.post(
-        `${API_URL}?token=${token}`,
-        novaChave,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // Atualiza a lista de chaves após adicionar e mostra na tela
-      obterChaves();
-    } catch (error: unknown) {
-      console.error("Erro ao adicionar chave:", error);
-    }
+  if (!tokenExists) {
+    return (
+      <div>
+        Erro: Usuário não autenticado. Por favor, faça login novamente.
+       <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>; 
+      </div>
+    );
   }
 
-  function addChaves(e: React.FormEvent) {
+  // Se o token existe, renderiza o componente principal que usa os hooks
+  return <ChavesContent />;
+}
+
+function ChavesContent() {
+  const navigate = useNavigate();
+
+
+  const { chaves, loading: loadingChaves, error: errorChaves, refetch: refetchChaves } = useGetChaves();
+  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  const { usuarios: allUsuarios, loading: loadingUsuarios, error: errorUsuarios } = useGetUsuarios(); 
+  const [chavesList, setChavesList] = useState<IChave[]>([]);
+  const [chaveSelecionada, setChaveSelecionada] = useState<IChave | null>(null);
+  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
+  const [disponivel, setDisponivel] = useState<boolean>(true);
+  const [descricao, setDescricao] = useState<string>("");
+  const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<number[]>([]);
+  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
+  const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pesquisa, setPesquisa] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
+  const [descricaoSelecionada, setDescricaoSelecionada] = useState<string | null>(null);
+  const itensPorPagina = 4;
+
+  useEffect(() => {
+    if (chaves && Array.isArray(chaves)) {
+      setChavesList(chaves);
+    }
+  }, [chaves]);
+
+  const handleCloseFeedbackModals = () => {
+    setTimeout(() => {
+      setIsSuccesModalOpen(false);
+      setIsPopUpErrorOpen(false);
+      setErrorMessage("");
+    }, 3000);
+  };
+
+  const resetFormsAndCloseModals = () => {
+    setSalaSelecionadaId(null);
+    setDescricao("");
+    setDisponivel(true);
+    setUsuariosAutorizadosIds([]);
+    setChaveSelecionada(null);
+    setIsChavesModalOpen(false);
+    setIsEditModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setIsViewUsersModalOpen(false);
+    setIsDescricaoModalOpen(false);
+    setDescricaoSelecionada(null);
+  };
+
+
+
+  async function criarChave(e: React.FormEvent) {
     e.preventDefault();
+    const currentToken = localStorage.getItem("authToken"); 
+    if (!currentToken) {
+      setErrorMessage("Sessão expirada ou token inválido. Faça login novamente.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      navigate("/login");
+      return;
+    }
+    if (salaSelecionadaId === null) {
+      setErrorMessage("Selecione uma sala.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      return;
+    }
 
-    const novaChave: Chaves = {
-      sala: Number(selectedSala),
+    const novaChavePayload = {
+      sala: salaSelecionadaId,
       disponivel: true,
-      usuarios: [],
-      token: token,
-      id: nextId,
+      usuarios_autorizados: usuariosAutorizadosIds,
+      descricao: descricao || null,
+      token: currentToken, // Usar token lido
     };
 
-    // Adiciona a chave à API
-    adicionarChaveAPI(novaChave);
-
-    // Atualiza o estado local
-    setChaves([...chaves, novaChave]);
-    setItensAtuais([...listaChaves, novaChave]);
-    setNextId(nextId + 1);
-
-    // Reseta os campos
-    setSelectedSala(null);
-    closeChavesModal();
-    closeUserModal();
-  }
-
-  // Função para realizar a requisição PATCH
-  async function atualizarChaveAPI(chaveAtualizada: Chaves) {
+    setIsLoading(true);
     try {
-      const response = await api.put(
-        `${API_URL}${chaveAtualizada.id}/`,
-        {
-          sala: chaveAtualizada.sala,                         
-          disponivel: chaveAtualizada.disponivel,             
-          usuarios_autorizados: chaveAtualizada.usuarios,      
-          token: token                                         
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (response.status === 200) {
-        return response.data;
-      }
-    } catch (error: unknown) {
-      console.error("Erro ao atualizar chave na API:", error);
-    }
-  }
-  
-  
-
-  //Função para realizar a requisicao DELETE
-
-  async function excluirChaveAPI(
-    chaveId: number,
-    sala: number,
-    disponivel: boolean,
-    usuarios: number[]
-  ) {
-    try {
-      const response = await api.delete(
-        `${API_URL}${chaveId}/`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          data: {
-            sala,
-            disponivel,
-            usuarios_autorizados: usuarios,
-            token,
-          },
-        }
-      );
-
-      if (response.status === 200 || response.status === 204) {
-        ""      }
-    } catch (error: unknown) {
-      console.error("Erro ao excluir chave:", error);
+      await api.post("/chameco/api/v1/chaves/", novaChavePayload, {
+        params: { token: currentToken } // Enviar como param também, se necessário
+      });
+      setIsSuccesModalOpen(true);
+      resetFormsAndCloseModals();
+      if (refetchChaves) refetchChaves(true); // Força refresh no hook
+      handleCloseFeedbackModals();
+    } catch (err) {
+      console.error("Erro ao criar a chave:", err);
+      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+      setErrorMessage(`Erro ao criar chave: ${apiErrorMessage}`);
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+    } finally {
+      setIsLoading(false);
     }
   }
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
+  async function atualizarChave(e: React.FormEvent) {
+    e.preventDefault();
+    const currentToken = localStorage.getItem("authToken"); 
+    if (!chaveSelecionada || chaveSelecionada.id === null) {
+      setErrorMessage("Nenhuma chave selecionada para atualização.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      return;
+    }
+    if (!currentToken) {
+      setErrorMessage("Sessão expirada ou token inválido. Faça login novamente.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      navigate("/login");
+      return;
+    }
+    if (salaSelecionadaId === null) {
+      setErrorMessage("Selecione uma sala.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      return;
+    }
 
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const chaveAtualizadaPayload = {
+      sala: salaSelecionadaId,
+      disponivel: disponivel,
+      usuarios_autorizados: usuariosAutorizadosIds,
+      descricao: descricao || null,
+      token: currentToken,
+    };
 
-  const salas: Sala[] = [
-    { id: 1, nome: "Sala 101" },
-    { id: 2, nome: "Sala 202" },
-    { id: 3, nome: "Sala E09" },
-    { id: 4, nome: "Sala E10" },
-    { id: 5, nome: "Sala E11" },
-    { id: 6, nome: "Sala E12" },
-  ];
+    setIsLoading(true);
+    try {
+      await api.put(`/chameco/api/v1/chaves/${chaveSelecionada.id}/`, chaveAtualizadaPayload, {
+        params: { token: currentToken }
+      });
+      setIsSuccesModalOpen(true);
+      resetFormsAndCloseModals();
+      if (refetchChaves) refetchChaves(true); 
+      handleCloseFeedbackModals();
+    } catch (err) {
+      console.error("Erro ao atualizar a chave:", err);
+      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+      setErrorMessage(`Erro ao atualizar chave: ${apiErrorMessage}`);
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-  const [listaChaves, setItensAtuais] = useState<Chaves[]>([]);
+  async function excluirChave(e: React.FormEvent) {
+    e.preventDefault();
+    const currentToken = localStorage.getItem("authToken"); 
+    if (!chaveSelecionada || chaveSelecionada.id === null) {
+      setErrorMessage("Nenhuma chave selecionada para exclusão.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      return;
+    }
+    if (!currentToken) {
+      setErrorMessage("Sessão expirada ou token inválido. Faça login novamente.");
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+      navigate("/login");
+      return;
+    }
 
-  const [isSearching, setIsSearching] = useState(false);
-  const [pesquisa, setPesquisa] = useState("");
+    setIsLoading(true);
+    try {
+      await api.delete(`/chameco/api/v1/chaves/${chaveSelecionada.id}/`, {
+        params: { token: currentToken }, // DELETE usa token como param
+      });
+      setIsSuccesModalOpen(true);
+      resetFormsAndCloseModals();
+      if (refetchChaves) refetchChaves(true); 
+      handleCloseFeedbackModals();
+    } catch (err) {
+      console.error("Erro ao excluir a chave:", err);
+      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+      setErrorMessage(`Erro ao excluir chave: ${apiErrorMessage}`);
+      setIsPopUpErrorOpen(true);
+      handleCloseFeedbackModals();
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-  const chavesFiltradas = isSearching
-    ? listaChaves.filter(
-        (chave) => chave.sala.toString().includes(pesquisa) //||
-        //chave.blocos.toLowerCase().includes(pesquisa.toLowerCase())
-        //chave.qntd.toString().toLowerCase().includes(pesquisa.toLowerCase())
-      )
-    : listaChaves;
+  // --- Funções Auxiliares
 
-  // Adicionando funcionalidade ao passador de página
-  const itensPorPagina = 4;
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const totalPaginas = Math.max(
-    1,
-    Math.ceil(listaChaves.length / itensPorPagina)
-  );
+  const handlePesquisa = (valor: string) => {
+    setPesquisa(valor);
+    setIsSearching(valor !== "");
+    setPaginaAtual(1);
+  };
+
+  const chavesFiltradas = chavesList.filter((chave) => {
+    if (!isSearching) return true;
+    const sala = salas?.find(s => s.id === chave.sala);
+    const termoPesquisa = pesquisa.toLowerCase();
+    const usuariosNomes = chave.usuarios?.map(u => u.nome.toLowerCase()).join(" ") || "";
+    return (
+      sala?.nome?.toLowerCase().includes(termoPesquisa) ||
+      chave.id?.toString().includes(termoPesquisa) ||
+      (chave.descricao && chave.descricao.toLowerCase().includes(termoPesquisa)) ||
+      usuariosNomes.includes(termoPesquisa)
+    );
+  });
+
+  const totalPaginas = Math.max(1, Math.ceil(chavesFiltradas.length / itensPorPagina));
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
+  const itensPaginados = chavesFiltradas.slice(indexInicio, indexFim);
 
-  const itensAtuais = chavesFiltradas.slice(indexInicio, indexFim);
-
-  // adicionando modal de excluir chave
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  function statusSelecao(id: number) {
-    const chave = listaChaves.find((chave) => chave.id === id) || null;
-    setChaveSelecionada(chave);
-  }
-
-  function openChavesModal() {
-    setIsChavesModalOpen(true);
-  }
-
-  /* function openDescricaoModal() {
-    setIsDescricaoModalOpen(true);
-  }
-  function closeDescricaoModal() {
-    setDescricao("");
-    setIsDescricaoModalOpen(false);
-  }*/
-
-  function openEditModal() {
-    const chave = listaChaves.find(
-      (chave) => chave.id === chaveSelecionada?.id
-    );
-    if (chave) {
-      setSelectedSala(chave.sala);
-      setIsEditModalOpen(true);
-    }
-  }
-
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
-
-  function editarChave(e: React.FormEvent) {
-    e.preventDefault();
-  
-    if (chaveSelecionada !== null) {
-      const chaveAtualizada: Chaves = {
-        ...chaveSelecionada,
-        sala: selectedSala as number, 
-        disponivel: chaveSelecionada.disponivel, 
-        usuarios: chaveSelecionada.usuarios, 
-      };
-  
-      // Chama a função de requisição para atualizar a chave na API
-      atualizarChaveAPI(chaveAtualizada);
-  
-      // Atualizando estado local após a atualização na API
-      setChaves((prevChaves) =>
-        prevChaves.map((chave) =>
-          chave.id === chaveSelecionada.id ? chaveAtualizada : chave
-        )
-      );
-  
-      setItensAtuais((prevLista) =>
-        prevLista.map((chave) =>
-          chave.id === chaveSelecionada.id ? chaveAtualizada : chave
-        )
-      );
-  
-      // Resetando os campos e fechando o modal
-      setChaveSelecionada(null);
-      setSelectedSala(0);
-      closeEditModal();
-    }
-  }
-  
-  
-  //  function adicionarUsuarios(chaveId: number, novoUsuario: string) {
-  //    setItensAtuais((prevLista) => {
-  //     return prevLista.map((chave) => {
-  //        if (chave.id === chaveId) {
-  //          return {
-  //            ...chave,
-  //            usuarios: [...chave.usuarios, novoUsuario],
-  //          };
-  //        }
-  //        return chave;
-  //      });
-  //    });
-  //  }
-
-  function openUserModal(chave: Chaves) {
-    setChaveSelecionada(chave);
-    setIsUserModalOpen(true);
-  }
-
-  function closeUserModal() {
-    setIsUserModalOpen(false);
-    setChaveSelecionada(null);
-  }
-
-  function closeChavesModal() {
-    setSelectedSala(0);
-    setIsChavesModalOpen(false);
-  }
-
-  function avancarPagina() {
+  const avancarPagina = () => {
     if (paginaAtual < totalPaginas) {
       setPaginaAtual(paginaAtual + 1);
     }
-  }
+  };
 
-  function voltarPagina() {
+  const voltarPagina = () => {
     if (paginaAtual > 1) {
       setPaginaAtual(paginaAtual - 1);
     }
+  };
+
+  const openChavesModalHandler = () => {
+    resetFormsAndCloseModals();
+    setIsChavesModalOpen(true);
+  };
+
+  const openEditModalHandler = (chave: IChave) => {
+    setChaveSelecionada(chave);
+    setSalaSelecionadaId(chave.sala);
+    setDisponivel(chave.disponivel);
+    setDescricao(chave.descricao || "");
+    setUsuariosAutorizadosIds(chave.usuarios?.map(u => u.id) || []); 
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModalHandler = (chave: IChave) => {
+    setChaveSelecionada(chave);
+    setIsDeleteModalOpen(true);
+  };
+  
+  const openViewUsersModalHandler = (chave: IChave) => {
+    setChaveSelecionada(chave);
+    setIsViewUsersModalOpen(true);
+  };
+
+  const openDescricaoModalHandler = (descricao: string | null | undefined) => {
+    setDescricaoSelecionada(descricao || "Nenhuma descrição fornecida.");
+    setIsDescricaoModalOpen(true);
+  };
+
+  // Mostra carregamento enquanto hooks buscam dados
+  if (loadingChaves || loadingSalas || loadingUsuarios) {
+    return <Spinner></Spinner>; 
   }
 
-  function openDeleteModal() {
-    if (chaveSelecionada !== null) {
-      setIsDeleteModalOpen(true);
-    }
+  // Mostra erro se algum hook falhar (exceto o erro de token já tratado no componente pai)
+  if (errorSalas || errorUsuarios) {
+    navigate("/login");
   }
-
-  function closeDeleteModal() {
-    setIsDeleteModalOpen(false);
+  
+  // Tratamento específico para erro do hook useGetChaves que não seja falta de token
+  if (errorChaves && errorChaves.message !== "Token não encontrado") {
+       navigate("/login");
   }
-
-  // adicionando função de excluir chave
-  function removeChave(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (chaveSelecionada) {
-      excluirChaveAPI(
-        chaveSelecionada.id,
-        chaveSelecionada.sala,
-        chaveSelecionada.disponivel,
-        chaveSelecionada.usuarios
-      )
-        .then(() => {
-          setItensAtuais((prevLista) =>
-            prevLista.filter((chave) => chave.id !== chaveSelecionada.id)
-          );
-          setChaveSelecionada(null);
-          closeDeleteModal();
-        })
-        .catch((error) => {
-          console.error("Erro ao excluir a chave:", error);
-        });
-    }
-  }
-
-  // const [error, setError] = useState<string>("");
-  // {
-  //   /*garantir que qntd seja um número */
-  // }
-  // function handleQntdChange(e: React.ChangeEvent<HTMLInputElement>) {
-  //   const value = e.target.value;
-
-  //   {
-  //     /* Verifica se o valor é um número*/
-  //   }
-  //   if (!/^\d*$/.test(value)) {
-  //     setError("Por favor, insira apenas números.");
-  //   } else {
-  //     setError("");
-  //     setQntd(Number(value));
-  //   }
-  // }
 
   return (
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
-      {/* background */}
       <MenuTopo text="MENU" backRoute="/menu" />
-      {/* container */}
-      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-2 py-2 tablet:py-4 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-[480px] h-[90%]">
-        {/* título chaves */}
-        <div className="relative flex w-full gap-2 mt-5 justify-center items-center content-center flex-wrap tablet:flex-row mb-[30px]">
+      <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-2 py-2 tablet:py-4 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-auto min-h-[480px] h-auto">
+         <div className="relative flex w-full gap-2 mt-5 justify-center items-center content-center flex-wrap tablet:flex-row mb-[30px]">
           <h1 className="flex justify-center text-3xl text-[#081683] font-semibold">
             CHAVES
           </h1>
-          {/* Adicionando botão de status */}
           <div
             onClick={() => navigate("/statusChaves")}
-            className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0"
+            className="absolute right-0 top-0 flex items-center gap-2 mb-[15px] text-[#02006C] font-medium mt-[35px] tablet:mb-0 cursor-pointer"
           >
             <span className="font-semibold text-[20px]">STATUS DE CHAVE</span>
-            <button onClick={() => navigate("/statusChaves")}>
-              <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
-            </button>
+            <ChevronRight className="w-[25px] h-[25px] tablet:w-[35px] tablet:h-[35px]" />
           </div>
         </div>
 
-        <main className="flex flex-col mobile:px-8  py-3 w-auto justify-center gap-3">
-          {/* inputs + botão */}
+        <main className="flex flex-col mobile:px-8 py-3 w-auto justify-center gap-3">
           <div className="relative flex flex-wrap justify-between items-center gap-2">
-            {/* Filtros de busca */}
             <div className="h-fit items-center w-full tablet:w-auto">
-              {/* input de pesquisa */}
               <Pesquisa
                 pesquisa={pesquisa}
                 setIsSearching={setIsSearching}
-                setPesquisa={setPesquisa}
+                setPesquisa={handlePesquisa}
               />
             </div>
-
-            {/* botão de + chaves */}
-            <div className="flex items-center w-full gap-10 tablet:w-auto">
-              <button
-                onClick={openDeleteModal}
-                className="flex gap-1 items-center font-medium text-sm text-rose-600 underline"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  fill="#e11d48"
-                  className="bi bi-x-lg"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-                Excluir
-              </button>
-              {isDeleteModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={removeChave}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR CHAVE
-                      </p>
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" text-[#192160]" />
-                      </button>
-                    </div>
-                    <TriangleAlert className="size-16 text-red-700" />
-
-                    <p className="text-center px-2">
-                      Essa ação é{" "}
-                      <strong className="font-semibold ">definitiva</strong> e
-                      não pode ser desfeita.{" "}
-                      <strong className="font-semibold">
-                        Tem certeza disso?
-                      </strong>
-                    </p>
-                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                      >
-                        CANCELAR
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                      >
-                        EXCLUIR
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-              {/* Fim adicionando pop up de deletar cahve */}
-
+            <div className="flex items-center w-full justify-end gap-4 tablet:w-auto">
               <BotaoAdicionar
                 text="ADICIONAR CHAVE"
-                onClick={openChavesModal}
+                onClick={openChavesModalHandler}
               />
-
-              {/* Adicionando pop up de adicionar chaves */}
-              {isChavesModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={addChaves}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                        ADICIONAR CHAVE
-                      </p>
-                      <button
-                        onClick={closeChavesModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" mb-[5px] text-[#192160]" />
-                      </button>
-                    </div>
-
-                    <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                        Selecione uma sala
-                      </p>
-                      <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
-                        value={selectedSala === null ? "" : selectedSala}
-                        onChange={(e) => {
-                          setSelectedSala(Number(e.target.value));
-                        }}
-                      >
-                        <option
-                          className="text-[#777DAA] text-xs font-medium"
-                          value=""
-                          disabled
-                        >
-                          Selecione uma sala
-                        </option>
-                        {salas.map((sala) => (
-                          <option
-                            key={sala.id}
-                            value={sala.id}
-                            className="text-center bg-[#B8BCE0]"
-                          >
-                            {sala.nome}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* 
-                    <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                        Selecione um bloco
-                      </p>
-                      <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedBloco}
-                        onChange={(e) => setSelectedBloco(e.target.value)}
-                        required
-                      >
-                        <option
-                          className="text-[#777DAA] text-xs font-medium"
-                          value=""
-                          disabled
-                        >
-                          Selecione um Bloco
-                        </option>
-                        {blocos.map((bloco, index) => (
-                          <option
-                            key={index}
-                            value={bloco}
-                            className="text-center bg-[#B8BCE0]"
-                          >
-                            {bloco}
-                          </option>
-                        ))}
-                      </select>
-                    </div> */}
-
-                    {/* <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Informe a quantidade de chaves
-                      </p>
-
-                      <input
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Quantidade de chaves"
-                        value={qntd}
-                        min="0"
-                        step="1"
-                        onChange={handleQntdChange}
-                        required
-                      />
-                      {/* Exibe a mensagem de erro se houver um erro */}
-                    {/* {error && (
-                        <p className="text-red-500 text-xs mt-1">{error}</p>
-                      )}
-                    </div> */}
-
-                    {/*<div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Descreva os detalhes sobre a chave
-                      </p>
-                      <textarea
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        placeholder="Descrição do detalhamento sobre a chave"
-                        value={descricao}
-                        onChange={(e) => setDescricao(e.target.value)}
-                        required
-                      />
-                    </div>*/}
-
-                    <div className="flex justify-center items-center mt-[10px] w-full">
-                      <button
-                        type="submit"
-                        className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                      >
-                        <Plus className="h-10px" /> CRIAR NOVA CHAVE
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
             </div>
           </div>
-
-          {/*lista de chaves */}
-          <div className="overflow-y-auto h-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-            <table className="w-auto h-auto border-separate border-spacing-y-2 tablet:mb-6 bg-white">
+        {/* Tabela */}
+        <div className="overflow-y-auto h-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+            <table className="w-full h-full border-separate border-spacing-y-2 bg-white">
               <thead className="bg-white sticky top-0 z-10">
-                <tr>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900  w-[25%]">
-                    Salas
-                  </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[25%]">
-                    Blocos
-                  </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[10%]">
-                    Quantidade
-                  </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[20%]">
-                    Lista de pessoas autorizadas
-                  </th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[10%]">
-                    Disponível
-                  </th>
+                 <tr>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Sala</th>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Bloco</th>
+                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[7%]">Quantidade</th>
+                  <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">Usuários Autorizados</th>
+                  <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[14%]">Status da chave</th>
+                  <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[5%]">Descrição</th>
+                  <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[15%]"></th>
                 </tr>
               </thead>
               <tbody>
-                {itensAtuais.map((chaves) => (
-                  <tr
-                    key={chaves.id}
-                    className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
-                      chaveSelecionada && chaveSelecionada.id === chaves.id
-                        ? "bg-gray-200"
-                        : ""
-                    }`}
-                    onClick={() => statusSelecao(chaves.id)}
-                  >
-                    <td className="align-center p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%] ">
-                      <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal">
-                        {salas.find((sala) => sala.id === chaves.sala)?.nome ||
-                          "Sala não encontrada"}
-                      </p>
-                    </td>
-                    <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
-                      <div className=" flex justify-center items-center">
-                        <img
-                          className="size-6 ml-2 mr-2"
-                          src="/bloco-chave.svg"
-                          alt="icon bloco"
-                        />
-                        <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
-                          {/*chaves.blocos*/}
+                {itensPaginados.length > 0 ? (
+                  itensPaginados.map((chave) => (
+                    <tr
+                      key={chave.id}
+                      className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""}`}
+                    >
+                      <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px]  break-words">
+                        {salas?.find((sala) => sala.id === chave.sala)?.nome || `ID: ${chave.sala}` || "N/A"}
+                      </td>
+                      <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                        <div className="flex justify-center items-center ">
+                          <svg className="size-6 ml-2 mr-2  " xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                          <path d="M15.2572 2.83333V11H2.42391V4C2.42391 3.69058 2.54683 3.39383 2.76562 3.17504C2.98441 2.95625 3.28116 2.83333 3.59058 2.83333H15.2572ZM17.5906 0.5H3.59058C2.66232 0.5 1.77208 0.868749 1.1157 1.52513C0.459325 2.1815 0.0905762 3.07174 0.0905762 4L0.0905762 13.3333H17.5906V0.5Z" fill="#565D8F"/>
+                          <path d="M24.5902 2.83333C24.8996 2.83333 25.1964 2.95625 25.4152 3.17504C25.634 3.39383 25.7569 3.69058 25.7569 4V11H22.2569V2.83333H24.5902ZM24.5902 0.5H19.9236V13.3333H28.0902V4C28.0902 3.07174 27.7215 2.1815 27.0651 1.52513C26.4087 0.868749 25.5185 0.5 24.5902 0.5V0.5Z" fill="#565D8F"/>
+                          <path d="M5.92391 18.0003V26.167H3.59058C3.28116 26.167 2.98441 26.0441 2.76562 25.8253C2.54683 25.6065 2.42391 25.3097 2.42391 25.0003V18.0003H5.92391ZM8.25724 15.667H0.0905762V25.0003C0.0905762 25.9286 0.459325 26.8188 1.1157 27.4752C1.77208 28.1316 2.66232 28.5003 3.59058 28.5003H8.25724V15.667Z" fill="#565D8F"/>
+                          <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
+                        </svg>
+                        <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate ">
+                          {salas?.find((sala) => sala.id === chave.sala)?.bloco || "-"}
                         </p>
-                      </div>
-                    </td>
-                    <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[20%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
-                      <div className="flex justify-center items-center ">
+                        </div>
+                      </td>
+                      <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[7%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
+                      <div className="flex justify-center pr-4 items-center ">
                         <svg
                           className="size-6 ml-2 mr-2  "
                           xmlns="http://www.w3.org/2000/svg"
@@ -693,14 +439,19 @@ export function Chaves() {
                             </clipPath>
                           </defs>
                         </svg>
-                        <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate">
-                          1
+                        <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate ">
+                          01  
                         </p>
                       </div>
                     </td>
-                    <button className="border-2 border-[#B8BCE0] border-solid bg-[#081683] ">
-                      <td className="align-center p-0.5 font-semibold  w-[40%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
-                        <div className=" flex justify-center items-center mr-1">
+                    
+                      <td className="align-center  w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words  ">
+                        <button 
+                      onClick={() => openViewUsersModalHandler(chave)}
+                      className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center  p-2"
+                      disabled={isLoading}
+                      title="Ver usuários autorizados">
+                        <div className=" flex justify-center items-center mr-1 ">
                           <svg
                             className="size-6 ml-2 mr-2"
                             xmlns="http://www.w3.org/2000/svg"
@@ -724,252 +475,353 @@ export function Chaves() {
                               </clipPath>
                             </defs>
                           </svg>
-                          <p className=" text-xs text-[#FFFF] text-center  text-[15px] font-semibold leading-normal truncate">
+                          <p className=" break-words text-xs text-[#FFFF] text-center  text-[0.8rem] font-semibold leading-normal truncate">
                             Pessoas autorizadas
                           </p>
                         </div>
+                        </button>
                       </td>
-                    </button>
-                    <td
-                      className={` text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0]  break-words min-w-8 w-20 ${
-                        chaves.disponivel === true
-                          ? "bg-[#22b350]"
-                          : "bg-red-700"
-                      }`}
-                    >
-                      {chaves.disponivel}
+                      <td className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0]  w-[14%] tablet:max-w-[200px] laptop:max-w-[400px]  break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"}`}>
+                        {chave.disponivel ? "Disponível" : "Indisponível"}
+                      </td>
+                      <td className="align-center  pl-2 pr-2 text-center w-[5%]">
+                        <button
+                          onClick={() => openDescricaoModalHandler(chave.descricao)}
+                          className="bg-[#565D8F] text-white p-1 rounded flex items-center justify-center  w-full h-full min-h-[40px] "
+                          disabled={isLoading}
+                          title="Ver descrição"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                          </svg>
+                        </button>
+                      </td>
+                      <td className="align-center text-xs text-[#646999] font-semibold w-[15%]">
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => openEditModalHandler(chave)}
+                            className="flex gap-1 items-center font-medium text-sm text-[#646999] underline disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading}
+                          >
+                            <img src="/fi-rr-pencil (1).svg" alt="Editar" className="w-4 h-4" />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => openDeleteModalHandler(chave)}
+                            className="flex gap-1 items-center font-medium text-sm text-rose-600 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading}
+                          >
+                            <X className="w-4 h-4" />
+                            Excluir
+                          </button>
+                        </div>
+                        
                     </td>
-
-                    <td className="align-center p-0.5 tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                      <div className="flex w-[96px] h-[20px] pr-[2px] justify-center items-start gap-[2px] flex-shrink-0">
-                        <svg
-                          className="size-4 ml-1 mr-0"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="19"
-                          height="19"
-                          viewBox="0 0 19 18"
-                          fill="none"
-                        >
-                          <g clip-path="url(#clip0_1781_442)">
-                            <path
-                              d="M9.5 0C7.71997 0 5.97991 0.527841 4.49987 1.51677C3.01983 2.50571 1.86628 3.91131 1.18509 5.55585C0.5039 7.20038 0.32567 9.00998 0.672937 10.7558C1.0202 12.5016 1.87737 14.1053 3.13604 15.364C4.39472 16.6226 5.99836 17.4798 7.74419 17.8271C9.49002 18.1743 11.2996 17.9961 12.9442 17.3149C14.5887 16.6337 15.9943 15.4802 16.9832 14.0001C17.9722 12.5201 18.5 10.78 18.5 9C18.4974 6.61384 17.5484 4.32616 15.8611 2.63889C14.1738 0.951621 11.8862 0.00258081 9.5 0V0ZM9.5 16.5C8.01664 16.5 6.5666 16.0601 5.33323 15.236C4.09986 14.4119 3.13856 13.2406 2.57091 11.8701C2.00325 10.4997 1.85473 8.99168 2.14411 7.53682C2.4335 6.08197 3.14781 4.74559 4.1967 3.6967C5.2456 2.64781 6.58197 1.9335 8.03683 1.64411C9.49168 1.35472 10.9997 1.50325 12.3701 2.0709C13.7406 2.63856 14.9119 3.59985 15.736 4.83322C16.5601 6.06659 17 7.51664 17 9C16.9978 10.9885 16.2069 12.8948 14.8009 14.3009C13.3948 15.7069 11.4885 16.4978 9.5 16.5Z"
-                              fill="#646999"
-                            />
-                            <path
-                              d="M9.5 7.5H8.75C8.55109 7.5 8.36032 7.57902 8.21967 7.71967C8.07902 7.86032 8 8.05109 8 8.25C8 8.44891 8.07902 8.63968 8.21967 8.78033C8.36032 8.92098 8.55109 9 8.75 9H9.5V13.5C9.5 13.6989 9.57901 13.8897 9.71967 14.0303C9.86032 14.171 10.0511 14.25 10.25 14.25C10.4489 14.25 10.6397 14.171 10.7803 14.0303C10.921 13.8897 11 13.6989 11 13.5V9C11 8.60218 10.842 8.22064 10.5607 7.93934C10.2794 7.65804 9.89782 7.5 9.5 7.5Z"
-                              fill="#646999"
-                            />
-                            <path
-                              d="M9.5 6C10.1213 6 10.625 5.49632 10.625 4.875C10.625 4.25368 10.1213 3.75 9.5 3.75C8.87868 3.75 8.375 4.25368 8.375 4.875C8.375 5.49632 8.87868 6 9.5 6Z"
-                              fill="#646999"
-                            />
-                          </g>
-                          <defs>
-                            <clipPath id="clip0_1781_442">
-                              <rect
-                                width="18"
-                                height="18"
-                                fill="white"
-                                transform="translate(0.5)"
-                              />
-                            </clipPath>
-                          </defs>
-                        </svg>
-                        <p
-                          //onClick={openDescricaoModal}
-                          className="text-[#646999] font-montserrat text-[11px] font-medium underline"
-                        >
-                          Ver mais
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => openEditModal()}
-                        className="ml-3 flex gap-1 justify-center items-center font-medium text-sm text-[#646999] underline"
-                      >
-                        <img src="fi-rr-pencil (1).svg" alt="" />
-                        Editar
-                      </button>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center p-4 text-gray-500">
+                      {loadingChaves ? "Carregando chaves..." : "Nenhuma chave encontrada."}
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-          {/*editar modal */}
-          {isEditModalOpen && (
-            <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-              <form
-                onSubmit={editarChave}
-                className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-              >
-                <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                  <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                    EDITAR CHAVE
-                  </p>
-                  <button
-                    onClick={closeEditModal}
-                    type="button"
-                    className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                  >
-                    <X className=" mb-[5px] text-[#192160]" />
-                  </button>
-                </div>
-
-                <div className="justify-center items-center ml-[40px] mr-8">
-                  <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                    Selecione uma sala
-                  </p>
-                  <select
-                    className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
-                    value={selectedSala === null ? "" : selectedSala}
-                    onChange={(e) => {
-                      setSelectedSala(Number(e.target.value));
-                    }}
-                  >
-                    <option
-                      className="text-[#777DAA] text-xs font-medium"
-                      value=""
-                      disabled
-                    >
-                      Selecione uma sala
-                    </option>
-                    {salas.map((sala) => (
-                      <option
-                        key={sala.id}
-                        value={sala.id}
-                        className="text-center bg-[#B8BCE0]"
-                      >
-                        {sala.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                        Selecione um bloco
-                      </p>
-                      <select
-                        className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA] "
-                        value={selectedBloco}
-                        onChange={(e) => setSelectedBloco(e.target.value)}
-                        required
-                      >
-                        <option
-                          className="text-[#777DAA] text-xs font-medium"
-                          value=""
-                          disabled
-                        >
-                          Selecione um Bloco
-                        </option>
-                        {blocos.map((bloco, index) => (
-                          <option
-                            key={index}
-                            value={bloco}
-                            className="text-center bg-[#B8BCE0]"
-                          >
-                            {bloco}
-                          </option>
-                        ))}
-                      </select>
-                    </div> */}
-
-                {/* <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Informe a quantidade de chaves
-                      </p>
-
-                      <input
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Quantidade de chaves"
-                        value={qntd}
-                        min="0"
-                        step="1"
-                        onChange={handleQntdChange}
-                        required
-                      />
-                      {/* Exibe a mensagem de erro se houver um erro */}
-                {/* {error && (
-                        <p className="text-red-500 text-xs mt-1">{error}</p>
-                      )}
-                    </div> 
-                    <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Descreva os detalhes sobre a chave
-                      </p>
-                      <textarea
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        placeholder="Descrição do detalhamento sobre a chave"
-                        value={descricao}
-                        onChange={(e) => setDescricao(e.target.value)}
-                        required
-                      />
-                    </div>*/}
-                <div className="flex justify-center items-center mt-[10px] w-full">
-                  <button
-                    type="submit"
-                    className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                  >
-                    SALVAR ALTERAÇÕES
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/*fim modal editar chave 
-          {isDescricaoModalOpen && chaveSelecionada && (
-            <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-              <div className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
-                <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                  <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                    Descrição sobre chaves
-                  </p>
-                  <button
-                    onClick={closeDescricaoModal}
-                    type="button"
-                    className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                  >
-                    <X className=" mb-[5px] text-[#192160]" />
-                  </button>
-                </div>
-                <div className=" rounded-[10px] bg-[#B8BCE0] p-4">
-                  <div
-                    key={chaveSelecionada.id}
-                    className="rounded-[10px] bg-[#B8BCE0] p-4"
-                  >
-                    <p className="text-[#192160] text-center text-[20px] font-semibold ml-[10px] w-[85%]">
-                      {chaveSelecionada.descricao}{" "}
-                      
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}*/}
+          {/* Paginação */}
+           <div className="mt-4">
+            <PassadorPagina
+              avancarPagina={avancarPagina}
+              voltarPagina={voltarPagina}
+              totalPaginas={totalPaginas}
+              paginaAtual={paginaAtual}
+            />
+          </div>
         </main>
-
-        
-
-        {/* Logo Chameco lateral */}
-        <div className="flex justify-start mt-2 sm:hidden">
+         {/* Logo Chameco */} 
+         <div className="flex justify-start mt-4 sm:hidden">
           <img
             className="sm:w-[200px] w-32"
-            src="\logo_lateral.png"
+            src="/logo_lateral.png"
             alt="logo chameco"
           />
         </div>
-        <div className="mt-2">
-          <PassadorPagina
-            avancarPagina={avancarPagina}
-            voltarPagina={voltarPagina}
-            totalPaginas={totalPaginas}
-            paginaAtual={paginaAtual}
-          />
-        </div>
-        {/* Fim passador de página */}
       </div>
+      {/* Modal Adicionar Chave */} 
+      {isChavesModalOpen && (
+         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+          <form
+            onSubmit={criarChave}
+            className="container flex flex-col gap-4 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[450px]"
+          >
+              <div className="flex justify-between items-center w-full">
+              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">ADICIONAR CHAVE</h3>
+              <button onClick={resetFormsAndCloseModals} type="button" className="p-1 rounded flex-shrink-0">
+                <X className="text-[#192160]" />
+              </button>
+            </div>
+
+            <div className="w-full">
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
+              <select
+                className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                value={salaSelecionadaId === null ? "" : salaSelecionadaId}
+                onChange={(e) => setSalaSelecionadaId(e.target.value ? Number(e.target.value) : null)}
+                required
+              >
+                <option value="" disabled>Selecione...</option>
+                {salas?.map((sala) => (
+                  <option key={sala.id} value={sala.id}>{sala.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-full">
+              <label htmlFor="add-descricao" className="text-[#192160] text-sm font-medium mb-1 block">Descreva os detalhes sobre a chave (opcional)</label>
+              <textarea
+                id="add-descricao"
+                className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium"
+                placeholder="Detalhes sobre a chave"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+              />
+            </div>
+            
+            <div className="w-full">
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados </label>
+              <div className="p-2 max-h-32 overflow-y-auto">
+                {allUsuarios.map(user => (
+                  <div key={user.id} className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id={`user-add-${user.id}`}
+                      checked={usuariosAutorizadosIds.includes(user.id)}
+                      onChange={(e) => {
+                        const id = user.id;
+                        if (e.target.checked) {
+                          setUsuariosAutorizadosIds(prev => [...prev, id]);
+                        } else {
+                          setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id));
+                        }
+                      }}
+                      className="form-checkbox h-4 w-4 text-blue-600"
+                    />
+                    <label htmlFor={`user-add-${user.id}`} className="text-sm text-[#777DAA]">{user.nome}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center items-center mt-2 w-full">
+              <button
+                type="submit"
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-[#16C34D] text-[#FFF] disabled:opacity-50"
+                disabled={isLoading}
+              >
+                <Plus className="h-4 w-4" /> {isLoading ? "CRIANDO..." : "CRIAR NOVA CHAVE"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      {/* Modal Editar Chave */} 
+      {isEditModalOpen && chaveSelecionada && (
+         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+          <form
+            onSubmit={atualizarChave}
+            className="container flex flex-col gap-4 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[450px]"
+          >
+            {/* ... Conteúdo do modal Editar ... */} 
+             <div className="flex justify-between items-center w-full">
+              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">EDITAR CHAVE</h3>
+              <button onClick={resetFormsAndCloseModals} type="button" className="p-1 rounded flex-shrink-0">
+                <X className="text-[#192160]" />
+              </button>
+            </div>
+
+            <div className="w-full">
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
+               <select
+                className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                value={salaSelecionadaId === null ? "" : salaSelecionadaId}
+                onChange={(e) => setSalaSelecionadaId(e.target.value ? Number(e.target.value) : null)}
+                required
+              >
+                <option value="" disabled>Selecione...</option>
+                {salas?.map((sala) => (
+                  <option key={sala.id} value={sala.id}>{sala.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-full">
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Descrição (opcional)</label>
+              <textarea
+                className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium"
+                placeholder="Detalhes sobre a chave"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+              />
+            </div>
+            
+            <div className="w-full">
+               <label className="flex items-center gap-2 text-[#192160] text-sm font-medium mb-1">
+                 <input 
+                    type="checkbox" 
+                    checked={disponivel}
+                    onChange={(e) => setDisponivel(e.target.checked)}
+                    className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                  Disponível
+               </label>
+            </div>
+            
+            <div className="w-full">
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados</label>
+              <div className="border border-[#646999]  rounded-[10px] p-2 max-h-32 overflow-y-auto">
+                {allUsuarios.map(user => (
+                  <div key={user.id} className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id={`user-add-${user.id}`}
+                      checked={usuariosAutorizadosIds.includes(user.id)}
+                      onChange={(e) => {
+                        const id = user.id;
+                        if (e.target.checked) {
+                          setUsuariosAutorizadosIds(prev => [...prev, id]);
+                        } else {
+                          setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id));
+                        }
+                      }}
+                      className="form-checkbox h-4 w-4 text-blue-600"
+                    />
+                    <label htmlFor={`user-edit-${user.id}`} className="text-sm text-[#777DAA]">{user.nome}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center items-center mt-2 w-full">
+              <button
+                type="submit"
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-[#16C34D] text-[#FFF] disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      {/* Modal Excluir Chave */} 
+      {isDeleteModalOpen && chaveSelecionada && (
+         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+          <form
+            onSubmit={excluirChave}
+            className="container flex flex-col gap-3 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+          >
+             {/* ... Conteúdo do modal Excluir ... */} 
+              <div className="flex justify-between items-center w-full">
+              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">EXCLUIR CHAVE</h3>
+              <button onClick={resetFormsAndCloseModals} type="button" className="p-1 rounded flex-shrink-0">
+                <X className="text-[#192160]" />
+              </button>
+            </div>
+            <TriangleAlert className="size-16 text-red-700" />
+            <p className="text-center px-2">
+              Essa ação é{" "}
+              <strong className="font-semibold">definitiva</strong> e não pode ser desfeita.
+              Deseja excluir a chave da sala <strong className="font-semibold">{salas?.find(s => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong>?
+            </p>
+            <div className="flex justify-center items-center mt-2 w-full gap-3">
+              <button
+                onClick={resetFormsAndCloseModals}
+                type="button"
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-slate-500 text-[#FFF] disabled:opacity-50"
+                disabled={isLoading}
+              >
+                CANCELAR
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-red-700 text-[#FFF] disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? "EXCLUINDO..." : "EXCLUIR"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      
+      {isViewUsersModalOpen && chaveSelecionada && (
+         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+          <div className="container flex flex-col gap-3 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
+             
+              <div className="flex justify-between items-center w-full">
+              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">USUÁRIOS AUTORIZADOS</h3>
+              <button onClick={resetFormsAndCloseModals} type="button" className="p-1 rounded flex-shrink-0">
+                <X className="text-[#192160]" />
+              </button>
+            </div>
+            <p className="text-sm text-center text-gray-600">Chave da sala: <strong className="font-semibold">{salas?.find(s => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong></p>
+            <div className=" rounded-md bg-[#B8BCE0] p-2 max-h-48 overflow-y-auto">
+              {chaveSelecionada.usuarios && chaveSelecionada.usuarios.length > 0 ? (
+                chaveSelecionada.usuarios.map(user => (
+                  <p key={user.id} className="text-sm text-[#192160] py-1">- {user.nome} </p>
+                ))
+              ) : (
+                <p className="text-sm text-center text-gray-700">Nenhum usuário autorizado.</p>
+              )}
+            </div>
+             <div className="flex justify-center items-center mt-2 w-full">
+               <button
+                onClick={resetFormsAndCloseModals}
+                type="button"
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-slate-500 text-[#FFF]"
+              >
+                FECHAR
+              </button>
+             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal Ver Descrição */} 
+      {isDescricaoModalOpen && (
+        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+          <div className="container flex flex-col gap-4 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[450px]">
+            <div className="flex justify-between items-center w-full">
+              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">DESCRIÇÃO DA CHAVE</h3>
+              <button onClick={resetFormsAndCloseModals} type="button" className="p-1 rounded flex-shrink-0">
+                <X className="text-[#192160]" />
+              </button>
+            </div>
+           <div className=" rounded-md bg-[#B8BCE0] p-2"> 
+             {descricaoSelecionada && descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
+                <p className="text-sm text-[#192160] py-1 whitespace-pre-wrap break-words">{descricaoSelecionada}</p>
+              ) : (
+                <p className="text-sm text-center text-gray-700">Nenhuma descrição adicionada.</p>
+              )}
+            </div>
+            <div className="flex justify-center items-center mt-2 w-full">
+              <button
+                type="button"
+                onClick={resetFormsAndCloseModals}
+                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-gray-300 text-gray-700"
+              >
+                FECHAR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modais de Feedback */} 
+      {isSuccesModalOpen && <PopUpdeSucess text="Operação realizada com sucesso!" />}
+      {isPopUpErrorOpen && <PopUpdeErro text={errorMessage || "Ops, deu erro! Tente novamente :)"} />}
     </div>
   );
 }
+

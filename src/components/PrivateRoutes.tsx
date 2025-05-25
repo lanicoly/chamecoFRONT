@@ -1,7 +1,8 @@
 import { useLocation, Navigate } from 'react-router-dom';
-import axios, { isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { useState, useEffect } from 'react';
 import api from "../services/api";
+import Spinner from "./spinner"
 
 interface PrivateRouteProps {
   children: JSX.Element; //será exibido se o acesso for permitido
@@ -11,7 +12,7 @@ interface PrivateRouteProps {
 
 export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
   const location = useLocation();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
 
   
@@ -32,14 +33,11 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
           token: token,
         });
         setIsValidToken(response.status === 200);
-      } catch(error){
-        // Tratamento seguro com TypeScript
-        if (isAxiosError(error)) {
-          // Erro específico do Axios
-          console.error('Erro na validação do token:', error.response?.data);
+      } catch(err){
+        if (isAxiosError(err)) {
+          console.error('Erro na validação do token:', err.response?.data);
         } else {
-          // Erro genérico (ex: rede falhou)
-          console.error('Erro desconhecido:', error);
+          console.error('Erro desconhecido:', err);
         }
         setIsValidToken(false);
       }
@@ -49,15 +47,8 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
   }, [token]);
 
   if (isValidToken === null) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}>
-        <div className="spinner"></div>
-      </div>
+    return(
+      <Spinner></Spinner>
     );
   }
 

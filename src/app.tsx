@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+//import { useState, useEffect } from "react";
 
 //separei as outras telas em um arquivo de componentes e a única diferença delas pro app é o nome que exporto no arquivo e que eu tenho que chamar elas aqui para mexer com elas, pois a navegação ocorre inicializando o que tem no app
 import { Menu } from "./pages/menu";

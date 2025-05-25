@@ -1,4 +1,4 @@
-import axios, { formToJSON } from "axios";
+import axios from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -60,7 +60,7 @@ export function Login() {
         
       if (statusResponse === 200 && response.data?.token) { //testar sem status response
 
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("authToken", response.data.token);
 
         if(response.data.usuario) {
           localStorage.setItem("userData", JSON.stringify(response.data.usuario));
