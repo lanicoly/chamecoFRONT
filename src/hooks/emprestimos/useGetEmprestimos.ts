@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 
-const CACHE_TTL = 60 * 5; // 5 minutes
+const CACHE_TTL = 60 * 1; // 5 minutes
 
 
-const useGetEmprestimos = (finalizados?: boolean) => {
+const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
   const [emprestimos, setChaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -56,7 +56,7 @@ const useGetEmprestimos = (finalizados?: boolean) => {
     };
 
     fetchEmprestimos();
-  }, [finalizados]); 
+  }, [finalizados, refreshTrigger]); 
 
   return { new_emprestimos: emprestimos, loading, error };
 }

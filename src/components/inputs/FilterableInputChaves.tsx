@@ -23,7 +23,7 @@ interface IdropdownResponsavelProps {
 }
 
 
-export function FilterableInputChaves({items, onSelectItem}: IdropdownResponsavelProps) {
+export function FilterableInputChaves({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const {salas} = useGetSalas();
 
@@ -76,7 +76,7 @@ export function FilterableInputChaves({items, onSelectItem}: IdropdownResponsave
         <input
             type="text"
             placeholder="Chave"
-            value={searchTerm}
+            value={reset ? "" : searchTerm}
             onChange={handleInputChange}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
 import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
-import { Info, Check} from "lucide-react";
+import { Info, Check } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
@@ -12,16 +12,14 @@ import { PassadorPagina } from "./passadorPagina";
 import api from "../services/api";
 import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+// import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetChaves from "../hooks/chaves/useGetChaves";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
-import { getNomeSolicitante } from "../utils/getNomeSolicitante.ts";
-import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala.ts";
-
-
+import { getNomeSolicitante } from "../utils/getNomeSolicitante";
+import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 // import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 
 interface EmprestimosPendentesProps {
@@ -34,6 +32,8 @@ interface EmprestimosPendentesProps {
   dataRetirada: string;
   horario_emprestimo: string;
   pesquisa: string;
+  refreshCounter: number;
+  setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export interface IusuarioResponsavel {
@@ -45,18 +45,19 @@ export interface IusuarioResponsavel {
 export function EmprestimosPendentes({
   new_emprestimos,
   solicitantes,
-  responsaveis,
-  pesquisa,
+  setRefreshCounter
 }: EmprestimosPendentesProps) {
-  const [emprestimoSelecionado, setEmprestimoSelecionado] = useState<Iemprestimo | null>(null);
+  const [emprestimoSelecionado, setEmprestimoSelecionado] =
+    useState<Iemprestimo | null>(null);
 
-  const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] = useState<DateRange | undefined>();
+  const [filtroDataEmprestimoRetirada, setFiltroDataEmprestimoRetirada] =
+    useState<DateRange | undefined>();
 
-  const {usuarios} = useGetUsuarios();
-  const {salas: salasData} = useGetSalas();
-  const {chaves: chavesData} = useGetChaves();
+  // const { usuarios } = useGetUsuarios();
+  const { salas: salasData } = useGetSalas();
+  const { chaves: chavesData } = useGetChaves();
+  const { responsaveis } = useGetResponsaveis();
 
-  
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
     chave: "",
@@ -70,64 +71,95 @@ export function EmprestimosPendentes({
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
-  .filter((emprestimos) => {
-    // const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
-    // const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
-    // const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
-    const observacao = emprestimos.observacao?.toLowerCase() ?? "";
+    .filter((emprestimos) => {
+      const salaNome = buscarNomeSalaPorIdChave(
+        emprestimos.chave,
+        chavesData,
+        salasData
+      );
+      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
+        emprestimos.chave,
+        chavesData,
+        salasData
+      )}`;
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emprestimos.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = getNomeSolicitante(
+        emprestimos.usuario_solicitante,
+        solicitantes
+      );
+      const dataHoraRetirada = emprestimos.horario_emprestimo
+        ? formatarDataHora(emprestimos.horario_emprestimo)
+        : { data: "", hora: "" };
 
+      return (
+        (filtroPendente.sala === "" ||
+          salaNome.toLowerCase().includes(filtroPendente.sala.toLowerCase())) &&
+        (filtroPendente.chave === "" ||
+          chaveNome
+            .toLowerCase()
+            .includes(filtroPendente.chave.toLowerCase())) &&
+        (filtroPendente.solicitante === "" ||
+          solicitanteNome
+            .toLowerCase()
+            .includes(filtroPendente.solicitante.toLowerCase())) &&
+        (filtroPendente.responsavel === "" ||
+          responsavelNome
+            .toLowerCase()
+            .includes(filtroPendente.responsavel.toLowerCase())) &&
+        (filtroPendente.horaRetirada === "" ||
+          dataHoraRetirada.hora
+            ?.toLowerCase()
+            .includes(filtroPendente.horaRetirada.toLowerCase()))
+      );
+    })
+    .filter((emp) => {
+      if (
+        !isFiltroPendente ||
+        !filtroDataEmprestimoRetirada?.from ||
+        !filtroDataEmprestimoRetirada?.to
+      )
+        return true;
 
-    const { data: dataRetirada, hora: horaEmprestimo } = emprestimos.horario_emprestimo
-      ? formatarDataHora(emprestimos.horario_emprestimo)
-      : { data: "", hora: "" };
+      if (!emp.horario_emprestimo) return false;
 
-    return (
-      // sala.includes(pesquisa.toLowerCase()) ||
-      // solicitante.includes(pesquisa.toLowerCase()) ||
-      // responsavel.includes(pesquisa.toLowerCase()) ||
-      dataRetirada.includes(pesquisa) ||
-      horaEmprestimo.includes(pesquisa) ||
-      observacao.includes(pesquisa)
-    );
-  })
-  .filter((emprestimos) => {
-    // const sala = getNomeSala(emprestimos.sala)?.toLowerCase() ?? "";
-    // const responsavel = getNomeResponsavel(emprestimos.usuario_responsavel)?.toLowerCase() ?? "";
-    // const solicitante = getNomeSolicitante(emprestimos.usuario_solicitante)?.toLowerCase() ?? "";
-    const horaEmprestimo = emprestimos.horario_emprestimo
-      ? formatarDataHora(emprestimos.horario_emprestimo).hora
-      : "";
+      const dataDevolucao = new Date(emp.horario_emprestimo);
 
-    return (
-      // (filtroPendente.sala === "" || sala.includes(filtroPendente.sala.toLowerCase())) &&
-      // (filtroPendente.solicitante === "" || solicitante.includes(filtroPendente.solicitante.toLowerCase())) &&
-      (filtroPendente.responsavel === "" || responsavel.includes(filtroPendente.responsavel.toLowerCase())) &&
-      (filtroPendente.horaRetirada === "" || horaEmprestimo.includes(filtroPendente.horaRetirada))
-    );
-  })
-  .filter((emprestimos) => {
-    if (
-      !isFiltroPendente ||
-      !filtroDataEmprestimoRetirada?.from ||
-      !filtroDataEmprestimoRetirada?.to
-    ) return true;
+      const dataRetiradaSemHora = new Date(
+        dataDevolucao.getFullYear(),
+        dataDevolucao.getMonth(),
+        dataDevolucao.getDate()
+      );
 
-    if (!emprestimos.dataRetirada) return false;
+      const from = new Date(
+        filtroDataEmprestimoRetirada.from.getFullYear(),
+        filtroDataEmprestimoRetirada.from.getMonth(),
+        filtroDataEmprestimoRetirada.from.getDate()
+      );
 
-    const data = new Date(emprestimos.dataRetirada);
-    return (
-      data >= filtroDataEmprestimoRetirada.from &&
-      data <= filtroDataEmprestimoRetirada.to
-    );
-  });
+      const to = new Date(
+        filtroDataEmprestimoRetirada.to.getFullYear(),
+        filtroDataEmprestimoRetirada.to.getMonth(),
+        filtroDataEmprestimoRetirada.to.getDate()
+      );
 
-  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(null);
+      return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
+    });
+
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+    null
+  );
 
   //paginação para emprestimos pendentes
   const itensAtuaisPendentes = emprestimosFiltradosPendentes.slice();
   const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
   const itensPorPaginaPendente = 5;
-  const totalPaginasPendentes = Math.max(1, Math.ceil(new_emprestimos.length / itensPorPaginaPendente));
+  const totalPaginasPendentes = Math.max(
+    1,
+    Math.ceil(new_emprestimos.length / itensPorPaginaPendente)
+  );
 
   function avancarPaginaPendente() {
     if (paginaAtualPendente < totalPaginasPendentes) {
@@ -151,29 +183,21 @@ export function EmprestimosPendentes({
 
   const closeDetalhesModal = () => {
     setIsDetalhesModalOpen(false);
-    ""  }
+    console.log("fechou");
+  };
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  function openEditModal() {
-    setIsEditModalOpen(true);
-  }
+  // function openEditModal() {
+  //   setIsEditModalOpen(true);
+  // }
 
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
+  // function closeEditModal() {
+  //   setIsEditModalOpen(false);
+  // }
 
   //funcao para editarObservacao
   const [observacao, setObservacao] = useState<string | null>(null);
-
-  function editarObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado && observacao) {
-      emprestimoSelecionado.observacao = observacao;
-    }
-    setObservacao("");
-    closeEditModal();
-  }
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -185,66 +209,72 @@ export function EmprestimosPendentes({
     setIsDeleteModalOpen(false);
   }
 
-  //criando função de excluir observação de emprestimos
-  function removeObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado) {
-      emprestimoSelecionado.observacao = "";
-    }
-    setObservacao("");
-    closeDeleteModal();
-  }
-
   async function finalizarEmprestimo(emprestimo: number | undefined | null) {
+    try {
+      const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {
+        id_emprestimo: emprestimo,
+      });
 
-      try {
-
-        const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {id_emprestimo : emprestimo});
-
-        if (!response) {
-          console.error("Erro ao finalizar o empréstimo");
-          return;
-        }
-
-        
-        setIsSuccessModalOpen(true);
-
-      } catch (error) {
-        const statusResponse = error.response?.status;
-
-        if (statusResponse === 400) {
-          console.log("Emprestimo já finalizado!", error.response.data);
-          return;
-        }
-        if (statusResponse === 401) {
-          console.log("Emprestimo não encontrado!");  
-          return;
-        }
-        if (statusResponse === 403) {
-          console.log("Você não tem permissão para finalizar este empréstimo!");
-          return;
-        }
-        if (statusResponse === 500) {
-          console.log("Erro interno do servidor! Contate o suporte.");
-          return;
-        }
-      } finally {
-        handleCloseModalAndReload();
+      if (!response) {
+        console.error("Erro ao finalizar o empréstimo");
+        return;
       }
+
+      console.log("Empréstimo finalizado com sucesso!", response.data);
+
+      //Colocando esse incremento no lugar do reload
+      setRefreshCounter((contadorAtual) => contadorAtual + 1);
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      const statusResponse = error.response?.status;
+
+      if (statusResponse === 400) {
+        console.log("Emprestimo já finalizado!", error.response.data);
+        return;
+      }
+      if (statusResponse === 401) {
+        console.log("Emprestimo não encontrado!");
+        return;
+      }
+      if (statusResponse === 403) {
+        console.log("Você não tem permissão para finalizar este empréstimo!");
+        return;
+      }
+      if (statusResponse === 500) {
+        console.log("Erro interno do servidor! Contate o suporte.");
+        return;
+      }
+    } finally {
+      handleCloseModalAndReload();
+    }
   }
 
   const handleCloseModalAndReload = () => {
-    setTimeout(() => { 
-      setIsSuccessModalOpen(false) 
-      window.location.reload();
+    setTimeout(() => {
+      setIsSuccessModalOpen(false);
+      // window.location.reload();
     }, 5000);
+  };
+
+
+  function emprestimoPendenteAlerta(emprestimo: {
+    horario_emprestimo?: string;
+    horario_devolucao?: string | null;
+  }) {
+    if (!emprestimo.horario_emprestimo || emprestimo.horario_devolucao)
+      return false;
+
+    const retirada = new Date(emprestimo.horario_emprestimo);
+    const agora = new Date();
+    const diferencaHoras = agora.getTime() - retirada.getTime();
+
+    return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
   return (
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
-
-        {isSuccessModalOpen && (<PopUpdeDevolucao/>)}
+        {isSuccessModalOpen && <PopUpdeDevolucao />}
 
         <thead className="bg-white top-0 ">
           <tr>
@@ -537,34 +567,97 @@ export function EmprestimosPendentes({
               )
               .map((emprestimo, index) => (
                 <tr key={index}>
-                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
+                  <td
+                    className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500 border-l-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salasData)}
+                      {buscarNomeSalaPorIdChave(
+                        emprestimo.chave,
+                        chavesData,
+                        salasData
+                      )}
                     </p>
                   </td>
-                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
+                  <td
+                    className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salasData)}`}
+                      {`Chave ${buscarNomeSalaPorIdChave(
+                        emprestimo.chave,
+                        chavesData,
+                        salasData
+                      )}`}
                     </p>
                   </td>
-                  <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                  <td
+                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0] "
+                    }`}
+                  >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {getNomeSolicitante(emprestimo.usuario_solicitante, usuarios) || "Solicitante não encontrado"}
+                      {getNomeSolicitante(
+                        emprestimo.usuario_solicitante,
+                        solicitantes
+                      ) || "Solicitante não encontrado"}
                     </p>
                   </td>
-                  <td className=" p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                  <td
+                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeUsuarioPorId(emprestimo.usuario_responsavel, usuarios)}
+                      {buscarNomeUsuarioPorId(
+                        emprestimo.usuario_responsavel,
+                        responsaveis
+                      ) || "Responsavel não encontrado"}
                     </p>
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
+                  <td
+                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).data
+                      : ""}
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
+                  <td
+                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                      : ""}
                   </td>
-                  <td className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1]  p-0.5 font-semibold break-words">
-                    <div onClick={() => finalizarEmprestimo(emprestimo.id)} className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer">
+                  <td
+                    className={`border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words ${
+                      emprestimoPendenteAlerta(emprestimo)
+                        ? " border-r-red-500 border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
+                    }`}
+                  >
+                    <div
+                      onClick={() => finalizarEmprestimo(emprestimo.id)}
+                      className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
+                    >
                       <Check color="white" size={18} />
                       <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
                         DEVOLVER
@@ -587,9 +680,9 @@ export function EmprestimosPendentes({
                       observacao={observacao}
                       setObservacao={setObservacao}
                       emprestimoSelecionado={emprestimoSelecionado}
-                      removeObservacao={removeObservacao}
+                      // removeObservacao={() => removeObservacao}
                       closeDetalhesModal={closeDetalhesModal}
-                      editarObservacao={editarObservacao}
+                      // editarObservacao={editarObservacao}
                       openDeleteModal={openDeleteModal}
                       closeDeleteModal={closeDeleteModal}
                       isDeleteModalOpen={isDeleteModalOpen}
