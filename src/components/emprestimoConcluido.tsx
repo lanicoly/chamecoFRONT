@@ -4,14 +4,19 @@ import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
-import { Info, X, TriangleAlert } from "lucide-react";
+import useGetChaves from "../hooks/chaves/useGetChaves";
+import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
+import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
+import { Info } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
-import useGetChaves from "../hooks/chaves/useGetChaves";
+// import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
+import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
+import { formatarDataHora } from "../utils/formatarDarahora";
+import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 
 interface EmprestimosConcluidosProps {
   salas: IoptionSalas[];
@@ -27,19 +32,15 @@ interface EmprestimosConcluidosProps {
   pesquisa: string;
 }
 
+
 export function EmprestimosConcluidos({
   new_emprestimos,
-  salas,
-  responsaveis,
   solicitantes,
-  pesquisa,
+  salas,
 }: EmprestimosConcluidosProps) {
-
-  const {chaves} = useGetChaves();
 
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
-
 
   //constantes para filtrar data de devolução/retirada
   const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
@@ -50,10 +51,8 @@ export function EmprestimosConcluidos({
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
-  function converterDataBRparaDate(dataStr: string): Date {
-    const [dia, mes, ano] = dataStr.split("/");
-    return new Date(Number(ano), Number(mes) - 1, Number(dia));
-  }
+  const {chaves} = useGetChaves();
+  const {responsaveis} = useGetResponsaveis();
 
   const [filtroConcluido, setFiltroConcluido] = useState({
     sala: "",
@@ -67,127 +66,123 @@ export function EmprestimosConcluidos({
   });
   const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
 
-  // const getNomeChave = (idChave: number | null | undefined) =>
-  //   idChave != null ? chaves.find((chave) => chave.id === idChave)?.nome || "" : "";
-
-  const getNomeSolicitante = (idSolicitante: number | null | undefined) =>
-    idSolicitante != null
-      ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
-      : "";
-
-  const getNomeSala = (idSala: number | null | undefined) =>
-    idSala != null
-      ? salas.find((sala) => sala.superusuario === idSala)?.nome || ""
-      : "";
-
-  const getNomeResponsavel = (idResponsavel: number | null | undefined) =>
-    idResponsavel != null
-      ? responsaveis.find((r) => r.superusuario === idResponsavel)?.nome || ""
-      : "";
-
-  //Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
-  function formatarDataHora(dataFormatada: string) {
-  const data = new Date(dataFormatada);
-  const dataBr = data.toLocaleDateString("pt-BR");
-  const horaBr = data.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  return {
-    data: dataBr,
-    hora: horaBr,
-  };
-}
-
   const emprestimosFiltradosConcluidos = new_emprestimos
-  .filter((emp) => {
-    const salaNome = getNomeSala(emp.sala);
-    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
-    const dataHoraRetirada = emp.dataRetirada
-      ? formatarDataHora(emp.dataRetirada)
-      : { data: '', hora: '' };
-      
-    const dataHoraEmprestimoDevolucao = emp.horario_devolucao
-      ? formatarDataHora(emp.horario_devolucao)
-      : { data: '', hora: '' };
+    .filter((emp) => {
+      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chaves, salas);
+      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
+        emp.chave,
+        chaves,
+        salas
+      )}`;
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emp.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante, solicitantes);
+      const dataHoraRetirada = emp.horario_emprestimo
+        ? formatarDataHora(emp.horario_emprestimo)
+        : { data: "", hora: "" };
 
-    return (
-      salaNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      solicitanteNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      responsavelNome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-      dataHoraRetirada.data.includes(pesquisa) ||
-      dataHoraRetirada.hora.includes(pesquisa) ||
-      dataHoraEmprestimoDevolucao.data.includes(pesquisa) ||
-      dataHoraEmprestimoDevolucao.hora.includes(pesquisa) ||
-      emp.observacao?.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-  })
-  .filter((emp) => {
-    const salaNome = getNomeSala(emp.sala);
-    const responsavelNome = getNomeResponsavel(emp.usuario_responsavel);
-    const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante);
+      const dataHoraEmprestimoDevolucao = emp.horario_devolucao
+        ? formatarDataHora(emp.horario_devolucao)
+        : { data: "", hora: "" };
 
-    return (
-      (filtroConcluido.sala === "" ||
-        salaNome.toLowerCase().includes(filtroConcluido.sala.toLowerCase())) &&
-      (filtroConcluido.solicitante === "" ||
-        solicitanteNome
-          .toLowerCase()
-          .includes(filtroConcluido.solicitante.toLowerCase())) &&
-      (filtroConcluido.responsavel === "" ||
-        responsavelNome
-          .toLowerCase()
-          .includes(filtroConcluido.responsavel.toLowerCase())) &&
-      (filtroConcluido.horaRetirada === "" ||
-        emp.horario_emprestimo
-          ?.toLowerCase()
-          .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
-      (filtroConcluido.horaDevolucao === "" ||
-        emp.horario_devolucao
-          ?.toLowerCase()
-          .includes(filtroConcluido.horaDevolucao.toLowerCase()))
-    );
-  })
-  .filter((emp) => {
-    if (
-      !isFiltroConcluido ||
-      !filtroDataDevolucao?.from ||
-      !filtroDataDevolucao?.to
-    )
-      return true;
+      return (
+        (filtroConcluido.sala === "" ||
+          salaNome
+            .toLowerCase()
+            .includes(filtroConcluido.sala.toLowerCase())) &&
+        (filtroConcluido.chave === "" ||
+          chaveNome
+            .toLowerCase()
+            .includes(filtroConcluido.chave.toLowerCase())) &&
+        (filtroConcluido.solicitante === "" ||
+          solicitanteNome
+            .toLowerCase()
+            .includes(filtroConcluido.solicitante.toLowerCase())) &&
+        (filtroConcluido.responsavel === "" ||
+          responsavelNome
+            .toLowerCase()
+            .includes(filtroConcluido.responsavel.toLowerCase())) &&
+        (filtroConcluido.horaRetirada === "" ||
+          dataHoraRetirada.hora
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
+        (filtroConcluido.horaDevolucao === "" ||
+          dataHoraEmprestimoDevolucao.hora
+            ?.toLowerCase()
+            .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+      );
+    })
+    .filter((emp) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataDevolucao?.from ||
+        !filtroDataDevolucao?.to
+      )
+        return true;
 
-    const dataDevolucao = emp.dataDevolucao
-      ? converterDataBRparaDate(emp.dataDevolucao)
-      : null;
-    return (
-      dataDevolucao &&
-      dataDevolucao >= filtroDataDevolucao.from &&
-      dataDevolucao <= filtroDataDevolucao.to
-    );
-  })
-  .filter((emp) => {
-    if (
-      !isFiltroConcluido ||
-      !filtroDataEmprestimoRetiradaConcluidos?.from ||
-      !filtroDataEmprestimoRetiradaConcluidos?.to
-    )
-      return true;
+      if (!emp.horario_devolucao) return false;
 
-    const dataEmprestimoRetirada = emp.dataRetirada
-      ? converterDataBRparaDate(emp.dataRetirada)
-      : null;
-    return (
-      dataEmprestimoRetirada &&
-      dataEmprestimoRetirada >= filtroDataEmprestimoRetiradaConcluidos.from &&
-      dataEmprestimoRetirada <= filtroDataEmprestimoRetiradaConcluidos.to
-    );
-  });
+      const dataDevolucao = new Date(emp.horario_devolucao);
 
-    const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-      null
-    );
+      const dataDevolucaoSemHora = new Date(
+        dataDevolucao.getFullYear(),
+        dataDevolucao.getMonth(),
+        dataDevolucao.getDate()
+      );
+
+      const from = new Date(
+        filtroDataDevolucao.from.getFullYear(),
+        filtroDataDevolucao.from.getMonth(),
+        filtroDataDevolucao.from.getDate()
+      );
+
+      const to = new Date(
+        filtroDataDevolucao.to.getFullYear(),
+        filtroDataDevolucao.to.getMonth(),
+        filtroDataDevolucao.to.getDate()
+      );
+
+      return dataDevolucaoSemHora >= from && dataDevolucaoSemHora <= to;
+    })
+    .filter((emp) => {
+      if (
+        !isFiltroConcluido ||
+        !filtroDataEmprestimoRetiradaConcluidos?.from ||
+        !filtroDataEmprestimoRetiradaConcluidos?.to
+      )
+        return true;
+
+      if (!emp.horario_emprestimo) return false;
+
+      const dataDevolucao = new Date(emp.horario_emprestimo);
+
+      const dataRetiradaSemHora = new Date(
+        dataDevolucao.getFullYear(),
+        dataDevolucao.getMonth(),
+        dataDevolucao.getDate()
+      );
+
+      const from = new Date(
+        filtroDataEmprestimoRetiradaConcluidos.from.getFullYear(),
+        filtroDataEmprestimoRetiradaConcluidos.from.getMonth(),
+        filtroDataEmprestimoRetiradaConcluidos.from.getDate()
+      );
+
+      const to = new Date(
+        filtroDataEmprestimoRetiradaConcluidos.to.getFullYear(),
+        filtroDataEmprestimoRetiradaConcluidos.to.getMonth(),
+        filtroDataEmprestimoRetiradaConcluidos.to.getDate()
+      );
+
+      return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
+
+    });
+
+  const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
+    null
+  );
 
   //paginação para emprestimos concluidos
   const itensAtuaisConcluidos = emprestimosFiltradosConcluidos.slice();
@@ -224,9 +219,9 @@ export function EmprestimosConcluidos({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  function openEditModal() {
-    setIsEditModalOpen(true);
-  }
+  // function openEditModal() {
+  //   setIsEditModalOpen(true);
+  // }
 
   function closeEditModal() {
     setIsEditModalOpen(false);
@@ -686,24 +681,32 @@ export function EmprestimosConcluidos({
                     {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeSolicitante(emprestimo.usuario_solicitante) ||
+                    {getNomeSolicitante(emprestimo.usuario_solicitante, solicitantes) ||
                       "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeResponsavel(emprestimo.usuario_responsavel) ||
-                      "Responsavel não encontrado"}
+                    {buscarNomeUsuarioPorId(
+                      emprestimo.usuario_responsavel,
+                      responsaveis
+                    ) || "Responsavel não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).data : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).data
+                      : ""}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo ? formatarDataHora(emprestimo.horario_emprestimo).hora : ''}
+                    {emprestimo.horario_emprestimo
+                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                      : ""}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
-                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).data}
+                    {emprestimo.horario_devolucao &&
+                      formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
                   <td className=" p-2 text-sm text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horario_devolucao && formatarDataHora(emprestimo.horario_devolucao).hora}
+                    {emprestimo.horario_devolucao &&
+                      formatarDataHora(emprestimo.horario_devolucao).hora}
                   </td>
 
                   <td className="pl-2">
@@ -717,170 +720,17 @@ export function EmprestimosConcluidos({
                   {/* Adicionando pop up de detalhes do empréstimo */}
                   {isDetalhesModalOpen && (
                     // emprestimo.id === emprestimoSelecionado?.id &&
-                    <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                      <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
-                        <div className="flex justify-between w-full px-3">
-                          <p className="text-[#192160] text-left text-[20px] font-semibold pr-6">
-                            DETALHES
-                          </p>
-                          <div className="flex justify-center items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={openEditModal}
-                              className="flex gap-1 justify-end items-center font-medium text-sm text-[#646999] underline"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                fill="#646999"
-                                className="bi bi-pen"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                              </svg>
-                              Editar
-                            </button>
-
-                            {/* Começo do pop up de editar observacao */}
-                            {isEditModalOpen && (
-                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                <form
-                                  // onSubmit={editarObservacao}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                                >
-                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                      EDITAR OBSERVAÇÃO
-                                    </p>
-
-                                    <button
-                                      onClick={closeEditModal}
-                                      type="button"
-                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                    >
-                                      <X className=" mb-[5px] text-[#192160]" />
-                                    </button>
-                                  </div>
-
-                                  <div className="justify-center items-center ml-[40px] mr-8">
-                                    <p className="text-[#192160] text-sm font-medium mb-1">
-                                      Digite a nova observação
-                                    </p>
-
-                                    <input
-                                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                                      type="text"
-                                      placeholder="Observação"
-                                      value={
-                                        observacao !== null ? observacao : ""
-                                      }
-                                      onChange={(e) =>
-                                        setObservacao(e.target.value)
-                                      }
-                                    />
-                                  </div>
-
-                                  <div className="flex justify-center items-center mt-[10px] w-full">
-                                    <button
-                                      type="button"
-                                      onClick={editarObservacao}
-                                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                                    >
-                                      SALVAR ALTERAÇÕES
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
-                            {/* Fim do pop up de editar observacao*/}
-
-                            <button
-                              type="button"
-                              onClick={openDeleteModal}
-                              className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                fill="#e11d48"
-                                className="bi bi-x-lg"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                              </svg>
-                              Excluir
-                            </button>
-
-                            {/* Adicionando pop up de deletar observacao */}
-                            {isDeleteModalOpen && (
-                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                <form
-                                  onSubmit={removeObservacao}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                                >
-                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                                      EXCLUIR OBSERVAÇÃO
-                                    </p>
-                                    <button
-                                      onClick={closeDeleteModal}
-                                      type="button"
-                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                    >
-                                      <X className=" text-[#192160]" />
-                                    </button>
-                                  </div>
-                                  <TriangleAlert className="size-16 text-red-700" />
-
-                                  <p className="text-center px-2">
-                                    Essa ação é{" "}
-                                    <strong className="font-semibold ">
-                                      definitiva
-                                    </strong>{" "}
-                                    e não pode ser desfeita.{" "}
-                                    <strong className="font-semibold">
-                                      Tem certeza disso?
-                                    </strong>
-                                  </p>
-                                  <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                                    <button
-                                      onClick={closeDeleteModal}
-                                      type="button"
-                                      className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                                    >
-                                      CANCELAR
-                                    </button>
-                                    <button
-                                      type="submit"
-                                      onClick={removeObservacao}
-                                      className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                                    >
-                                      EXCLUIR
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            onClick={closeDetalhesModal}
-                            type="button"
-                            className="px-2 py-1 rounded flex-shrink-0 "
-                          >
-                            <X className=" mb-[5px] text-[#192160]" />
-                          </button>
-                        </div>
-
-                        <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
-                          <p className="text-[#192160] font-medium p-1">
-                            {emprestimoSelecionado?.observacao ||
-                              "Detalhes sobre o empréstimo"}
-                          </p>
-                        </div>
-                      </form>
-                    </div>
+                     <IsDetalhesModal
+                                          observacao={observacao}
+                                          setObservacao={setObservacao}
+                                          emprestimoSelecionado={emprestimoSelecionado}
+                                          removeObservacao={() => removeObservacao}
+                                          closeDetalhesModal={closeDetalhesModal}
+                                          editarObservacao={() => editarObservacao}
+                                          openDeleteModal={openDeleteModal}
+                                          closeDeleteModal={closeDeleteModal}
+                                          isDeleteModalOpen={isDeleteModalOpen}
+                                        />
                   )}
                   {/* Fim adicionando pop up de detalhes do emprestimo */}
                 </tr>

@@ -1,17 +1,30 @@
 import { TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
+import { Iemprestimo } from "../../../pages/emprestimos";
 
-export function IsDetalhesModal ( 
-    observacao: string | null , 
-    setObservacao: (value: string) => void, 
-    emprestimoSelecionado: any, 
-    removeObservacao: () => void, 
+interface DetalhesModal{
+  observacao: string | null;
+  setObservacao: (value: string) => void, 
+    emprestimoSelecionado: Iemprestimo | null, 
+    // removeObservacao: () => void, 
     closeDetalhesModal: () => void,
-    editarObservacao: () => void,
+    // editarObservacao: () => void,
     openDeleteModal: () => void,
     closeDeleteModal: () => void,
-    isDeleteModalOpen: boolean,
-) {  
+    isDeleteModalOpen: boolean, 
+}
+
+export function IsDetalhesModal ( {
+    observacao, 
+    setObservacao, 
+    emprestimoSelecionado, 
+    // removeObservacao, 
+    closeDetalhesModal,
+    // editarObservacao,
+    openDeleteModal,
+    closeDeleteModal,
+    isDeleteModalOpen,
+}: DetalhesModal){  
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
 
@@ -22,6 +35,26 @@ export function IsDetalhesModal (
     function closeEditModal() {
         setIsEditModalOpen(false);
     }
+
+
+  function editarObservacao(e: React.FormEvent) {
+    e.preventDefault();
+    if (emprestimoSelecionado && observacao) {
+      emprestimoSelecionado.observacao = observacao;
+    }
+    setObservacao("");
+    closeEditModal();
+  }
+
+  //criando função de excluir observação de emprestimos
+  function removeObservacao(e: React.FormEvent) {
+    e.preventDefault();
+    if (emprestimoSelecionado) {
+      emprestimoSelecionado.observacao = "";
+    }
+    setObservacao("");
+    closeDeleteModal();
+  }
 
     return (
         // emprestimo.id === emprestimoSelecionado?.id &&
@@ -194,3 +227,5 @@ export function IsDetalhesModal (
         </div>
     )
 }
+
+export default IsDetalhesModal;
