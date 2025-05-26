@@ -382,7 +382,7 @@ function ChavesContent() {
                  <tr>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Sala</th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Bloco</th>
-                  <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[7%]">Quantidade</th>
+                  {/*<th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[7%]">Quantidade</th>*/}
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">Usuários Autorizados</th>
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[14%]">Status da chave</th>
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[5%]">Descrição</th>
@@ -412,7 +412,7 @@ function ChavesContent() {
                         </p>
                         </div>
                       </td>
-                      <td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[7%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
+                      {/*<td className="align-center p-0.5 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[7%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
                       <div className="flex justify-center pr-4 items-center ">
                         <svg
                           className="size-6 ml-2 mr-2  "
@@ -443,7 +443,7 @@ function ChavesContent() {
                           01  
                         </p>
                       </div>
-                    </td>
+                    </td>*/}
                     
                       <td className="align-center  w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words  ">
                         <button 
@@ -666,7 +666,7 @@ function ChavesContent() {
               />
             </div>
             
-            <div className="w-full">
+            {/*<div className="w-full">
                <label className="flex items-center gap-2 text-[#192160] text-sm font-medium mb-1">
                  <input 
                     type="checkbox" 
@@ -677,7 +677,7 @@ function ChavesContent() {
                   Disponível
                </label>
             </div>
-            
+            */}
             <div className="w-full">
               <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados</label>
               <div className="border border-[#646999]  rounded-[10px] p-2 max-h-32 overflow-y-auto">
