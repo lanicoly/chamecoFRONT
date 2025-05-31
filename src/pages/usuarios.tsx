@@ -7,6 +7,9 @@ import { BotaoAdicionar } from "../components/botaoAdicionar";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import AdicionarUsuarioForm from "../components/forms/AdicionarUsuarioForm";
 import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuario";
+import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
+import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
+import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
 
 interface Ichaves {
   id: number,
@@ -34,7 +37,7 @@ export function Usuarios() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const totalPaginas = Math.max(
     1,
-    Math.ceil(listaUsers.length / itensPorPagina)
+    Math.round(listaUsers.length / itensPorPagina)
   );
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
@@ -220,85 +223,16 @@ export function Usuarios() {
 
               {/* Adicionando pop up de editar usuario */}
               {isEditModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={editaUser}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                        EDITAR USUÁRIO
-                      </p>
-                      <button
-                        onClick={closeEditModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" mb-[5px] text-[#192160]" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Digite o novo nome do usuário
-                      </p>
-
-                      <input
-                        value={nome}
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Nome do usuário"
-                        onChange={(e) => setNome(e.target.value)}
-                        required
-                      />
-
-                      <div>
-                        <p className="text-[#192160] text-sm font-medium mb-1">
-                          Digite o novo email do usuário
-                        </p>
-
-                        <input
-                          className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                          type="text"
-                          placeholder="Email do usuário"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <p className="text-[#192160] text-sm font-medium mb-1">
-                          Selecione o novo tipo de usuário
-                        </p>
-                        <select
-                          name="tipo_usuario"
-                          id="tipo_usuario"
-                          className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-[#777DAA] text-xs font-medium w-full"
-                          value={tipo}
-                          onChange={(e) => setTipo(e.target.value)}
-                          required
-                        >
-                          <option value="">Tipo de usuário</option>
-                          <option value="administrativo">Administrativo</option>
-                          <option value="codis">CODIS</option>
-                          <option value="guarita">Guarita</option>
-                          <option value="servidor">Servidor</option>
-                          <option value="aluno">Aluno</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center items-center mt-[10px] w-full">
-                      <button
-                        type="submit"
-                        className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                      >
-                        SALVAR ALTERAÇÕES <Check className="size-5" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  <PopUpEditarUsuario 
+                    editaUser={editaUser} 
+                    closeEditModal={closeEditModal}
+                    nome={nome}
+                    setNome={setNome}
+                    email={email}
+                    setEmail={setEmail}
+                    tipo={tipo}
+                    setTipo={setTipo}
+                  />
               )}
               {/* Fim adicionando pop up de editar usuario */}
 
@@ -321,57 +255,14 @@ export function Usuarios() {
 
               {/* Adicionando pop up de deletar usuario */}
               {isDeleteModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={removeUser}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR USUÁRIO
-                      </p>
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" text-[#192160]" />
-                      </button>
-                    </div>
-                    <TriangleAlert className="size-16 text-red-700" />
-
-                    <p className="text-center px-2">
-                      Essa ação é{" "}
-                      <strong className="font-semibold ">definitiva</strong> e
-                      não pode ser desfeita.{" "}
-                      <strong className="font-semibold">
-                        Tem certeza disso?
-                      </strong>
-                    </p>
-                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                      >
-                        CANCELAR
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                      >
-                        EXCLUIR
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  <PopUpDeleteUsuario removeUser={removeUser} closeDeleteModal={closeDeleteModal}/>
               )}
               {/* Fim adicionando pop up de deletar usuario */}
             </div>
             {/* fim botões editar e excluir */}
 
             {/* tabela com todos os usuarios */}
-            <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+            {/* <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr>
@@ -408,7 +299,8 @@ export function Usuarios() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </div> */}
+            <TabelaDeUsuarios filtrarUsuario={filtrarUsuario} userSelecionado={userSelecionado} statusSelecao={statusSelecao}/>
             {/* fim tabela com todos os usuarios */}
 
             {/* passador de página */}

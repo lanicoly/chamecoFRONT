@@ -50,6 +50,14 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
     };
   }, []);
 
+  useEffect(() => {
+    if (reset) {
+      setSearchTerm("");
+      setSelectedOption(null);
+    }
+  },[reset]);
+
+  console.log("Usuário selecionado:", searchTerm)
   
   return (
     <div ref={dropdownRef} className="relative">
@@ -57,7 +65,7 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
         <input
             type="text"
             placeholder="Solicitante"
-            value={reset ? "" : searchTerm}
+            value={searchTerm || ""}
             onChange={handleInputChange}
             // className="flex-1 outline-none text-[#646999]"
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'

@@ -12,15 +12,13 @@ import { PassadorPagina } from "./passadorPagina";
 import api from "../services/api";
 import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
-// import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetSalas from "../hooks/salas/useGetSalas";
-import useGetChaves from "../hooks/chaves/useGetChaves";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
-// import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
+import { useChaves } from "../context/ChavesContext";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -55,7 +53,8 @@ export function EmprestimosPendentes({
 
   // const { usuarios } = useGetUsuarios();
   const { salas: salasData } = useGetSalas();
-  const { chaves: chavesData } = useGetChaves();
+  // const { chaves: chavesData } = useGetChaves();
+  const {chaves: chavesData, refetch} = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
   const [filtroPendente, setFiltroPendente] = useState({
@@ -186,16 +185,6 @@ export function EmprestimosPendentes({
     console.log("fechou");
   };
 
-  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // function openEditModal() {
-  //   setIsEditModalOpen(true);
-  // }
-
-  // function closeEditModal() {
-  //   setIsEditModalOpen(false);
-  // }
-
   //funcao para editarObservacao
   const [observacao, setObservacao] = useState<string | null>(null);
 
@@ -225,6 +214,8 @@ export function EmprestimosPendentes({
       //Colocando esse incremento no lugar do reload
       setRefreshCounter((contadorAtual) => contadorAtual + 1);
       setIsSuccessModalOpen(true);
+      refetch();
+      
     } catch (error) {
       const statusResponse = error.response?.status;
 

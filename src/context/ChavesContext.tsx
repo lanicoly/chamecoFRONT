@@ -1,0 +1,44 @@
+import { createContext, useCallback, useContext, useEffect, useState} from "react";
+import api from "../services/api";
+
+
+const ChavesContext = createContext<any>([]);
+
+export const ChavesProvider = (({children}: {children: React.ReactNode}) => {
+    const [chaves, setChaves] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
+
+    const fetchChaves = useCallback(async () => {
+
+        setLoading(true);
+
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            setError(new Error("Token não encontrado"));
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await api.get(`/chameco/api/v1/chaves/`);
+            setChaves(response.data?.results || []);
+
+        } catch (error) {
+            setError(err as Error)
+            console.log(error)
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchChaves();
+    }, [fetchChaves]);
+
+    return (
+        <ChavesContext.Provider value={{chaves, loading, error, refetch: fetchChaves}}>
+            {children}
+        </ChavesContext.Provider>
+    )
+})
+
+export const useChaves = () => useContext(ChavesContext);

@@ -1,62 +1,38 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import api from "../../services/api";
-import { set } from "date-fns";
-
-
-const CACHE_TTL = 60 * 5; // 5 minutes
-
+import api from "../../services/api.js";
 
 const useGetChaves = () => {
+  const [chaves, setChaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-    const [chaves, setChaves] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
-    
-    useEffect(() => {
-        const fetchChaves = async () => {
-          const token = localStorage.getItem("authToken");
-          const cache = localStorage.getItem("chaves");
-          const cachTimestamp = localStorage.getItem("chavesTimestamp");
-    
-          if (!token) {
-            setError(new Error("Token não encontrado"));
-            setLoading(false);
-            return;
-          }
+  useEffect(() => {
+    const fetchChaves = async () => {
+      setLoading(true);
+      setError(null);
 
-          const isCacheValid = cachTimestamp && (Date.now() - parseInt(cachTimestamp)) < CACHE_TTL;
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        setError(new Error("Token não encontrado"));
+        setLoading(false);
+        return;
+      }
 
-          if (isCacheValid) {
-            setChaves(JSON.parse(cache || "[]"));
-            setLoading(false);
-            return; 
+      try {
+        const response = await api.get(`/chameco/api/v1/chaves/`);
+        setChaves(response.data?.results || []);
+      } catch (err) {
+        console.error("Erro na requisição:", err);
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-          } else {
-    
-            try {
-              const response = await api.get(`/chameco/api/v1/chaves/`);
-    
-              if (!response) throw new Error("Erro ao puxar as chaves");
-    
-              setChaves(response.data.results || []);
+    fetchChaves(); // Executa uma vez ao montar
+  }, []); // NÃO depende de `chaves`
 
-              localStorage.setItem("chaves", JSON.stringify(response.data.results || []));
-              localStorage.setItem("chavesTimestamp", Date.now().toString());
-    
-            } catch (err) {
-              console.error("Erro na requisição:", err);
-              setError(err as Error);
-            } finally {
-              setLoading(false);
-            }
-          }
-        };
-    
-        fetchChaves();
-    }, []);
-    
-    return { chaves, loading, error };
-}
+  return { chaves, loading, error };
+};
 
-export default useGetChaves
+export default useGetChaves;
