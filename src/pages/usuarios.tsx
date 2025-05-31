@@ -50,9 +50,17 @@ export function Usuarios() {
     setListaUsers(usuarios);
   }, [usuarios]);
 
-  const filtrarUsuario =
-    filtro !== "todos" ? listaUsers.filter((usuario) => usuario.tipo.toLowerCase() === filtro.toLowerCase()) : listaUsers;
+  const filtrarUsuario =  listaUsers.filter((usuario) => {
+    const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());
+    const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
+    const filtroMatch = filtro === "todos" || usuario.tipo.toLowerCase() === filtro.toLowerCase();
 
+    if (!pesquisa) {
+      return filtroMatch;
+    }
+
+    return (nomeMatch || setorMatch) && filtroMatch;
+  });
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [tipo, setTipo] = useState("");
