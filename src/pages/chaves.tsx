@@ -6,12 +6,12 @@ import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-import useGetChaves from "../hooks/chaves/useGetChaves";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
+import { useChaves } from "../context/ChavesContext";
 
 export interface IUsuario {
   id: number;
@@ -73,7 +73,7 @@ function ChavesContent() {
   const navigate = useNavigate();
 
 
-  const { chaves, loading: loadingChaves, error: errorChaves, refetch: refetchChaves } = useGetChaves();
+  const { chaves, loading: loadingChaves, error: errorChaves, refetch: refetchChaves } = useChaves();
   const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
   const { usuarios: allUsuarios, loading: loadingUsuarios, error: errorUsuarios } = useGetUsuarios(); 
   const [chavesList, setChavesList] = useState<IChave[]>([]);

@@ -8,7 +8,6 @@ import "react-day-picker/style.css";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
-import useGetChaves from "../hooks/chaves/useGetChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
@@ -18,6 +17,8 @@ import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
+import { Chaves } from "./chaves";
+import { useChaves } from "../context/ChavesContext";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
@@ -40,26 +41,13 @@ export interface FiltroEmprestimo {
   filtroDataEmprestimo: DateRange | undefined;
 }
 
-const token: string | null = localStorage.getItem("authToken");
-
 export function Emprestimos() {
-  // { filtroDataEmprestimo, setFiltroDataEmprestimo }: FiltroEmprestimo
 
   const [pesquisa, setPesquisa] = useState("");
-  // const [isSearching, setIsSearching] = useState(false);
 
-  const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
-    null
-  );
-  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
-    null
-  );
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<
-    number | null
-  >(null);
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<
-    number | null
-  >(null);
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
   const [observacao, setObservacao] = useState<string | null>(null);
 
   const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
@@ -69,11 +57,10 @@ export function Emprestimos() {
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
   const { responsaveis } = useGetResponsaveis();
-  const { chaves } = useGetChaves();
+  // const { chaves } = useGetChaves();
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
-  // const { new_emprestimos } = useGetEmprestimos();
-  // const [emprestimosPendentes, setEmprestimosPendentes] = useState<Iemprestimo[]>([]);
+  const {chaves, refetch} = useChaves();
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -81,7 +68,7 @@ export function Emprestimos() {
       usuario_responsavel: responsavelSelecionadoId,
       usuario_solicitante: solicitanteSelecionadoId,
       observacao: observacao,
-      token: token,
+      // token: token,
     };
 
     if (
@@ -93,33 +80,29 @@ export function Emprestimos() {
       return;
     } else {
       try {
-        const response = await api.post(
-          "/chameco/api/v1/realizar-emprestimo/",
-          novoEmprestimo
-        );
+        const response = await api.post("/chameco/api/v1/realizar-emprestimo/", novoEmprestimo);
 
-        setEmprestimos((prevEmprestimos) => [
-          ...prevEmprestimos,
-          response.data,
-        ]);
-        setIsSuccesModalOpen(!isSuccesModalOpen);
-
-        //Colocando aqui para guardar os valores caso o usuário cometa algum erro.
-        setOnReset(!onReset);
-        setSalaSelecionadaId(null);
-        setChaveSelecionadaId(null);
-        setSolicitanteSelecionadoId(null);
-        setResponsavelSelecionadoId(null);
-        setObservacao("");
+        if (response) {
+            setOnReset(true); // ativa o reset
+            setTimeout(() => setOnReset(false), 100); // evita reset contínuo
+            setEmprestimos((prevEmprestimos) => [
+              ...prevEmprestimos,
+              response.data,
+            ]);
+            setIsSuccesModalOpen(!isSuccesModalOpen);
+            setObservacao("");
+        }
         
         //Colocando esse incremento no lugar do reload
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
+        refetch();
       } catch (error) {
         console.error(
           "Erro ao criar o empréstimo:",
           error.response?.data || error.message
         );
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
+
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -275,18 +258,8 @@ export function Emprestimos() {
                 </thead>
                 <tbody>
                   <tr>
-                    {/* <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
-                      <FilterableInputSalas
-                        items={salas}
-                        onSelectItem={(idSelecionado) => {
-                          setSalaSelecionadaId(idSelecionado);
-                        }}
-                        reset={onReset}
-                      />
-                    </td> */}
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputChaves
-                        items={chaves}
                         onSelectItem={(idSelecionado) => {
                           setChaveSelecionadaId(Number(idSelecionado) || null);
                         }}

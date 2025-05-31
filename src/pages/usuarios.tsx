@@ -1,15 +1,30 @@
 import { Check, Plus, TriangleAlert, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
+import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import AdicionarUsuarioForm from "../components/forms/AdicionarUsuarioForm";
+import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuario";
+import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
+import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
+import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
+import { useChaves } from "../context/ChavesContext";
 
-export interface Usuario {
-  id: number;
-  nome: string;
-  email: string;
-  tipo: string;
+interface Ichaves {
+  id: number,
+  nome: string
+}
+
+export interface Iusuario {
+  autorizado_emprestimo: boolean,
+  chaves: Ichaves[];
+  id: number,
+  id_cortex: number,
+  nome: string,
+  setor: string,
+  tipo: string,
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -17,12 +32,13 @@ export interface Usuario {
 //estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Usuarios() {
-  const [listaUsers, setListaUsers] = useState<Usuario[]>([]);
+  const { usuarios } = useGetUsuarios();
+  const [listaUsers, setListaUsers] = useState<Iusuario[]>([]);
   const itensPorPagina = 5;
   const [paginaAtual, setPaginaAtual] = useState(1);
   const totalPaginas = Math.max(
     1,
-    Math.ceil(listaUsers.length / itensPorPagina)
+    Math.round(listaUsers.length / itensPorPagina)
   );
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
@@ -31,24 +47,21 @@ export function Usuarios() {
   const [isSearching, setIsSearching] = useState(false);
   const [filtro, setFiltro] = useState("todos");
 
-  const filtrarUsuario =
-    filtro !== "todos"
-      ? listaUsers.filter(
-          (usuario) => usuario.tipo.toLowerCase() === filtro.toLowerCase()
-        )
-      : listaUsers;
+  useEffect(() => {
+    setListaUsers(usuarios);
+  }, [usuarios]);
 
-  const usuariosFiltrados =
-    isSearching || filtro
-      ? filtrarUsuario.filter(
-          (usuario) =>
-            usuario.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-            usuario.email.toLowerCase().includes(pesquisa.toLowerCase())
-        )
-      : filtrarUsuario;
+  const filtrarUsuario =  listaUsers.filter((usuario) => {
+    const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());
+    const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
+    const filtroMatch = filtro === "todos" || usuario.tipo.toLowerCase() === filtro.toLowerCase();
 
-  const itensAtuais = usuariosFiltrados.slice(indexInicio, indexFim);
-  const [nextId, setNextId] = useState(1);
+    if (!pesquisa) {
+      return filtroMatch;
+    }
+
+    return (nomeMatch || setorMatch) && filtroMatch;
+  });
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [tipo, setTipo] = useState("");
@@ -73,7 +86,7 @@ export function Usuarios() {
     const usuario = listaUsers.find((user) => user.id === userSelecionado);
     if (usuario) {
       setNome(usuario.nome);
-      setEmail(usuario.email);
+      setEmail(usuario.setor);
       setTipo(usuario.tipo);
       setIsEditModalOpen(true);
     }
@@ -93,23 +106,6 @@ export function Usuarios() {
     setIsDeleteModalOpen(false);
   }
 
-  function addUser(e: React.FormEvent) {
-    e.preventDefault();
-    const usuario: Usuario = {
-      id: nextId,
-      nome,
-      email,
-      tipo,
-    };
-        
-    setListaUsers([...listaUsers, usuario]);
-    setNextId(nextId + 1);
-    setNome("");
-    setEmail("");
-    setTipo("");
-    closeUserModal();
-  }
-
   function removeUser(e: React.FormEvent) {
     e.preventDefault();
     setListaUsers(
@@ -127,9 +123,9 @@ export function Usuarios() {
           if (nome) {
             usuario.nome = nome;
           }
-          if (email) {
-            usuario.email = email;
-          }
+          // if (email) {
+          //   usuario.email = email;
+          // }
           if (tipo) {
             usuario.tipo = tipo;
           }
@@ -190,34 +186,14 @@ export function Usuarios() {
           {/* adicionar usuario + pesquisa */}
           <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
             <div className="flex gap-2 flex-wrap">
-              {/* input de pesquisa */}
+
               <Pesquisa
                 pesquisa={pesquisa}
                 setIsSearching={setIsSearching}
                 setPesquisa={setPesquisa}
               />
-              {/* fim input de pesquisa */}
 
-              {/* input de filtro */}
-              <div>
-                <select
-                  name="filtrar_tipo_usuario"
-                  id="filtrar_tipo_usuario"
-                  value={filtro}
-                  onChange={(e) => {
-                    setFiltro(e.target.value);
-                  }}
-                  className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-sky-900 text-sm font-medium h-fit"
-                >
-                  <option value="todos">Todos</option>
-                  <option value="administrativo">Administrativo</option>
-                  <option value="codis">CODIS</option>
-                  <option value="guarita">Guarita</option>
-                  <option value="servidor">Servidor</option>
-                  <option value="aluno">Aluno</option>
-                </select>
-              </div>
-              {/* fim input de filtro */}
+              <SelectTipoUsuario filtro={filtro} setFiltro={setFiltro} />
             </div>
 
             {/* botao adicionar usuairo */}
@@ -226,94 +202,7 @@ export function Usuarios() {
 
             {/* Adicionando pop up de adicionar usuarios */}
             {isUserModalOpen && (
-              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                <form
-                  onSubmit={addUser}
-                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                >
-                  {/*cabeçalho modal add user*/}
-                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                      ADICIONAR USUÁRIO
-                    </p>
-                    <button
-                      onClick={closeUserModal}
-                      type="button"
-                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                    >
-                      <X className=" mb-[5px] text-[#192160]" />
-                    </button>
-                  </div>
-                  {/* fim cabeçalho modal add user*/}
-
-                  <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-                    {/*seção nome de usuáiro */}
-                    <div>
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Digite o nome do usuário
-                      </p>
-                      <input
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Nome do usuário"
-                        value={nome}
-                        onChange={(e) => setNome(e.target.value)}
-                        required
-                      />
-                    </div>
-                    {/* fim seção nome de usuário */}
-
-                    {/*seção email de usuário*/}
-                    <div>
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Digite o e-mail do usuário
-                      </p>
-                      <input
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Email do usuário"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    {/* fim seção email de usuário*/}
-
-                    {/* seção tipo do usuário*/}
-                    <div>
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Selecione o tipo do usuário
-                      </p>
-                      <select
-                        name="tipo_usuario"
-                        id="tipo_usuario"
-                        className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-[#777DAA] text-xs font-medium w-full"
-                        value={tipo}
-                        onChange={(e) => setTipo(e.target.value)}
-                        required
-                      >
-                        <option value="">Tipo de usuário</option>
-                        <option value="administrativo">Administrativo</option>
-                        <option value="codis">CODIS</option>
-                        <option value="guarita">Guarita</option>
-                        <option value="servidor">Servidor</option>
-                        <option value="aluno">Aluno</option>
-                      </select>
-                    </div>
-                    {/* fim seção tipo do usuário*/}
-                  </div>
-                  {/* botão salvar criação de  usuário*/}
-                  <div className="flex justify-center items-center mt-[10px] w-full">
-                    <button
-                      type="submit"
-                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                    >
-                      <Plus className="h-10px" /> CRIAR USUÁRIO
-                    </button>
-                  </div>
-                  {/* fim botão salvar criação de  usuário*/}
-                </form>
-              </div>
+              <AdicionarUsuarioForm closeUserModal={closeUserModal}/>
             )}
 
             {/* Fim adicionando pop up de adicionar usuarios */}
@@ -343,85 +232,16 @@ export function Usuarios() {
 
               {/* Adicionando pop up de editar usuario */}
               {isEditModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={editaUser}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                        EDITAR USUÁRIO
-                      </p>
-                      <button
-                        onClick={closeEditModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" mb-[5px] text-[#192160]" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3 justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Digite o novo nome do usuário
-                      </p>
-
-                      <input
-                        value={nome}
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Nome do usuário"
-                        onChange={(e) => setNome(e.target.value)}
-                        required
-                      />
-
-                      <div>
-                        <p className="text-[#192160] text-sm font-medium mb-1">
-                          Digite o novo email do usuário
-                        </p>
-
-                        <input
-                          className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                          type="text"
-                          placeholder="Email do usuário"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <p className="text-[#192160] text-sm font-medium mb-1">
-                          Selecione o novo tipo de usuário
-                        </p>
-                        <select
-                          name="tipo_usuario"
-                          id="tipo_usuario"
-                          className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-[#777DAA] text-xs font-medium w-full"
-                          value={tipo}
-                          onChange={(e) => setTipo(e.target.value)}
-                          required
-                        >
-                          <option value="">Tipo de usuário</option>
-                          <option value="administrativo">Administrativo</option>
-                          <option value="codis">CODIS</option>
-                          <option value="guarita">Guarita</option>
-                          <option value="servidor">Servidor</option>
-                          <option value="aluno">Aluno</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center items-center mt-[10px] w-full">
-                      <button
-                        type="submit"
-                        className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                      >
-                        SALVAR ALTERAÇÕES <Check className="size-5" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  <PopUpEditarUsuario 
+                    editaUser={editaUser} 
+                    closeEditModal={closeEditModal}
+                    nome={nome}
+                    setNome={setNome}
+                    email={email}
+                    setEmail={setEmail}
+                    tipo={tipo}
+                    setTipo={setTipo}
+                  />
               )}
               {/* Fim adicionando pop up de editar usuario */}
 
@@ -444,57 +264,14 @@ export function Usuarios() {
 
               {/* Adicionando pop up de deletar usuario */}
               {isDeleteModalOpen && (
-                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                  <form
-                    onSubmit={removeUser}
-                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                  >
-                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                        EXCLUIR USUÁRIO
-                      </p>
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                      >
-                        <X className=" text-[#192160]" />
-                      </button>
-                    </div>
-                    <TriangleAlert className="size-16 text-red-700" />
-
-                    <p className="text-center px-2">
-                      Essa ação é{" "}
-                      <strong className="font-semibold ">definitiva</strong> e
-                      não pode ser desfeita.{" "}
-                      <strong className="font-semibold">
-                        Tem certeza disso?
-                      </strong>
-                    </p>
-                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                      <button
-                        onClick={closeDeleteModal}
-                        type="button"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                      >
-                        CANCELAR
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                      >
-                        EXCLUIR
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  <PopUpDeleteUsuario removeUser={removeUser} closeDeleteModal={closeDeleteModal}/>
               )}
               {/* Fim adicionando pop up de deletar usuario */}
             </div>
             {/* fim botões editar e excluir */}
 
             {/* tabela com todos os usuarios */}
-            <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
+            {/* <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
               <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr>
@@ -502,7 +279,7 @@ export function Usuarios() {
                       Nome de usuário
                     </th>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
-                      Email
+                      Setor
                     </th>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 ">
                       Tipo de Usuario
@@ -510,7 +287,7 @@ export function Usuarios() {
                   </tr>
                 </thead>
                 <tbody>
-                  {itensAtuais.map((usuario) => (
+                  {filtrarUsuario.map((usuario: Iusuario) => (
                     <tr
                       key={usuario.id}
                       className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
@@ -522,7 +299,7 @@ export function Usuarios() {
                         {usuario.nome}
                       </td>
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[30%] break-words flex-1">
-                        {usuario.email}
+                        {usuario.setor !== "" ? usuario.setor : "Não informado"}
                       </td>
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         {usuario.tipo}
@@ -531,7 +308,8 @@ export function Usuarios() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </div> */}
+            <TabelaDeUsuarios filtrarUsuario={filtrarUsuario} userSelecionado={userSelecionado} statusSelecao={statusSelecao}/>
             {/* fim tabela com todos os usuarios */}
 
             {/* passador de página */}

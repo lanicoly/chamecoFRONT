@@ -4,7 +4,6 @@ import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
-import useGetChaves from "../hooks/chaves/useGetChaves";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { Info } from "lucide-react";
