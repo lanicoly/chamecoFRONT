@@ -27,6 +27,8 @@ export const ChavesProvider = (({children}: {children: React.ReactNode}) => {
         } catch (error) {
             setError(err as Error)
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }, []);
 

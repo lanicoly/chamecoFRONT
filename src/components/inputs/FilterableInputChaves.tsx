@@ -26,8 +26,6 @@ interface IdropdownResponsavelProps {
 
 export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
 
-  console.log("Reset dentro de chaves:", reset)
-
   const {chaves} = useChaves();
   const {salas} = useGetSalas();
 

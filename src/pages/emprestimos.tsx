@@ -8,7 +8,6 @@ import "react-day-picker/style.css";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
-import useGetChaves from "../hooks/chaves/useGetChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
@@ -62,8 +61,6 @@ export function Emprestimos() {
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   const {chaves, refetch} = useChaves();
-
-  console.log("Usuários:", usuarios)
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {

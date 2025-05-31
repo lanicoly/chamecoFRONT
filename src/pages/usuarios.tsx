@@ -10,6 +10,7 @@ import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuar
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
+import { useChaves } from "../context/ChavesContext";
 
 interface Ichaves {
   id: number,

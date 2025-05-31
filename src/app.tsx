@@ -69,7 +69,7 @@ export function App() {
         <Route
           path="/emprestimos"
           element={
-            <PrivateRoute allowedTypes={["serv.terceirizado", "diretor.geral"]}>
+            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral"]}>
               <Emprestimos />
             </PrivateRoute>
           }

@@ -57,7 +57,6 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
     }
   },[reset]);
 
-  console.log("Usuário selecionado:", searchTerm)
   
   return (
     <div ref={dropdownRef} className="relative">
