@@ -1,4 +1,4 @@
-import axios, { formToJSON } from "axios";
+import axios from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -28,6 +28,12 @@ export function Login() {
     return cpf.replace(/\D/g, "");
   }
 
+//  export interface LoginResponse{
+//    token:string;
+//    usuario:any;
+//    tipo:string;
+//  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
@@ -50,7 +56,7 @@ export function Login() {
         const statusResponse = response.status;
 
         // Adicionar o console.log para exibir os dados da resposta(obter token)
-        
+        console.log("Resposta do login:", response.data);
         
       if (statusResponse === 200 && response.data?.token) { //testar sem status response
 
