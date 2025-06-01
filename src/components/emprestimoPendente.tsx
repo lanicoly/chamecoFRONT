@@ -19,6 +19,7 @@ import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
+import { PopUpError } from "../components/popups/PopUpError";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -198,6 +199,9 @@ export function EmprestimosPendentes({
     setIsDeleteModalOpen(false);
   }
 
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const [mensagemErro, setMensagemErro] = useState("");
+
   async function finalizarEmprestimo(emprestimo: number | undefined | null) {
     try {
       const response = await api.post("/chameco/api/v1/finalizar-emprestimo/", {
@@ -220,19 +224,31 @@ export function EmprestimosPendentes({
       const statusResponse = error.response?.status;
 
       if (statusResponse === 400) {
-        console.log("Emprestimo já finalizado!", error.response.data);
+        const mensagem = "Emprestimo já finalizado!";
+        console.log(mensagem, error.response.data);
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
         return;
       }
       if (statusResponse === 401) {
-        console.log("Emprestimo não encontrado!");
+        const mensagem = "Emprestimo não encontrado!";
+        console.log(mensagem);
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
         return;
       }
       if (statusResponse === 403) {
-        console.log("Você não tem permissão para finalizar este empréstimo!");
+        const mensagem = "Você não tem permissão para finalizar este empréstimo!";
+        console.log(mensagem);
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
         return;
       }
       if (statusResponse === 500) {
-        console.log("Erro interno do servidor! Contate o suporte.");
+        const mensagem = "Erro interno do servidor! Contate o suporte.";
+        console.log(mensagem);
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
         return;
       }
     } finally {
@@ -266,6 +282,7 @@ export function EmprestimosPendentes({
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
         {isSuccessModalOpen && <PopUpdeDevolucao />}
+        {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
 
         <thead className="bg-white top-0 ">
           <tr>
@@ -671,9 +688,7 @@ export function EmprestimosPendentes({
                       observacao={observacao}
                       setObservacao={setObservacao}
                       emprestimoSelecionado={emprestimoSelecionado}
-                      // removeObservacao={() => removeObservacao}
                       closeDetalhesModal={closeDetalhesModal}
-                      // editarObservacao={editarObservacao}
                       openDeleteModal={openDeleteModal}
                       closeDeleteModal={closeDeleteModal}
                       isDeleteModalOpen={isDeleteModalOpen}

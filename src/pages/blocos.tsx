@@ -5,14 +5,16 @@ import { MenuTopo } from "../components/menuTopo";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import api from "../services/api";
+import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpError } from "../components/popups/PopUpError";
 
 export interface Blocos {
   id: number;
   nome: string;
   // descricao: string;
-  token: string;
+  // token: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -24,12 +26,16 @@ export function Blocos() {
 
   const [blocos, setBlocos] = useState<Blocos[]>([]);
   const [nextId, setNextId] = useState(11);
+  const [nome, setNome] = useState("");
+  const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const [mensagemErro, setMensagemErro] = useState("");
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   //Começo da integração
   useEffect(() => {
     obterBlocos();
   }, []);
-
 
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
@@ -48,7 +54,7 @@ export function Blocos() {
             id: bloco.id,
             nome: bloco.nome,
             // descricao: bloco.descricao,
-            token: bloco.token,
+            // token: bloco.token,
           }));
 
           setBlocos(blocos);
@@ -63,38 +69,50 @@ export function Blocos() {
   }
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
-  async function adicionarBlocoAPI(novoBloco: Blocos) {
-    try {
-      const response = await api.post(`${URL}?token=${token}`, novoBloco, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
-      obterBlocos();
-    } catch (error: unknown) {
-      console.log("Erro ao adicionar bloco", error);
-    }
-  }
-
-  //função para adicionar blocos
-  function addBlocos(e: React.FormEvent) {
-    e.preventDefault();
+  async function adicionarBloco() {
     const novoBloco: Blocos = {
       id: nextId,
       nome,
       // descricao,
-      token,
+      // token,
     };
-    //Adiciona o novo bloco a API
-    adicionarBlocoAPI(novoBloco);
 
-    setBlocos([...blocos, novoBloco]);
-    setNextId(nextId + 1);
-    setNome("");
-    // setDescricao("");
-    closeAdicionarBlocoModal();
+    if (novoBloco.nome === null) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
+    } else {
+      try {
+        const response = await api.post("/chameco/api/v1/blocos/", novoBloco);
+
+        if (response) {
+          setBlocos((prevBlocos) => [...prevBlocos, response.data]);
+          setIsSuccesModalOpen(!isSuccesModalOpen);
+          setNome("");
+          closeAdicionarBlocoModal();
+        }
+
+        setMensagemSucesso("Bloco adicionado com sucesso!")
+      } catch (error) {
+        const mensagem =
+          error.response?.data?.message || "Erro ao criar bloco.";
+        console.error(
+          "Erro ao criar bloco:",
+          error.response?.data || error.message
+        );
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+      } finally {
+        handleCloseMOdalAndReload();
+      }
+    }
   }
+
+  const handleCloseMOdalAndReload = () => {
+    setTimeout(() => {
+      setIsSuccesModalOpen(false);
+      setIsPopUpErrorOpen(false);
+    }, 2000);
+  };
 
   // Adicionando funcionalidade ao botão de paginação
   const itensPorPagina = 12;
@@ -129,7 +147,7 @@ export function Blocos() {
   // Adicionando função de abrir e fechar modal do botão de adicionar bloco
   const [isAdicionarBlocoModalOpen, setIsAdicionarBlocoModalOpen] =
     useState(false);
-  const [nome, setNome] = useState("");
+
   // const [descricao, setDescricao] = useState("");
 
   function openAdicionarBlocoModal() {
@@ -171,17 +189,15 @@ export function Blocos() {
     setIsEditModalOpen(false);
   }
 
-
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
-      const response = await api.put(
-        `${URL}${blocoSelecionado.id}/`,
-        { nome: blocoSelecionado.nome},
-      );
+      const response = await api.put(`${URL}${blocoSelecionado.id}/`, {
+        nome: blocoSelecionado.nome,
+      });
 
       if (response.status === 200) {
-          return response.data;
+        return response.data;
       }
     } catch (error: unknown) {
       console.error("Erro ao editar bloco.", error);
@@ -216,7 +232,6 @@ export function Blocos() {
       const response = await api.delete(`${URL}${id}/`, {
         data: { nome },
       });
-
     } catch (error: unknown) {
       console.error("Erro ao excluir bloco:", error);
     }
@@ -263,6 +278,8 @@ export function Blocos() {
 
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
+      {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
       {/* Adicionando barra de navegação */}
       <MenuTopo text="MENU" backRoute="/menu" />
       {/* Adicionando container */}
@@ -298,7 +315,10 @@ export function Blocos() {
             <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
               {/* inicio do formulario de adicionar bloco */}
               <form
-                onSubmit={addBlocos}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  adicionarBloco();
+                }}
                 className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
               >
                 {/* div com o paragrafo de adicionar bloco + botão de sair do pop up */}
@@ -308,7 +328,7 @@ export function Blocos() {
                   </p>
                   <button
                     onClick={closeAdicionarBlocoModal}
-                    type="button"
+                    type="submit"
                     className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
                   >
                     <X className=" mb-[5px] text-[#192160]" />
@@ -441,7 +461,7 @@ export function Blocos() {
                       </svg>
                       VER SALAS
                     </button>
-                    
+
                     <button
                       onClick={() => openEditModal()}
                       className="flex gap-1 justify-center items-center font-medium text-sm md:text-base text-[#646999] underline"

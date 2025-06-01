@@ -2,13 +2,15 @@ import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../components/menuTopo";
-import axios from "axios";
+// import axios from "axios";
 import api from '../services/api';
+import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpError } from "../components/popups/PopUpError";
 export interface Sala {
   id: number;
   nome: string;
   bloco: number;
-  token: string;
+  // token: string;
   // descricao: string;
 }
 
@@ -23,14 +25,11 @@ export function Salas() {
     obterSalas();
 }, []);
 
-    const URL = "https://chamecoapi.pythonanywhere.com/chameco/api/v1/salas/";
-    const token = "3d17a927f262faf356a8cd52300a06aa4ddd0f2ef408ba454752313090bc38f2";
  
   //Função para requisição get (obter blocos)
   async function obterSalas() {
     try {
-      const url = `${URL}?token=${token}`;
-      const response = await api.get(url, {
+      const response = await api.get("/chameco/api/v1/salas/", {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -43,7 +42,7 @@ export function Salas() {
             id: sala.id,
             nome: sala.nome,
             bloco: sala.bloco,
-            token: sala.token,
+            // token: sala.token,
           }));
           setListaSalas(salas);
         } else {
@@ -83,6 +82,10 @@ export function Salas() {
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [salaSelecionada, setSalaSelecionada] = useState<number | null>(null);
+  const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const [mensagemErro, setMensagemErro] = useState("");
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   function openSalaModal() {
     setIsSalaModalOpen(true);
@@ -105,38 +108,48 @@ export function Salas() {
   }
 
   // função para requisição do método post
-    async function adicionarSalaAPI(sala: Sala) {
+    async function adicionarSalaAPI() {
+      const novaSala: Sala = {
+        id: nextId,
+        nome,
+        bloco: 1 //temos que ajustar isso.
+      }
+      if (novaSala.nome === null) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
+    } else {
       try {
-        const response = await api.post(`${URL}?token=${token}`, sala, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-                
-        obterSalas();
+        const response = await api.post("/chameco/api/v1/salas/", novaSala);
+
+        if (response) {
+          setListaSalas((prevSalas) => [...prevSalas, response.data]);
+          setIsSuccesModalOpen(!isSuccesModalOpen);
+          setNome("");
+          closeSalaModal();
+        }
+              
+        setMensagemSucesso("Sala adicionado com sucesso!")
       } catch (error: unknown) {
-        console.log("Erro ao adicionar sala", error);
+        const mensagem =
+          error.response?.data?.message || "Erro ao criar sala.";
+        console.error(
+          "Erro ao criar sala:",
+          error.response?.data || error.message
+        );
+        setMensagemErro(mensagem);
+        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+      } finally {
+        handleCloseMOdalAndReload();
       }
     }
-
-  function addSala(e: React.FormEvent) {
-    e.preventDefault();
-    const sala: Sala = {
-      id: nextId,
-      nome,
-      bloco: 10, //temos que alterar para adicionar a sala no id do bloco que queremos
-      token
-      // descricao,
-    };
-
-    adicionarSalaAPI(sala);
-
-    setListaSalas([...listaSalas, sala]);
-    setNextId(nextId + 1);
-    setNome("");
-    // setDescricao("");
-    closeSalaModal();
   }
+
+  const handleCloseMOdalAndReload = () => {
+    setTimeout(() => {
+      setIsSuccesModalOpen(false);
+      setIsPopUpErrorOpen(false);
+    }, 2000);
+  };
 
   //Adicionando função de excluir sala + função para requisição delete
     async function excluirSalaAPI(id: number, nome: string, bloco:number) {
@@ -261,6 +274,8 @@ export function Salas() {
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
+      {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
       {/* menu topo */}
       <MenuTopo text = "VOLTAR" backRoute="/blocos" />
       {/* menu topo */}
@@ -327,7 +342,10 @@ export function Salas() {
             {isSalaModalOpen && (
               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                 <form
-                  onSubmit={addSala}
+                  onSubmit={(e) => {
+                  e.preventDefault();
+                  adicionarSalaAPI();
+                }}
                   className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
                 >
                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
@@ -336,7 +354,7 @@ export function Salas() {
                     </p>
                     <button
                       onClick={closeSalaModal}
-                      type="button"
+                      type="submit"
                       className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
                     >
                       <X className=" mb-[5px] text-[#192160]" />
@@ -494,9 +512,9 @@ export function Salas() {
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-24  ">
                       Nome da sala
                     </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">
+                    {/* <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">
                       Descrição da sala
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody>

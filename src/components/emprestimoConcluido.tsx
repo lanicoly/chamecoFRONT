@@ -16,6 +16,7 @@ import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { getNomeSolicitante } from "../utils/getNomeSolicitante";
+import { useChaves } from "../context/ChavesContext";
 
 interface EmprestimosConcluidosProps {
   salas: IoptionSalas[];
@@ -31,13 +32,11 @@ interface EmprestimosConcluidosProps {
   pesquisa: string;
 }
 
-
 export function EmprestimosConcluidos({
   new_emprestimos,
   solicitantes,
   salas,
 }: EmprestimosConcluidosProps) {
-
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
 
@@ -50,8 +49,9 @@ export function EmprestimosConcluidos({
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
-  const {chaves} = useGetChaves();
-  const {responsaveis} = useGetResponsaveis();
+  // const { chaves } = useChaves();
+  const {chaves: chavesData, refetch} = useChaves();
+  const { responsaveis } = useGetResponsaveis();
 
   const [filtroConcluido, setFiltroConcluido] = useState({
     sala: "",
@@ -67,17 +67,20 @@ export function EmprestimosConcluidos({
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
-      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chaves, salas);
+      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chavesData, salas);
       const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
         emp.chave,
-        chaves,
+        chavesData,
         salas
       )}`;
       const responsavelNome = buscarNomeUsuarioPorId(
         emp.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = getNomeSolicitante(emp.usuario_solicitante, solicitantes);
+      const solicitanteNome = getNomeSolicitante(
+        emp.usuario_solicitante,
+        solicitantes
+      );
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
         : { data: "", hora: "" };
@@ -176,7 +179,6 @@ export function EmprestimosConcluidos({
       );
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
-
     });
 
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
@@ -216,27 +218,8 @@ export function EmprestimosConcluidos({
     setIsDetalhesModalOpen(false);
   }
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // function openEditModal() {
-  //   setIsEditModalOpen(true);
-  // }
-
-  function closeEditModal() {
-    setIsEditModalOpen(false);
-  }
-
   //funcao para editarObservacao
   const [observacao, setObservacao] = useState<string | null>(null);
-
-  function editarObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado && observacao) {
-      emprestimoSelecionado.observacao = observacao;
-    }
-    setObservacao("");
-    closeEditModal();
-  }
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -246,16 +229,6 @@ export function EmprestimosConcluidos({
 
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
-  }
-
-  //criando função de excluir observação de emprestimos
-  function removeObservacao(e: React.FormEvent) {
-    e.preventDefault();
-    if (emprestimoSelecionado) {
-      emprestimoSelecionado.observacao = "";
-    }
-    setObservacao("");
-    closeDeleteModal();
   }
 
   return (
@@ -674,14 +647,20 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}
+                    {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salas)}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {`Chave ${buscarNomeSalaPorIdChave(emprestimo.chave, chaves, salas)}`}
+                    {`Chave ${buscarNomeSalaPorIdChave(
+                      emprestimo.chave,
+                      chavesData,
+                      salas
+                    )}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeSolicitante(emprestimo.usuario_solicitante, solicitantes) ||
-                      "Solicitante não encontrado"}
+                    {getNomeSolicitante(
+                      emprestimo.usuario_solicitante,
+                      solicitantes
+                    ) || "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {buscarNomeUsuarioPorId(
@@ -719,17 +698,15 @@ export function EmprestimosConcluidos({
                   {/* Adicionando pop up de detalhes do empréstimo */}
                   {isDetalhesModalOpen && (
                     // emprestimo.id === emprestimoSelecionado?.id &&
-                     <IsDetalhesModal
-                                          observacao={observacao}
-                                          setObservacao={setObservacao}
-                                          emprestimoSelecionado={emprestimoSelecionado}
-                                          removeObservacao={() => removeObservacao}
-                                          closeDetalhesModal={closeDetalhesModal}
-                                          editarObservacao={() => editarObservacao}
-                                          openDeleteModal={openDeleteModal}
-                                          closeDeleteModal={closeDeleteModal}
-                                          isDeleteModalOpen={isDeleteModalOpen}
-                                        />
+                    <IsDetalhesModal
+                      observacao={observacao}
+                      setObservacao={setObservacao}
+                      emprestimoSelecionado={emprestimoSelecionado}
+                      closeDetalhesModal={closeDetalhesModal}
+                      openDeleteModal={openDeleteModal}
+                      closeDeleteModal={closeDeleteModal}
+                      isDeleteModalOpen={isDeleteModalOpen}
+                    />
                   )}
                   {/* Fim adicionando pop up de detalhes do emprestimo */}
                 </tr>

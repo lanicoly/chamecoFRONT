@@ -17,7 +17,7 @@ import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
-import { Chaves } from "./chaves";
+// import { Chaves } from "./chaves";
 import { useChaves } from "../context/ChavesContext";
 
 // deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
@@ -62,6 +62,9 @@ export function Emprestimos() {
   const { usuarios } = useGetUsuarios();
   const {chaves, refetch} = useChaves();
 
+  const [mensagemErro, setMensagemErro] = useState("");
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,
@@ -94,13 +97,17 @@ export function Emprestimos() {
         }
         
         //Colocando esse incremento no lugar do reload
+        
+        setMensagemSucesso("Empréstimo realizado com sucesso!");
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
         refetch();
       } catch (error) {
+        const mensagem = error.response?.data?.message || "Erro ao criar o empréstimo.";
         console.error(
           "Erro ao criar o empréstimo:",
           error.response?.data || error.message
         );
+        setMensagemErro(mensagem);
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
 
       } finally {
@@ -177,8 +184,8 @@ export function Emprestimos() {
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
-      {isSuccesModalOpen && <PopUpdeSucesso />}
-      {isPopUpErrorOpen && <PopUpError />}
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
+      {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
 
       <MenuTopo text="MENU" backRoute="/menu" />
 
