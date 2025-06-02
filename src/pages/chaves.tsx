@@ -1,5 +1,5 @@
 import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
@@ -12,6 +12,7 @@ import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
 import { useChaves } from "../context/ChavesContext";
+
 
 export interface IUsuario {
   id: number;
@@ -65,6 +66,8 @@ export function Chaves() {
     );
   }
 
+  
+
   // Se o token existe, renderiza o componente principal que usa os hooks
   return <ChavesContent />;
 }
@@ -96,12 +99,31 @@ function ChavesContent() {
   const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
   const [descricaoSelecionada, setDescricaoSelecionada] = useState<string | null>(null);
   const itensPorPagina = 4;
+  const [usuarioFilter, setUsuarioFilter] = useState('');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
 
   useEffect(() => {
     if (chaves && Array.isArray(chaves)) {
       setChavesList(chaves);
     }
   }, [chaves]);
+
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+  if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    setShowUserDropdown(false);
+  }
+}
+
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
+
 
   const handleCloseFeedbackModals = () => {
     setTimeout(() => {
@@ -589,28 +611,64 @@ function ChavesContent() {
               />
             </div>
             
-            <div className="w-full">
-              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados </label>
-              <div className="p-2 max-h-32 overflow-y-auto">
-                {allUsuarios.map(user => (
-                  <div key={user.id} className="flex items-center gap-2">
-                    <input 
-                      type="checkbox" 
-                      id={`user-add-${user.id}`}
-                      checked={usuariosAutorizadosIds.includes(user.id)}
-                      onChange={(e) => {
-                        const id = user.id;
-                        if (e.target.checked) {
-                          setUsuariosAutorizadosIds(prev => [...prev, id]);
-                        } else {
-                          setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id));
-                        }
-                      }}
-                      className="form-checkbox h-4 w-4 text-blue-600"
-                    />
-                    <label htmlFor={`user-add-${user.id}`} className="text-sm text-[#777DAA]">{user.nome}</label>
+            <div className="w-full" ref={dropdownRef}>
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados</label>
+              <div className="relative">
+                <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
+                  {usuariosAutorizadosIds.map(id => {
+                    const user = allUsuarios.find(u => u.id === id);
+                    return (
+                      <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
+                        {user.nome}
+                        <button
+                          type="button"
+                          onClick={() => setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id))}
+                          className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                          </svg>
+                        </button>
+                      </div>
+                    );
+                  })}
+                  <input
+                    type="text"
+                    className="flex-grow min-w-[50px] outline-none text-[#777DAA] text-xs"
+                    placeholder={usuariosAutorizadosIds.length > 0 ? "" : "Buscar usuário..."}
+                    value={usuarioFilter}
+                    onChange={(e) => setUsuarioFilter(e.target.value)}
+                    onFocus={() => setShowUserDropdown(true)}
+                  />
+                </div>
+                
+                {showUserDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
+                    {allUsuarios
+                      .filter(user => 
+                        !usuariosAutorizadosIds.includes(user.id) && 
+                        user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
+                      )
+                      .map(user => (
+                        <div
+                          key={user.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
+                          onClick={() => {
+                            setUsuariosAutorizadosIds(prev => [...prev, user.id]);
+                            setUsuarioFilter('');
+                          }}
+                        >
+                          {user.nome}
+                        </div>
+                      ))}
+                    {allUsuarios.filter(user => 
+                        !usuariosAutorizadosIds.includes(user.id) && 
+                        user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
+                      ).length === 0 && (
+                      <div className="p-2 text-[#777DAA] text-xs">Nenhum usuário encontrado</div>
+                    )}
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
