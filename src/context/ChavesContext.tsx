@@ -22,7 +22,7 @@ export const ChavesProvider = (({children}: {children: React.ReactNode}) => {
 
         try {
             const response = await api.get(`/chameco/api/v1/chaves/`);
-            setChaves(response.data?.results || []);
+            setChaves(response.data.results || []);
 
         } catch (error) {
             setError(err as Error)
