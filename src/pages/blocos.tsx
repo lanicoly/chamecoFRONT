@@ -192,11 +192,12 @@ export function Blocos() {
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
-      const response = await api.put(`${URL}${blocoSelecionado.id}/`, {
+      const response = await api.put(`/chameco/api/v1/blocos/${blocoSelecionado.id}/`, {
         nome: blocoSelecionado.nome,
       });
 
       if (response.status === 200) {
+        console.log("Bloco editado", response.data)
         return response.data;
       }
     } catch (error: unknown) {
@@ -229,9 +230,15 @@ export function Blocos() {
   //Adicionando função de excluir bloco + função para requisição delete
   async function excluirBlocoAPI(id: number, nome: string) {
     try {
-      const response = await api.delete(`${URL}${id}/`, {
+      const response = await api.delete(`/chameco/api/v1/blocos/${id}/`, {
         data: { nome },
       });
+
+      if (response.status === 200) {
+        console.log("Bloco excluido", response.data)
+        return response.data;
+      }
+
     } catch (error: unknown) {
       console.error("Erro ao excluir bloco:", error);
     }
