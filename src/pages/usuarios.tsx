@@ -189,6 +189,7 @@ export function Usuarios() {
 
               <Pesquisa
                 pesquisa={pesquisa}
+                placeholder="Nome ou Setor "
                 setIsSearching={setIsSearching}
                 setPesquisa={setPesquisa}
               />

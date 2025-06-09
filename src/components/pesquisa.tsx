@@ -1,11 +1,12 @@
 
 interface IpesquisaProps {
     pesquisa: string;
+    placeholder: string;
     setPesquisa: (p:string) => void;
     setIsSearching: (s:boolean) => void;
 }
 
-export function Pesquisa ({pesquisa, setIsSearching, setPesquisa}: IpesquisaProps) {
+export function Pesquisa ({pesquisa, placeholder, setIsSearching, setPesquisa}: IpesquisaProps) {
     return (
         <div className="h-fit items-center w-full tablet:w-auto">
             <div className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
@@ -16,7 +17,7 @@ export function Pesquisa ({pesquisa, setIsSearching, setPesquisa}: IpesquisaProp
                         setPesquisa(e.target.value);
                         setIsSearching(e.target.value.trim().length > 0);
                     }}
-                    placeholder="Setor ou Nome..."
+                    placeholder={placeholder}
                     className="placeholder-sky-900 text-sm font-medium outline-none "
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#64748b" className="bi bi-search" viewBox="0 0 16 16">
