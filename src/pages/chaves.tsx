@@ -98,7 +98,7 @@ function ChavesContent() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [isDescricaoModalOpen, setIsDescricaoModalOpen] = useState(false);
   const [descricaoSelecionada, setDescricaoSelecionada] = useState<string | null>(null);
-  const itensPorPagina = 4;
+  const itensPorPagina = 5;
   const [usuarioFilter, setUsuarioFilter] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const dropdownRef = useRef(null);
