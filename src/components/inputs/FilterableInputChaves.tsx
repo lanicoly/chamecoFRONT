@@ -27,6 +27,7 @@ interface IdropdownResponsavelProps {
 export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const {chaves} = useChaves();
+  console.log(chaves)
   const {salas} = useGetSalas();
 
   const [isOpen, setIsOpen] = useState(false);
