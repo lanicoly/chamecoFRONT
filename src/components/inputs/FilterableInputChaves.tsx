@@ -26,8 +26,8 @@ interface IdropdownResponsavelProps {
 
 export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
 
-  const {chaves} = useChaves();
-  console.log(chaves)
+  const {chaves, loading} = useChaves();
+  // console.log(chaves)
   const {salas} = useGetSalas();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +35,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const filterdItems = useMemo(() => {
-    return chaves.filter((item) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves, salas).toLowerCase().includes(searchTerm.toLowerCase()));
+    return chaves?.filter((item) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves, salas).toLowerCase().includes(searchTerm.toLowerCase()));
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

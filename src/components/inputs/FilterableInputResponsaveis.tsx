@@ -11,6 +11,12 @@ interface IdropdownResponsavelProps {
   reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
+const buscarResponsavel = (id: number | null, responsaveis: IoptionResponsaveis[]) => {
+  const responsavel = responsaveis.find(responsavel => responsavel.superusuario === id);
+
+  return responsavel ? `${responsavel.nome} | ${responsavel.superusuario}` : "";
+
+}
 
 export function FilterableInputResponsaveis({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
@@ -20,7 +26,7 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
 
   const filterdItems = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
+    return items.filter((item) => item.nome && buscarResponsavel(item.superusuario, items).toLowerCase().includes(lowerSearch));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,7 +97,7 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {option.nome}
+              {option.nome} | {option.superusuario}
             </div>
           ))}
         </div>

@@ -41,6 +41,8 @@ export interface FiltroEmprestimo {
   filtroDataEmprestimo: DateRange | undefined;
 }
 
+const token = localStorage.getItem("authToken");
+
 export function Emprestimos() {
 
   const [pesquisa, setPesquisa] = useState("");
@@ -48,7 +50,7 @@ export function Emprestimos() {
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
   const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
   const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
-  const [observacao, setObservacao] = useState<string | null>(null);
+  const [observacao, setObservacao] = useState<string | null>();
 
   const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
   const [onReset, setOnReset] = useState(false);
@@ -73,6 +75,8 @@ export function Emprestimos() {
       observacao: observacao,
       // token: token,
     };
+
+    console.log("Dados:", JSON.stringify(novoEmprestimo));
 
     if (
       novoEmprestimo.chave === null ||
@@ -154,8 +158,7 @@ export function Emprestimos() {
   }
 
   // Deixando o botão de alternar entre empréstimos pendentes e concluídos funcional
-  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
-    useState(true);
+  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] = useState(true);
   const alternarEmprestimos = () => {
     setExibirEmprestimosPendentes(
       (exibirEmprestimoAtual) => !exibirEmprestimoAtual
@@ -181,6 +184,12 @@ export function Emprestimos() {
 
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    // para garantir que sempre terei as chaves nessa tela
+    refetch()
+    console.log("atualizou o context")
+  }, [])
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">

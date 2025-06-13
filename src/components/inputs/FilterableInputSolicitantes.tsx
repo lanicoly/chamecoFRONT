@@ -11,6 +11,12 @@ interface IdropdownResponsavelProps {
   reset: boolean
 }
 
+const buscarSolicitante = (id: number | null, solicitantes: IoptionSolicitantes[]) => {
+    const solicitante = solicitantes.find( solicitante => solicitante.id === id );
+
+    return solicitante ? `${solicitante.nome} | ${solicitante.id}` : "";
+};
+
 export function FilterableInputSolicitantes({items, onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +25,7 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
 
   const filterdItems = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.nome.toLowerCase().includes(lowerSearch));
+    return items.filter((item) => item.nome && buscarSolicitante(item.id, items).toLowerCase().includes(lowerSearch));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -90,7 +96,7 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {option.nome}
+              {option.nome} | {option.id}
             </div>
           ))}
         </div>

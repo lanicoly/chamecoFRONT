@@ -111,18 +111,18 @@ function ChavesContent() {
   }, [chaves]);
 
   useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-  if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-    setShowUserDropdown(false);
-  }
-}
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    }
 
 
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, []);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
 
   const handleCloseFeedbackModals = () => {
