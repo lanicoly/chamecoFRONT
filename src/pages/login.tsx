@@ -3,6 +3,7 @@ import IMask from "imask";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../services/api";
+import { Footer } from "../components/footer";
 // import Cookies from "js-cookie";
 
 export function Login() {
@@ -104,6 +105,7 @@ export function Login() {
   }
 
   return (
+    <div>
     <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-no-repeat bg-center">
       {/* Adicionando container de login */}
       <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
@@ -228,6 +230,8 @@ export function Login() {
           </form>
         </div>
       </div>
+    </div>
+    <Footer/>
     </div>
   );
 }
