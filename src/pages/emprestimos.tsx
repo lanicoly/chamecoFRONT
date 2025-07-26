@@ -13,7 +13,7 @@ import useGetSalas from "../hooks/salas/useGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import api from "../services/api";
-import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
@@ -40,8 +40,6 @@ export interface FiltroEmprestimo {
   setFiltroDataEmprestimo: (dates: DateRange | undefined) => void;
   filtroDataEmprestimo: DateRange | undefined;
 }
-
-const token = localStorage.getItem("authToken");
 
 export function Emprestimos() {
 
@@ -73,7 +71,6 @@ export function Emprestimos() {
       usuario_responsavel: responsavelSelecionadoId,
       usuario_solicitante: solicitanteSelecionadoId,
       observacao: observacao,
-      // token: token,
     };
 
     console.log("Dados:", JSON.stringify(novoEmprestimo));
