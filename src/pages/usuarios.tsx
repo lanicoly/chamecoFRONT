@@ -11,6 +11,7 @@ import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsua
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
 import { useChaves } from "../context/ChavesContext";
+import { userFilter } from "../utils/userFilter";
 
 interface Ichaves {
   id: number,
@@ -26,10 +27,6 @@ export interface Iusuario {
   setor: string,
   tipo: string,
 }
-
-//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
-
-//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Usuarios() {
   const { usuarios } = useGetUsuarios();
@@ -51,17 +48,8 @@ export function Usuarios() {
     setListaUsers(usuarios);
   }, [usuarios]);
 
-  const filtrarUsuario =  listaUsers.filter((usuario) => {
-    const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());
-    const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
-    const filtroMatch = filtro === "todos" || usuario.tipo.toLowerCase() === filtro.toLowerCase();
+  const filtrarUsuario = userFilter(listaUsers, pesquisa, filtro, indexInicio, indexFim);
 
-    if (!pesquisa) {
-      return filtroMatch;
-    }
-
-    return (nomeMatch || setorMatch) && filtroMatch;
-  });
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [tipo, setTipo] = useState("");
@@ -263,70 +251,26 @@ export function Usuarios() {
                 Excluir
               </button>
 
-              {/* Adicionando pop up de deletar usuario */}
               {isDeleteModalOpen && (
                   <PopUpDeleteUsuario removeUser={removeUser} closeDeleteModal={closeDeleteModal}/>
               )}
-              {/* Fim adicionando pop up de deletar usuario */}
             </div>
-            {/* fim botões editar e excluir */}
 
-            {/* tabela com todos os usuarios */}
-            {/* <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-              <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
-                <thead className="bg-white sticky top-0 z-10">
-                  <tr>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 w-[45%]">
-                      Nome de usuário
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 flex-1 w-[30%]">
-                      Setor
-                    </th>
-                    <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 ">
-                      Tipo de Usuario
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtrarUsuario.map((usuario: Iusuario) => (
-                    <tr
-                      key={usuario.id}
-                      className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
-                        userSelecionado === usuario.id ? "bg-gray-200" : ""
-                      }`}
-                      onClick={() => statusSelecao(usuario.id)}
-                    >
-                      <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%]">
-                        {usuario.nome}
-                      </td>
-                      <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[30%] break-words flex-1">
-                        {usuario.setor !== "" ? usuario.setor : "Não informado"}
-                      </td>
-                      <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                        {usuario.tipo}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div> */}
-            <TabelaDeUsuarios filtrarUsuario={filtrarUsuario} userSelecionado={userSelecionado} statusSelecao={statusSelecao}/>
-            {/* fim tabela com todos os usuarios */}
+            <TabelaDeUsuarios 
+              filtrarUsuario={filtrarUsuario} 
+              userSelecionado={userSelecionado} 
+              statusSelecao={statusSelecao}
+            />
 
-            {/* passador de página */}
             <PassadorPagina
               avancarPagina={avancarPagina}
               voltarPagina={voltarPagina}
               totalPaginas={totalPaginas}
               paginaAtual={paginaAtual}
             />
-            {/* fim passador de página */}
           </div>
-          {/* fim conteudo central tabela*/}
         </div>
-        {/* fim conteudo central tela usuarios */}
 
-        {/* logo chameco lateral */}
         <div className="flex justify-start bottom-4 absolute sm:hidden">
           <img
             className="sm:w-[200px] w-32"
@@ -334,9 +278,7 @@ export function Usuarios() {
             alt="logo chameco"
           />
         </div>
-        {/* fim logo chameco lateral */}
       </div>
-      {/* fim parte informativa tela usuarios */}
     </div>
   );
 }

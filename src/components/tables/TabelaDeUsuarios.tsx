@@ -32,8 +32,8 @@ export function TabelaDeUsuarios({filtrarUsuario, userSelecionado, statusSelecao
                             key={usuario.id}
                             className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
                                 userSelecionado === usuario.id ? "bg-gray-200" : ""
-                        }`}
-                        onClick={() => statusSelecao(usuario.id)}
+                            }`}
+                            onClick={() => statusSelecao(usuario.id)}
                         >
                         <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%]">
                             {usuario.nome}

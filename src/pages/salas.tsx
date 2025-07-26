@@ -23,7 +23,7 @@ export function Salas() {
   //começo da integração 
   useEffect(() => {
     obterSalas();
-}, []);
+   }, []);
 
  
   //Função para requisição get (obter blocos)
@@ -44,6 +44,7 @@ export function Salas() {
             bloco: sala.bloco,
             // token: sala.token,
           }));
+
           setListaSalas(salas);
         } else {
           setListaSalas([]);
@@ -87,6 +88,8 @@ export function Salas() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
+  console.log("Salas:", listaSalas)
+
   function openSalaModal() {
     setIsSalaModalOpen(true);
   }
@@ -108,7 +111,7 @@ export function Salas() {
   }
 
   // função para requisição do método post
-    async function adicionarSalaAPI() {
+  async function adicionarSalaAPI() {
       const novaSala: Sala = {
         id: nextId,
         nome,
@@ -152,7 +155,7 @@ export function Salas() {
   };
 
   //Adicionando função de excluir sala + função para requisição delete
-    async function excluirSalaAPI(id: number, nome: string, bloco:number) {
+  async function excluirSalaAPI(id: number, nome: string, bloco:number) {
       try {
         const response = await api.delete(`${URL}${id}/`, {
           headers: {
@@ -165,7 +168,7 @@ export function Salas() {
       } catch (error: unknown) {
         console.error("Erro ao excluir sala:", error);
       }
-    }
+  }
 
     function removeSala(e: React.FormEvent) {
       e.preventDefault();
@@ -375,19 +378,6 @@ export function Salas() {
                       required
                     />
                   </div>
-{/* 
-                  <div className="justify-center items-center ml-[40px] mr-8">
-                    <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                      Descreva os detalhes sobre a sala
-                    </p>
-                    <textarea
-                      className="w-full px-2 py-1 rounded-[10px] border border-[#646999] text-[#777DAA] focus:outline-none text-xs font-medium"
-                      placeholder="Descrição do detalhamento sobre a sala"
-                      value={descricao}
-                      onChange={(e) => setDescricao(e.target.value)}
-                      required
-                    />
-                  </div> */}
 
                   <div className="flex justify-center items-center mt-[10px] w-full">
                     <button

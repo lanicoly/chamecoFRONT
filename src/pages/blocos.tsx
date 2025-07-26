@@ -7,14 +7,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import axios from "axios";
 import api from "../services/api";
-import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 
 export interface Blocos {
   id: number;
   nome: string;
-  // descricao: string;
-  // token: string;
 }
 
 //essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
@@ -53,10 +51,11 @@ export function Blocos() {
           const blocos = (data.results as Blocos[]).map((bloco) => ({
             id: bloco.id,
             nome: bloco.nome,
+
             // descricao: bloco.descricao,
             // token: bloco.token,
           }));
-
+          console.log("Blocos:", blocos)
           setBlocos(blocos);
         } else {
           setBlocos([]);
@@ -358,24 +357,7 @@ export function Blocos() {
                     required
                   />
                 </div>
-                {/* fim da div com input de digitar nome do bloco */}
 
-                {/* inicio da div com input descrever bloco */}
-                {/* <div className="justify-center items-center ml-[40px] mr-8">
-                  <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                    Descreva os detalhes sobre o bloco
-                  </p>
-                  <textarea
-                    className="w-full px-2 py-1 rounded-[10px] border border-[#646999] text-[#777DAA] focus:outline-none text-xs font-medium"
-                    placeholder="Descrição do detalhamento sobre o bloco"
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                    required
-                  />
-                </div> */}
-                {/* fim da div com input descrever bloco */}
-
-                {/* inicio da div que terá botoa de criar novo bloco */}
                 <div className="flex justify-center items-center mt-[10px] w-full">
                   <button
                     type="submit"
@@ -426,14 +408,6 @@ export function Blocos() {
                     <X className="text-[#192160]" />
                   </button>
                   {/* fim do botão de fechar pop up */}
-
-                  {/* inicio da div que terá a descriçao do bloco */}
-                  {/* <div className="flex w-full h-auto px-[10px] mb-4 flex-col rounded-lg bg-[#B8BCE0]">
-                    <p className="text-[#192160] font-medium px-[5px] py-[5px]">
-                      {blocoSelecionado.descricao}
-                    </p>
-                  </div> */}
-                  {/* fim da div com descrição do bloco */}
 
                   {/* inicio da div que terá os botoes de ver salas, editar e excluir */}
                   <div className="flex justify-center items-center gap-4 self-stretch ">

@@ -103,7 +103,8 @@ function ChavesContent() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-
+  console.log("Salas", salas)
+ 
   useEffect(() => {
     if (chaves && Array.isArray(chaves)) {
       setChavesList(chaves);
