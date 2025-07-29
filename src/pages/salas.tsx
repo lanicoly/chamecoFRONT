@@ -1,26 +1,19 @@
 import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
 import { MenuTopo } from "../components/menuTopo";
-// import axios from "axios";
 import api from '../services/api';
-import { PopUpdeSucesso } from "../components/popups/popUpdeSucesso";
+import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
+import { AxiosError } from "axios";
+
 export interface Sala {
   id: number;
   nome: string;
   bloco: number;
-  // token: string;
-  // descricao: string;
 }
 
-//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
-
-//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
-
 export function Salas() {
-  // const navigate = useNavigate();
-  //começo da integração 
+
   useEffect(() => {
     obterSalas();
    }, []);
@@ -42,7 +35,6 @@ export function Salas() {
             id: sala.id,
             nome: sala.nome,
             bloco: sala.bloco,
-            // token: sala.token,
           }));
 
           setListaSalas(salas);
@@ -133,14 +125,18 @@ export function Salas() {
               
         setMensagemSucesso("Sala adicionado com sucesso!")
       } catch (error: unknown) {
+        const axiosError = error as AxiosError<{ message?: string }>;
+
         const mensagem =
-          error.response?.data?.message || "Erro ao criar sala.";
+          axiosError.response?.data?.message || "Erro ao criar sala.";
+
         console.error(
           "Erro ao criar sala:",
-          error.response?.data || error.message
+          axiosError.response?.data || axiosError.message
         );
+
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true); // Garante abertura do pop-up
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -158,10 +154,7 @@ export function Salas() {
   async function excluirSalaAPI(id: number, nome: string, bloco:number) {
       try {
         const response = await api.delete(`${URL}${id}/`, {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          data: { nome, token, bloco }
+          data: { nome, bloco }
         });
     
               
@@ -203,13 +196,7 @@ export function Salas() {
     async function editarSalaAPI(salaSelecionada: Sala) {
       try {
         const response = await api.put(
-          `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, token: token, bloco: salaSelecionada.bloco},
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-          }
+          `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, bloco: salaSelecionada.bloco},
         );
   
         if (response.status === 200) {

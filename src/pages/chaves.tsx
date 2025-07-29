@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, X, TriangleAlert } from "lucide-react";
+import { Plus, X, TriangleAlert } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
@@ -13,6 +13,7 @@ import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
 import { useChaves } from "../context/ChavesContext";
 import { Iusuario } from "./usuarios";
+import { AxiosError } from "axios";
 
 
 export interface IUsuario {
@@ -118,7 +119,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
   const itensPorPagina = 5;
   const [usuarioFilter, setUsuarioFilter] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   console.log("Salas", salas)
   console.log("Chaves:", chaves);
@@ -204,9 +205,19 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
       resetFormsAndCloseModals();
       if (refetchChaves) refetchChaves(true); // Força refresh no hook
       handleCloseFeedbackModals();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Erro ao criar a chave:", err);
-      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+
+      let apiErrorMessage = "Erro desconhecido.";
+
+      if (err && typeof err === "object" && (err as AxiosError).isAxiosError) {
+        const axiosError = err as AxiosError;
+        const detail = (axiosError.response?.data as any)?.detail;
+        apiErrorMessage = detail || JSON.stringify(axiosError.response?.data) || axiosError.message;
+      } else if (err instanceof Error) {
+        apiErrorMessage = err.message;
+      }
+
       setErrorMessage(`Erro ao criar chave: ${apiErrorMessage}`);
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
@@ -255,12 +266,25 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
       resetFormsAndCloseModals();
       if (refetchChaves) refetchChaves(true); 
       handleCloseFeedbackModals();
-    } catch (err) {
-      console.error("Erro ao atualizar a chave:", err);
-      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
-      setErrorMessage(`Erro ao atualizar chave: ${apiErrorMessage}`);
+    } catch (err: unknown) {
+      // console.error("Erro ao atualizar a chave:", err);
+      // const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+      // setErrorMessage(`Erro ao atualizar chave: ${apiErrorMessage}`);
+      // setIsPopUpErrorOpen(true);
+      // handleCloseFeedbackModals();
+
+      let apiErrorMessage = "Erro ao atualizar chave:";
+
+      if (err && typeof err === "object" && (err as AxiosError).isAxiosError) {
+        const axiosError = err as AxiosError;
+        apiErrorMessage = (axiosError.response?.data as any)?.message || apiErrorMessage;
+      }
+
+      console.error("Erro ao lista as chaves:", err);
+      setErrorMessage(apiErrorMessage);
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
+
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +318,17 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
       handleCloseFeedbackModals();
     } catch (err) {
       console.error("Erro ao excluir a chave:", err);
-      const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
+
+      let apiErrorMessage = "Erro desconhecido.";
+
+      if (err && typeof err === "object" && (err as AxiosError).isAxiosError) {
+        const axiosError = err as AxiosError;
+        const detail = (axiosError.response?.data as any)?.detail;
+        apiErrorMessage = detail || JSON.stringify(axiosError.response?.data) || axiosError.message;
+      } else if (err instanceof Error) {
+        apiErrorMessage = err.message;
+      }
+
       setErrorMessage(`Erro ao excluir chave: ${apiErrorMessage}`);
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
@@ -313,11 +347,11 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
 
   const chavesFiltradas = chavesList.filter((chave) => {
     if (!isSearching) return true;
-    const sala: ISala = salas?.find((s:ISala) => s.id === chave.sala);
+    const sala: ISala | undefined = salas?.find((s:ISala) => s.id === chave.sala);
     const termoPesquisa = pesquisa.toLowerCase();
     const usuariosNomes = chave.usuarios?.map(u => u.nome.toLowerCase()).join(" ") || "";
     return (
-      sala.nome?.toLowerCase().includes(termoPesquisa) ||
+      sala?.nome?.toLowerCase().includes(termoPesquisa) ||
       chave.id?.toString().includes(termoPesquisa) ||
       (chave.descricao && chave.descricao.toLowerCase().includes(termoPesquisa)) ||
       usuariosNomes.includes(termoPesquisa)
@@ -452,7 +486,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                           <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
                         </svg>
                         <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate ">
-                          {salas?.find((sala) => sala.id === chave.sala)?.bloco || "-"}
+                          {salas?.find((sala: ISala) => sala.id === chave.sala)?.bloco || "-"}
                         </p>
                         </div>
                       </td>
@@ -609,10 +643,10 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
-                    const user: Iusuario = allUsuarios.find((u: Iusuario) => u.id === id);
+                    const user: Iusuario | undefined = allUsuarios.find((u: Iusuario) => u.id === id);
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
-                        {user.nome}
+                        {user?.nome}
                         <button
                           type="button"
                           onClick={() => setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id))}
@@ -701,7 +735,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 required
               >
                 <option value="" disabled>Selecione...</option>
-                {salas?.map((sala) => (
+                {salas?.map((sala: ISala) => (
                   <option key={sala.id} value={sala.id}>{sala.nome}</option>
                 ))}
               </select>
@@ -811,7 +845,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
             <p className="text-center px-2">
               Essa ação é{" "}
               <strong className="font-semibold">definitiva</strong> e não pode ser desfeita.
-              Deseja excluir a chave da sala <strong className="font-semibold">{salas?.find(s => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong>?
+              Deseja excluir a chave da sala <strong className="font-semibold">{salas?.find((s: ISala) => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong>?
             </p>
             <div className="flex justify-center items-center mt-2 w-full gap-3">
               <button
@@ -844,10 +878,10 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 <X className="text-[#192160]" />
               </button>
             </div>
-            <p className="text-sm text-center text-gray-600">Chave da sala: <strong className="font-semibold">{salas?.find(s => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong></p>
+            <p className="text-sm text-center text-gray-600">Chave da sala: <strong className="font-semibold">{salas?.find((s: ISala) => s.id === chaveSelecionada.sala)?.nome || `ID: ${chaveSelecionada.sala}`}</strong></p>
             <div className=" rounded-md bg-[#B8BCE0] p-2 max-h-48 overflow-y-auto">
               {chaveSelecionada.usuarios && chaveSelecionada.usuarios.length > 0 ? (
-                chaveSelecionada.usuarios.map(user => (
+                chaveSelecionada.usuarios.map((user: IUsuario) => (
                   <p key={user.id} className="text-sm text-[#192160] py-1">- {user.nome} </p>
                 ))
               ) : (

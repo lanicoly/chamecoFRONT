@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
-import api from "../../services/api";
+
 
 function AdicionarUsuarioForm({closeUserModal}: any) {
 

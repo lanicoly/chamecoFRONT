@@ -20,6 +20,7 @@ import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
 import { PopUpError } from "../components/popups/PopUpError";
+import { AxiosError } from "axios";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -220,35 +221,29 @@ export function EmprestimosPendentes({
       setIsSuccessModalOpen(true);
       refetch();
       
-    } catch (error) {
-      const statusResponse = error.response?.status;
+    } catch (error: unknown) {
+      const statusResponse = error as AxiosError<{ message?: string }>;
+      const status = statusResponse.response?.status;
 
-      if (statusResponse === 400) {
-        const mensagem = "Emprestimo já finalizado!";
-        console.log(mensagem, error.response.data);
+      if (status === 400) {
+        const mensagem = "Empréstimo já finalizado!";
+        console.log(mensagem, statusResponse.response?.data);
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true);
         return;
       }
-      if (statusResponse === 401) {
-        const mensagem = "Emprestimo não encontrado!";
+      if (status === 401) {
+        const mensagem = "Empréstimo não encontrado!";
         console.log(mensagem);
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true);
         return;
       }
-      if (statusResponse === 403) {
+      if (status === 403) {
         const mensagem = "Você não tem permissão para finalizar este empréstimo!";
         console.log(mensagem);
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
-        return;
-      }
-      if (statusResponse === 500) {
-        const mensagem = "Erro interno do servidor! Contate o suporte.";
-        console.log(mensagem);
-        setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true);
         return;
       }
     } finally {

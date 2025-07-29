@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../services/api";
 import { Footer } from "../components/footer";
-// import Cookies from "js-cookie";
+import Spinner from "../components/spinner";
+import { limparCPF } from "../utils/limparCPF";
 
 export function Login() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export function Login() {
   const [senha, setSenha] = useState<string>("");
   const [errorUsuario, setErrorUsuario] = useState<string>("");
   const [errorSenha, setErrorSenha] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const cpfInput = document.getElementById("cpf");
@@ -24,10 +26,6 @@ export function Login() {
       });
     }
   }, []);
-
-  function limparCPF(cpf: string) {
-    return cpf.replace(/\D/g, "");
-  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -44,6 +42,8 @@ export function Login() {
       cpf: limparCPF(usuario),
       password: senha,
     };
+
+    setLoading(true);
 
     try {
         const response = await api.post("/chameco/api/v1/login/", body)
@@ -69,12 +69,12 @@ export function Login() {
         window.dispatchEvent(new Event('storage'));
         navigate("/menu");
 
-        } else {
+      } else {
           setErrorSenha("Usuário não registrado no sistema!");
           return;
-        }
       }
-     catch (error) {
+
+    } catch (error) {
       if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
 
@@ -95,6 +95,8 @@ export function Login() {
           return;
         }
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -215,9 +217,9 @@ export function Login() {
               <div className="mt-[15px] text-center items-center ml-[60px]">
                 <button
                   type="submit"
-                  className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
+                  className="px-2 py-1 w-[120px] rounded-lg h-[45px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
                 >
-                  ENTRAR
+                   {loading ? (<Spinner/>) : "ENTRAR"}
                 </button>
               </div>
             </div>

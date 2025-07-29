@@ -69,11 +69,11 @@ export function Usuarios() {
   }
 
   function openEditModal() {
-    const usuario: Iusuario = usuarios.find((user: Iusuario) => user.id === userSelecionado);
+    const usuario: Iusuario | undefined = usuarios.find((user: Iusuario) => user.id === userSelecionado);
     if (usuario) {
-      setNome(usuario.nome);
-      setEmail(usuario.setor);
-      setTipo(usuario.tipo);
+      setNome(usuario?.nome);
+      setEmail(usuario?.setor);
+      setTipo(usuario?.tipo);
       setIsEditModalOpen(true);
     }
   }

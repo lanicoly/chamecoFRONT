@@ -1,7 +1,7 @@
 
 interface IpesquisaProps {
     pesquisa: string;
-    placeholder: string;
+    placeholder?: string;
     setPesquisa: (p:string) => void;
     setIsSearching: (s:boolean) => void;
 }

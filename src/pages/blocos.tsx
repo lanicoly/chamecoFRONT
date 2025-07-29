@@ -5,19 +5,15 @@ import { MenuTopo } from "../components/menuTopo";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
+import { AxiosError } from "axios";
 
 export interface Blocos {
   id: number;
   nome: string;
 }
-
-//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
-
-//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
 
 export function Blocos() {
   const navigate = useNavigate();
@@ -92,14 +88,18 @@ export function Blocos() {
 
         setMensagemSucesso("Bloco adicionado com sucesso!")
       } catch (error) {
+        const errorResponse = error as AxiosError<{ message?: string }>;
+
         const mensagem =
-          error.response?.data?.message || "Erro ao criar bloco.";
+          errorResponse.response?.data?.message || "Erro ao criar bloco.";
+
         console.error(
           "Erro ao criar bloco:",
-          error.response?.data || error.message
+          errorResponse.response?.data || errorResponse.message
         );
+
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true); // Abre o pop-up de erro de forma segura
       } finally {
         handleCloseMOdalAndReload();
       }

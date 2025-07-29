@@ -16,6 +16,7 @@ import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 import { useChaves } from "../context/ChavesContext";
+import { AxiosError } from "axios";
 
 export interface Iemprestimo {
   id?: number | null;
@@ -97,12 +98,16 @@ export function Emprestimos() {
         setMensagemSucesso("Empréstimo realizado com sucesso!");
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
         refetch();
-      } catch (error) {
-        const mensagem = error.response?.data?.message || "Erro ao criar o empréstimo.";
-        console.error(
-          "Erro ao criar o empréstimo:",
-          error.response?.data || error.message
-        );
+      } catch (error: unknown) {
+
+        let mensagem = "Erro ao criar o empréstimo.";
+
+        if (error && typeof error === "object" && (error as AxiosError).isAxiosError) {
+          const axiosError = error as AxiosError;
+          mensagem = (axiosError.response?.data as any)?.message || mensagem;
+        }
+
+        console.error("Erro ao criar o empréstimo:", error);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
 

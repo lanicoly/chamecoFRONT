@@ -25,7 +25,7 @@ export const ChavesProvider = React.memo(({children}: {children: React.ReactNode
             setChaves(response.data.results || []);
 
         } catch (error) {
-            setError(err as Error)
+            setError(error as Error)
             console.log(error)
         } finally {
             setLoading(false)
