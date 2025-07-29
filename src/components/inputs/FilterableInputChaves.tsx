@@ -99,7 +99,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {buscarNomeChavePorIdSala(option.sala, chaves, salas)}
+              {buscarNomeChavePorIdSala(option.sala, chaves as IChave[], salas)}
             </div>
           ))}
         </div>
