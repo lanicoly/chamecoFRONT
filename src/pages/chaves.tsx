@@ -12,6 +12,7 @@ import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
 import { useChaves } from "../context/ChavesContext";
+import { Iusuario } from "./usuarios";
 
 
 export interface IUsuario {
@@ -312,11 +313,11 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
 
   const chavesFiltradas = chavesList.filter((chave) => {
     if (!isSearching) return true;
-    const sala = salas?.find(s => s.id === chave.sala);
+    const sala: ISala = salas?.find((s:ISala) => s.id === chave.sala);
     const termoPesquisa = pesquisa.toLowerCase();
     const usuariosNomes = chave.usuarios?.map(u => u.nome.toLowerCase()).join(" ") || "";
     return (
-      sala?.nome?.toLowerCase().includes(termoPesquisa) ||
+      sala.nome?.toLowerCase().includes(termoPesquisa) ||
       chave.id?.toString().includes(termoPesquisa) ||
       (chave.descricao && chave.descricao.toLowerCase().includes(termoPesquisa)) ||
       usuariosNomes.includes(termoPesquisa)
@@ -380,7 +381,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
   }
   
   // Tratamento específico para erro do hook useGetChaves que não seja falta de token
-  if (errorChaves && errorChaves.message !== "Token não encontrado") {
+  if (errorChaves && typeof errorChaves === "object" && "message" in errorChaves && (errorChaves as any).message !== "Token não encontrado") {
        navigate("/login");
   }
 
@@ -440,7 +441,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                       className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""}`}
                     >
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px]  break-words">
-                        {salas?.find((sala) => sala.id === chave.sala)?.nome || `ID: ${chave.sala}` || "N/A"}
+                        {salas?.find((sala:ISala) => sala.id === chave.sala)?.nome || `ID: ${chave.sala}` || "N/A"}
                       </td>
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         <div className="flex justify-center items-center ">
@@ -586,7 +587,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 required
               >
                 <option value="" disabled>Selecione...</option>
-                {salas?.map((sala) => (
+                {salas?.map((sala: ISala) => (
                   <option key={sala.id} value={sala.id}>{sala.nome}</option>
                 ))}
               </select>
@@ -608,7 +609,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
-                    const user = allUsuarios.find(u => u.id === id);
+                    const user: Iusuario = allUsuarios.find((u: Iusuario) => u.id === id);
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
                         {user.nome}
@@ -637,11 +638,11 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
-                      .filter(user => 
+                      .filter((user: Iusuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       )
-                      .map(user => (
+                      .map((user: Iusuario) => (
                         <div
                           key={user.id}
                           className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
@@ -653,7 +654,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                           {user.nome}
                         </div>
                       ))}
-                    {allUsuarios.filter(user => 
+                    {allUsuarios.filter((user: Iusuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       ).length === 0 && (
@@ -718,25 +719,13 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
             </div>
             )}
           
-            
-            {/*<div className="w-full">
-               <label className="flex items-center gap-2 text-[#192160] text-sm font-medium mb-1">
-                 <input 
-                    type="checkbox" 
-                    checked={disponivel}
-                    onChange={(e) => setDisponivel(e.target.checked)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  Disponível
-               </label>
-            </div>
-            */}
+          
             <div className="w-full" ref={dropdownRef}>
               <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados</label>
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
-                    const user = allUsuarios.find(u => u.id === id);
+                    const user: IUsuario = allUsuarios.find((u: IUsuario) => u.id === id);
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
                         {user.nome}
@@ -765,11 +754,11 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
-                      .filter(user => 
+                      .filter((user: IUsuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       )
-                      .map(user => (
+                      .map((user: IUsuario) => (
                         <div
                           key={user.id}
                           className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
@@ -781,7 +770,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                           {user.nome}
                         </div>
                       ))}
-                    {allUsuarios.filter(user => 
+                    {allUsuarios.filter((user: IUsuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       ).length === 0 && (

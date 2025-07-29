@@ -1,3 +1,4 @@
+
 interface PassadorPaginaProps {
     voltarPagina: () => void;
     avancarPagina: () => void;

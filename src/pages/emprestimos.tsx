@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
-// import { Pesquisa } from "../components/pesquisa";
-// import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
@@ -17,10 +15,7 @@ import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
-// import { Chaves } from "./chaves";
 import { useChaves } from "../context/ChavesContext";
-
-// deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
 
 export interface Iemprestimo {
   id?: number | null;
@@ -492,7 +487,7 @@ export function Emprestimos() {
                 responsaveis={usuarios}
                 dataRetirada=""
                 horario_emprestimo=""
-                observacao={observacao}
+                observacao={observacao ?? null}
                 pesquisa={pesquisa}
                 refreshCounter={refreshCounter}
                 setRefreshCounter={setRefreshCounter}
@@ -513,7 +508,7 @@ export function Emprestimos() {
                   chaves={chaves}
                   responsaveis={usuarios}
                   solicitantes={usuarios}
-                  observacao={observacao}
+                  observacao={observacao ?? null}
                   dataRetirada=""
                   horario_emprestimo=""
                   dataDevolucao=""

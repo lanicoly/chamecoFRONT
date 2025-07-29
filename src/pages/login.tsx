@@ -29,12 +29,6 @@ export function Login() {
     return cpf.replace(/\D/g, "");
   }
 
-//  export interface LoginResponse{
-//    token:string;
-//    usuario:any;
-//    tipo:string;
-//  }
-
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
