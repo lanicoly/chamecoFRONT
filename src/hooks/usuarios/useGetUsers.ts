@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { IUsuario } from "../../pages/chaves";
 
 const CACHE_TTL = 60 * 5 * 1000; // 5 minutos em milissegundos
 
 const useGetUsuarios = () => {
-  const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [page, setPage] = useState(1);

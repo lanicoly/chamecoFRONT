@@ -1,11 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useState} from "react";
 import api from "../services/api";
+import { IChave } from "../pages/chaves";
 
 
 const ChavesContext = createContext<any>([]);
 
 export const ChavesProvider = React.memo(({children}: {children: React.ReactNode}) => {
-    const [chaves, setChaves] = useState([]);
+    const [chaves, setChaves] = useState<IChave[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 

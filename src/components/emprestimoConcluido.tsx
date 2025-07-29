@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
-import { IoptionSalas } from "./inputs/FilterableInputSalas";
-import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { Info } from "lucide-react";
@@ -11,18 +8,18 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-// import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { getNomeSolicitante } from "../utils/getNomeSolicitante";
 import { useChaves } from "../context/ChavesContext";
+import { ISala, IUsuario } from "../pages/chaves";
 
 interface EmprestimosConcluidosProps {
-  salas: IoptionSalas[];
+  salas: ISala[];
   chaves: IoptionChaves[];
-  responsaveis: IoptionResponsaveis[];
-  solicitantes: IoptionSolicitantes[];
+  responsaveis: IUsuario[];
+  solicitantes: IUsuario[];
   new_emprestimos: Iemprestimo[];
   observacao: string | null;
   dataRetirada: string;
@@ -50,7 +47,7 @@ export function EmprestimosConcluidos({
   ] = useState<DateRange | undefined>();
 
   // const { chaves } = useChaves();
-  const {chaves: chavesData, refetch} = useChaves();
+  const {chaves: chavesData} = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
   const [filtroConcluido, setFiltroConcluido] = useState({
@@ -63,7 +60,7 @@ export function EmprestimosConcluidos({
     dataDevolucao: "",
     horaDevolucao: "",
   });
-  const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
+  const [isFiltroConcluido] = useState(true);
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {

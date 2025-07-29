@@ -10,6 +10,7 @@ import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsua
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
 import { userFilter } from "../utils/userFilter";
+import { IUsuario } from "./chaves";
 
 interface Ichaves {
   id: number,
@@ -30,15 +31,15 @@ export function Usuarios() {
 
 
     const {
-    usuarios,
-    page,
-    totalPaginas,
-    nextPage,
-    prevPage,
+      usuarios,
+      page,
+      totalPaginas,
+      nextPage,
+      prevPage,
   } = useGetUsuarios();
 
   const itensPorPagina = 5;
-  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [paginaAtual] = useState(1);
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
 
@@ -69,7 +70,7 @@ export function Usuarios() {
   }
 
   function openEditModal() {
-    const usuario: Iusuario | undefined = usuarios.find((user: Iusuario) => user.id === userSelecionado);
+    const usuario: IUsuario | undefined = usuarios.find((user) => user.id === userSelecionado);
     if (usuario) {
       setNome(usuario?.nome);
       setEmail(usuario?.setor);
@@ -101,7 +102,7 @@ export function Usuarios() {
   function editaUser(e: React.FormEvent) {
     e.preventDefault();
     if (userSelecionado !== null) {
-      usuarios.map((usuario: Iusuario) => {
+      usuarios.map((usuario) => {
         if (usuario.id === userSelecionado) {
           if (nome) {
             usuario.nome = nome;

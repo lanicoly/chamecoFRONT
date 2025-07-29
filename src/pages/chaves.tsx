@@ -12,13 +12,18 @@ import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
 import { useChaves } from "../context/ChavesContext";
-import { Iusuario } from "./usuarios";
 import { AxiosError } from "axios";
 
 
 export interface IUsuario {
-  id: number;
-  nome: string;
+  autorizado_emprestimo: boolean,
+  chaves: IChave[];
+  id: number,
+  id_cortex: number,
+  nome: string,
+  setor: string,
+  tipo: string,
+  superusuario?: number
 }
 export interface IChave {
   id: number;
@@ -351,7 +356,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
     const termoPesquisa = pesquisa.toLowerCase();
     const usuariosNomes = chave.usuarios?.map(u => u.nome.toLowerCase()).join(" ") || "";
     return (
-      sala?.nome?.toLowerCase().includes(termoPesquisa) ||
+      sala?.nome.toLowerCase().includes(termoPesquisa) ||
       chave.id?.toString().includes(termoPesquisa) ||
       (chave.descricao && chave.descricao.toLowerCase().includes(termoPesquisa)) ||
       usuariosNomes.includes(termoPesquisa)
@@ -643,7 +648,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
-                    const user: Iusuario | undefined = allUsuarios.find((u: Iusuario) => u.id === id);
+                    const user: IUsuario | undefined = allUsuarios.find((u) => u.id === id);
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
                         {user?.nome}
@@ -672,11 +677,11 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
-                      .filter((user: Iusuario) => 
+                      .filter((user) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       )
-                      .map((user: Iusuario) => (
+                      .map((user) => (
                         <div
                           key={user.id}
                           className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
@@ -688,7 +693,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                           {user.nome}
                         </div>
                       ))}
-                    {allUsuarios.filter((user: Iusuario) => 
+                    {allUsuarios.filter((user) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       ).length === 0 && (
@@ -759,10 +764,10 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
-                    const user: IUsuario = allUsuarios.find((u: IUsuario) => u.id === id);
+                    const user: IUsuario | undefined = allUsuarios.find((u) => u.id === id);
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
-                        {user.nome}
+                        {user?.nome}
                         <button
                           type="button"
                           onClick={() => setUsuariosAutorizadosIds(prev => prev.filter(uid => uid !== id))}

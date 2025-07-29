@@ -1,7 +1,7 @@
-import { Iusuario } from "../../pages/usuarios"
+import { IUsuario } from "../../pages/chaves"
 
 interface ItabelaDeUsuarios {
-    filtrarUsuario: Iusuario[],
+    filtrarUsuario: IUsuario[],
     userSelecionado: any,
     statusSelecao: (arg: number) => void,
 }
@@ -27,7 +27,7 @@ export function TabelaDeUsuarios({filtrarUsuario, userSelecionado, statusSelecao
                   </tr>
                 </thead>
                 <tbody>
-                    {filtrarUsuario.map((usuario: Iusuario) => (
+                    {filtrarUsuario.map((usuario: IUsuario) => (
                         <tr
                             key={usuario.id}
                             className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${

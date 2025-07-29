@@ -68,7 +68,7 @@ export function Salas() {
       )
     : listaSalas;
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
-  const [nextId, setNextId] = useState(1);
+  const [nextId] = useState(1);
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
 
@@ -153,7 +153,7 @@ export function Salas() {
   //Adicionando função de excluir sala + função para requisição delete
   async function excluirSalaAPI(id: number, nome: string, bloco:number) {
       try {
-        const response = await api.delete(`${URL}${id}/`, {
+        await api.delete(`${URL}${id}/`, {
           data: { nome, bloco }
         });
     

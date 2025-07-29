@@ -1,6 +1,6 @@
-import { Iusuario } from "../pages/usuarios";
+import { IUsuario } from "../pages/chaves";
 
-export const userFilter = (listaUsers: Iusuario[], pesquisa: string, filtro: string, indexInicio: number, indexFim: number) => { 
+export const userFilter = (listaUsers: IUsuario[], pesquisa: string, filtro: string, indexInicio: number, indexFim: number) => { 
     
     return listaUsers.filter((usuario) => {
         const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());

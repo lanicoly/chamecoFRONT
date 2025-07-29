@@ -39,7 +39,7 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos() {
 
-  const [pesquisa, setPesquisa] = useState("");
+  const [pesquisa] = useState("");
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
   const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);

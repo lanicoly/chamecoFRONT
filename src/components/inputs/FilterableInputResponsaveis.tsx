@@ -1,17 +1,17 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 
-export interface IoptionResponsaveis {
+export interface IUsuario {
   superusuario: number;
   nome: string;
 }
 
 interface IdropdownResponsavelProps {
-  items: IoptionResponsaveis[];
+  items: IUsuario[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
   reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
-const buscarResponsavel = (id: number | null, responsaveis: IoptionResponsaveis[]) => {
+const buscarResponsavel = (id: number | undefined, responsaveis: IUsuario[]) => {
   const responsavel = responsaveis.find(responsavel => responsavel.superusuario === id);
 
   return responsavel ? `${responsavel.nome} | ${responsavel.superusuario}` : "";
@@ -22,16 +22,16 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState<IoptionResponsaveis | null>(null);
+  const [selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
 
-  const filterdItems = useMemo(() => {
+  const filterdItems = useMemo<IUsuario[]>(() => {
     const lowerSearch = searchTerm.toLowerCase();
     return items.filter((item) => item.nome && buscarResponsavel(item.superusuario, items).toLowerCase().includes(lowerSearch));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IoptionResponsaveis) => {
+  const handleSelect = (option: IUsuario) => {
     setSelectedOption(option);
     setSearchTerm(option.nome);
     setIsOpen(false);

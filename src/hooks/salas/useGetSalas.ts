@@ -1,6 +1,7 @@
 // import axios from "axios";
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { ISala } from "../../pages/chaves";
 
 
 
@@ -9,7 +10,7 @@ const CACHE_TTL = 60 * 5; // 5 minutes
 
 const useGetSalas = () => {
 
-    const [salas, setSalas] = useState([]);
+    const [salas, setSalas] = useState<ISala[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
    

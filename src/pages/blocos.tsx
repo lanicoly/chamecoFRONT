@@ -19,7 +19,7 @@ export function Blocos() {
   const navigate = useNavigate();
 
   const [blocos, setBlocos] = useState<Blocos[]>([]);
-  const [nextId, setNextId] = useState(11);
+  const [nextId] = useState(11);
   const [nome, setNome] = useState("");
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);

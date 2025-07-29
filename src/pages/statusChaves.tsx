@@ -14,16 +14,9 @@ export interface Chave {
     status: string;
 }
 
-// chore/refactor-folder-structure
-
-//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
-
-//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
-
-
 export function StatusChaves() {
 
-    const [listaChaves, setListaChaves] = useState<Chave[]>([
+    const [listaChaves] = useState<Chave[]>([
         { id: 1, sala: "Laboratório Y", bloco: "E", tipo: "Principal", descricao:"Chave do lab 2 do bloco H", posse: "Em uso pela prof. Aryane", status: "INDISPONÍVEL"},
         { id: 2, sala: "Laboratório X", bloco: "E",  tipo: "Secundária", descricao:"Chave do lab 1 do bloco H", posse:"Não está em uso no momento", status: "DISPONÍVEL"},
     ]);

@@ -1,8 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
-import { IoptionChaves } from "./inputs/FilterableInputChaves";
-import { IoptionSalas } from "./inputs/FilterableInputSalas";
 import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
 import { Info, Check } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
@@ -21,12 +18,13 @@ import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
+import { IChave, ISala, IUsuario } from "../pages/chaves";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
-  salas: IoptionSalas[];
-  chaves: IoptionChaves[];
-  responsaveis: IoptionResponsaveis[];
+  salas: ISala[];
+  chaves: IChave[];
+  responsaveis: IUsuario[];
   solicitantes: IoptionSolicitantes[];
   observacao: string | null;
   dataRetirada: string;
@@ -67,7 +65,7 @@ export function EmprestimosPendentes({
     dataRetirada: "",
     horaRetirada: "",
   });
-  const [isFiltroPendente, setIsFiltroPendente] = useState(true);
+  const [isFiltroPendente] = useState(true);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   //filtrando emprestimos pendentes
