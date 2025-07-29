@@ -68,7 +68,6 @@ export function Salas() {
       )
     : listaSalas;
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
-  const [nextId] = useState(1);
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
 
@@ -104,8 +103,7 @@ export function Salas() {
 
   // função para requisição do método post
   async function adicionarSalaAPI() {
-      const novaSala: Sala = {
-        id: nextId,
+      const novaSala = {
         nome,
         bloco: 1 //temos que ajustar isso.
       }
@@ -153,10 +151,11 @@ export function Salas() {
   //Adicionando função de excluir sala + função para requisição delete
   async function excluirSalaAPI(id: number, nome: string, bloco:number) {
       try {
-        await api.delete(`${URL}${id}/`, {
+        const response = await api.delete(`${URL}${id}/`, {
           data: { nome, bloco }
         });
-    
+        
+        setMensagemSucesso(`Sala excluida com sucesso: ${response.data.code}!`)
               
       } catch (error: unknown) {
         console.error("Erro ao excluir sala:", error);

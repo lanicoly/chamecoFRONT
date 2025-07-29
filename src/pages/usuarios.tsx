@@ -39,12 +39,12 @@ export function Usuarios() {
   } = useGetUsuarios();
 
   const itensPorPagina = 5;
-  const [paginaAtual] = useState(1);
+  const paginaAtual = 1;
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
 
   const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [_isSearching, setIsSearching] = useState(false);
   const [filtro, setFiltro] = useState("todos");
 
   const filtrarUsuario = userFilter(usuarios, pesquisa, filtro, indexInicio, indexFim);

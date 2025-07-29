@@ -26,10 +26,10 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const filterdItems = useMemo<IChave[]>(() => {
-    return chaves?.filter((item: IChave) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves, salas).toLowerCase().includes(searchTerm.toLowerCase()));
+    return chaves?.filter((item: IChave) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves as IChave[], salas).toLowerCase().includes(searchTerm.toLowerCase()));
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
