@@ -19,7 +19,6 @@ export function Blocos() {
   const navigate = useNavigate();
 
   const [blocos, setBlocos] = useState<Blocos[]>([]);
-  const [nextId] = useState(11);
   const [nome, setNome] = useState("");
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
@@ -65,11 +64,8 @@ export function Blocos() {
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBloco() {
-    const novoBloco: Blocos = {
-      id: nextId,
+    const novoBloco = {
       nome,
-      // descricao,
-      // token,
     };
 
     if (novoBloco.nome === null) {
@@ -99,7 +95,7 @@ export function Blocos() {
         );
 
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(true); // Abre o pop-up de erro de forma segura
+        setIsPopUpErrorOpen(true); 
       } finally {
         handleCloseMOdalAndReload();
       }

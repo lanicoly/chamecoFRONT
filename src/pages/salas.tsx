@@ -100,7 +100,6 @@ export function Salas() {
     Math.ceil(salasFiltradas.length / itensPorPagina)
   );
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
-  const [nextId] = useState(1);
   const [nome, setNome] = useState("");
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
@@ -134,12 +133,11 @@ export function Salas() {
 
   // função para requisição do método post
   async function adicionarSalaAPI() {
-    const novaSala: Sala = {
-      id: nextId,
-      nome,
-      bloco: blocoNumero,
-    };
-    if (novaSala.nome === null) {
+      const novaSala = {
+        nome,
+        bloco: blocoNumero
+      }
+      if (novaSala.nome === null) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     } else {
@@ -181,14 +179,16 @@ export function Salas() {
   };
 
   //Adicionando função de excluir sala + função para requisição delete
-  async function excluirSalaAPI(id: number, nome: string, bloco: number) {
-    try {
-      await api.delete(`${URL}${id}/`, {
-        data: { nome, bloco },
-      });
-    } catch (error: unknown) {
-      console.error("Erro ao excluir sala:", error);
-    }
+  async function excluirSalaAPI(id: number, nome: string, bloco:number) {
+      try {
+        await api.delete(`${URL}${id}/`, {
+          data: { nome, bloco }
+        });
+    
+              
+      } catch (error: unknown) {
+        console.error("Erro ao excluir sala:", error);
+      }
   }
 
   function removeSala(e: React.FormEvent) {

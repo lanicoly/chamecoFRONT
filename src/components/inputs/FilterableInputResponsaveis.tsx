@@ -22,7 +22,7 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
 
   const filterdItems = useMemo<IUsuario[]>(() => {
     const lowerSearch = searchTerm.toLowerCase();

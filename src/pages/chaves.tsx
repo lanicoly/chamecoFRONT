@@ -765,6 +765,9 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {usuariosAutorizadosIds.map(id => {
                     const user: IUsuario | undefined = allUsuarios.find((u) => u.id === id);
+                    
+                    if (!user) return null; // evita erro se não encontrar o usuário
+
                     return (
                       <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
                         {user?.nome}

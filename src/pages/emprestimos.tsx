@@ -39,14 +39,13 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos() {
 
-  const [pesquisa] = useState("");
+  const pesquisa = ""
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
   const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
   const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
   const [observacao, setObservacao] = useState<string | null>();
 
-  const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
@@ -85,10 +84,6 @@ export function Emprestimos() {
         if (response) {
             setOnReset(true); // ativa o reset
             setTimeout(() => setOnReset(false), 100); // evita reset contínuo
-            setEmprestimos((prevEmprestimos) => [
-              ...prevEmprestimos,
-              response.data,
-            ]);
             setIsSuccesModalOpen(!isSuccesModalOpen);
             setObservacao("");
         }

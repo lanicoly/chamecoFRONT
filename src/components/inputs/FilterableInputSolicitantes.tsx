@@ -21,7 +21,7 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState<IoptionSolicitantes | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<IoptionSolicitantes | null>(null);
 
   const filterdItems = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();

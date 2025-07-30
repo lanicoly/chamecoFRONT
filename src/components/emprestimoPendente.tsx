@@ -65,7 +65,6 @@ export function EmprestimosPendentes({
     dataRetirada: "",
     horaRetirada: "",
   });
-  const [isFiltroPendente] = useState(true);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   //filtrando emprestimos pendentes
@@ -116,7 +115,6 @@ export function EmprestimosPendentes({
     })
     .filter((emp) => {
       if (
-        !isFiltroPendente ||
         !filtroDataEmprestimoRetirada?.from ||
         !filtroDataEmprestimoRetirada?.to
       )

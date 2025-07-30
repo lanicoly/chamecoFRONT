@@ -34,19 +34,16 @@ export function EmprestimosConcluidos({
   solicitantes,
   salas,
 }: EmprestimosConcluidosProps) {
-  const [emprestimoSelecionado, setEmprestimoSelecionado] =
-    useState<Iemprestimo | null>(null);
+  const [emprestimoSelecionado, setEmprestimoSelecionado] = useState<Iemprestimo | null>(null);
 
   //constantes para filtrar data de devolução/retirada
-  const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
-    DateRange | undefined
-  >();
+  const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<DateRange | undefined>();
+  
   const [
     filtroDataEmprestimoRetiradaConcluidos,
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
-  // const { chaves } = useChaves();
   const {chaves: chavesData} = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
@@ -60,7 +57,6 @@ export function EmprestimosConcluidos({
     dataDevolucao: "",
     horaDevolucao: "",
   });
-  const [isFiltroConcluido] = useState(true);
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
@@ -115,7 +111,6 @@ export function EmprestimosConcluidos({
     })
     .filter((emp) => {
       if (
-        !isFiltroConcluido ||
         !filtroDataDevolucao?.from ||
         !filtroDataDevolucao?.to
       )
@@ -147,7 +142,6 @@ export function EmprestimosConcluidos({
     })
     .filter((emp) => {
       if (
-        !isFiltroConcluido ||
         !filtroDataEmprestimoRetiradaConcluidos?.from ||
         !filtroDataEmprestimoRetiradaConcluidos?.to
       )
