@@ -278,8 +278,7 @@ export function Blocos() {
   }
 
   const handleBlockSelect = (blocoSelecionado: Blocos) => {
-    // Navegando para a tela de salas com o bloco selecionado
-    navigate(`/salas?bloco=${blocoSelecionado.id}`);
+    navigate(`/salas/${blocoSelecionado.id}`);
   };
 
   return (
@@ -413,7 +412,8 @@ export function Blocos() {
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
                       className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
-                      onClick={() => handleBlockSelect(blocoSelecionado)}
+                      onClick={() => handleBlockSelect(blocoSelecionado
+                      )}
                     >
                       <svg
                         width="25"

@@ -1,10 +1,14 @@
 import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MenuTopo } from "../components/menuTopo";
-import api from '../services/api';
+import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
+import { useParams } from "react-router-dom";
+import { PassadorPagina } from "../components/passadorPagina";
+import { Pesquisa } from "../components/pesquisa";
+import { Blocos } from "../pages/blocos";
 
 export interface Sala {
   id: number;
@@ -13,18 +17,47 @@ export interface Sala {
 }
 
 export function Salas() {
-
   useEffect(() => {
     obterSalas();
-   }, []);
+  }, []);
 
- 
-  //Função para requisição get (obter blocos)
+  const [blocos, setBlocos] = useState<Blocos[]>([]);
+
+  const { blocoId } = useParams<{ blocoId: string }>();
+
+  const blocoIdNumber = blocoId ? Number(blocoId) : null;
+
+  const [todasSalas, setTodasSalas] = useState<Sala[]>([]);
+  const blocoNumero = blocoId ? Number(blocoId) : 1;
+
+  const salasDoBloco = todasSalas.filter(
+    (sala) => sala.bloco === blocoIdNumber
+  );
+
+  useEffect(() => {
+    async function obterBlocos() {
+      try {
+        const response = await api.get("/chameco/api/v1/blocos/", {
+          headers: { "Content-Type": "application/json" },
+        });
+        setBlocos(response.data.results);
+      } catch (error) {
+        console.error("Erro ao obter blocos:", error);
+      }
+    }
+    obterBlocos();
+  }, []);
+
+  const nomeDoBloco = Array.isArray(blocos)
+    ? blocos.find((bloco) => bloco.id === blocoIdNumber)?.nome.toUpperCase() ||
+      "BLOCO DESCONHECIDO"
+    : "BLOCO DESCONHECIDO";
+
   async function obterSalas() {
     try {
       const response = await api.get("/chameco/api/v1/salas/", {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -38,39 +71,37 @@ export function Salas() {
           }));
 
           setListaSalas(salas);
+          setTodasSalas(salas);
         } else {
           setListaSalas([]);
         }
       }
     } catch (error) {
       setListaSalas([]);
-      console.error('Erro ao obter salas:', error);
+      console.error("Erro ao obter salas:", error);
     }
   }
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const totalPaginas = Math.max(
-    1,
-    Math.ceil(listaSalas.length / itensPorPagina)
-  );
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
 
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const salasFiltradas = isSearching
-    ? listaSalas.filter(
-        (sala) =>
-          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) 
-          // sala.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+    ? salasDoBloco.filter((sala) =>
+        sala.nome.toLowerCase().includes(pesquisa.toLowerCase())
       )
-    : listaSalas;
+    : salasDoBloco;
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(salasFiltradas.length / itensPorPagina)
+  );
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
   const [nextId] = useState(1);
   const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -80,7 +111,7 @@ export function Salas() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  console.log("Salas:", listaSalas)
+  console.log("Salas:", listaSalas);
 
   function openSalaModal() {
     setIsSalaModalOpen(true);
@@ -88,7 +119,6 @@ export function Salas() {
 
   function closeSalaModal() {
     setNome("");
-    setDescricao("");
     setIsSalaModalOpen(false);
   }
 
@@ -104,12 +134,12 @@ export function Salas() {
 
   // função para requisição do método post
   async function adicionarSalaAPI() {
-      const novaSala: Sala = {
-        id: nextId,
-        nome,
-        bloco: 1 //temos que ajustar isso.
-      }
-      if (novaSala.nome === null) {
+    const novaSala: Sala = {
+      id: nextId,
+      nome,
+      bloco: blocoNumero,
+    };
+    if (novaSala.nome === null) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     } else {
@@ -122,8 +152,8 @@ export function Salas() {
           setNome("");
           closeSalaModal();
         }
-              
-        setMensagemSucesso("Sala adicionado com sucesso!")
+
+        setMensagemSucesso("Sala adicionada com sucesso!");
       } catch (error: unknown) {
         const axiosError = error as AxiosError<{ message?: string }>;
 
@@ -136,7 +166,7 @@ export function Salas() {
         );
 
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(true); // Garante abertura do pop-up
+        setIsPopUpErrorOpen(true);
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -151,88 +181,87 @@ export function Salas() {
   };
 
   //Adicionando função de excluir sala + função para requisição delete
-  async function excluirSalaAPI(id: number, nome: string, bloco:number) {
-      try {
-        await api.delete(`${URL}${id}/`, {
-          data: { nome, bloco }
-        });
-    
-              
-      } catch (error: unknown) {
-        console.error("Erro ao excluir sala:", error);
-      }
+  async function excluirSalaAPI(id: number, nome: string, bloco: number) {
+    try {
+      await api.delete(`${URL}${id}/`, {
+        data: { nome, bloco },
+      });
+    } catch (error: unknown) {
+      console.error("Erro ao excluir sala:", error);
+    }
   }
 
-    function removeSala(e: React.FormEvent) {
-      e.preventDefault();
-    
-      if (salaSelecionada === null) {
-        console.error("Nenhuma sala selecionada para excluir.");
-        return;
-      }
-      const salaSelecionadaObj = listaSalas.find(sala => sala.id === salaSelecionada);
-    
-      if (!salaSelecionadaObj) {
-        console.error("Sala não encontrada.");
-        return;
-      }
-    
-      const { id, nome, bloco } = salaSelecionadaObj;
-    
-      try {
-        excluirSalaAPI(id, nome, bloco);
-    
-        setListaSalas((prevSalas) =>
-          prevSalas.filter((sala) => sala.id !== salaSelecionada) 
-        );
-    
-        setSalaSelecionada(null);
-      } catch (error) {
-        console.error("Erro ao excluir sala:", error);
-      }
+  function removeSala(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (salaSelecionada === null) {
+      console.error("Nenhuma sala selecionada para excluir.");
+      return;
     }
+    const salaSelecionadaObj = listaSalas.find(
+      (sala) => sala.id === salaSelecionada
+    );
+
+    if (!salaSelecionadaObj) {
+      console.error("Sala não encontrada.");
+      return;
+    }
+
+    const { id, nome, bloco } = salaSelecionadaObj;
+
+    try {
+      excluirSalaAPI(id, nome, bloco);
+
+      setListaSalas((prevSalas) =>
+        prevSalas.filter((sala) => sala.id !== salaSelecionada)
+      );
+
+      setSalaSelecionada(null);
+    } catch (error) {
+      console.error("Erro ao excluir sala:", error);
+    }
+  }
 
   // adicionando função de editar informações de uma sala + função para requisição PUT
-    async function editarSalaAPI(salaSelecionada: Sala) {
-      try {
-        const response = await api.put(
-          `${URL}${salaSelecionada.id}/`, {nome: salaSelecionada.nome, bloco: salaSelecionada.bloco},
-        );
-  
-        if (response.status === 200) {
-                    
-          return response.data;
-        }
-      } catch (error: unknown) {
-        console.error("Erro ao editar sala.", error);
-      }
-    }
-  
+  async function editarSalaAPI(salaSelecionada: Sala) {
+    try {
+      const response = await api.put(`${URL}${salaSelecionada.id}/`, {
+        nome: salaSelecionada.nome,
+        bloco: salaSelecionada.bloco,
+      });
 
-    function editaSala(e: React.FormEvent) {
-      e.preventDefault();
-      
-      if (salaSelecionada !== null) {
-        const salaEditada = listaSalas.find((sala) => sala.id === salaSelecionada);
-    
-        if (salaEditada) {
-          if (nome) {
-            salaEditada.nome = nome; 
-          }
-          // if (descricao) {
-          //   salaEditada.descricao = descricao;  
-          // }
-    
-          editarSalaAPI(salaEditada);  
-        }
-    
-        setSalaSelecionada(null);  
-        setNome("");  
-        setDescricao("");  
-        closeEditModal();  
+      if (response.status === 200) {
+        return response.data;
       }
+    } catch (error: unknown) {
+      console.error("Erro ao editar sala.", error);
     }
-    
+  }
+
+  function editaSala(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (salaSelecionada !== null) {
+      const salaEditada = listaSalas.find(
+        (sala) => sala.id === salaSelecionada
+      );
+
+      if (salaEditada) {
+        if (nome) {
+          salaEditada.nome = nome;
+        }
+        // if (descricao) {
+        //   salaEditada.descricao = descricao;
+        // }
+
+        editarSalaAPI(salaEditada);
+      }
+
+      setSalaSelecionada(null);
+      setNome("");
+      closeEditModal();
+    }
+  }
 
   function statusSala(id: number) {
     if (salaSelecionada !== null) {
@@ -264,10 +293,10 @@ export function Salas() {
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
-      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso} />}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
       {/* menu topo */}
-      <MenuTopo text = "VOLTAR" backRoute="/blocos" />
+      <MenuTopo text="VOLTAR" backRoute="/blocos" />
       {/* menu topo */}
 
       {/* parte informativa tela salas */}
@@ -275,7 +304,7 @@ export function Salas() {
         {/* cabeçalho tela salas */}
         <div className="flex w-full gap-2">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
-            BLOCO X
+            {nomeDoBloco}
           </h1>
         </div>
         {/* fim cabeçalho tela salas */}
@@ -285,31 +314,13 @@ export function Salas() {
           {/* adicionar sala + pesquisa */}
           <div className="flex justify-center items-center min-w-[220px] flex-wrap gap-2 flex-1 mobile:justify-between">
             {/* input de pesquisa */}
-            <div className="h-fit items-center w-full tablet:w-auto">
-              <div className="flex justify-between items-center px-2 py-1 border-solid border-[1px] border-slate-500 rounded-md ">
-                <input
-                  type="text"
-                  value={pesquisa}
-                  onChange={(e) => {
-                    setPesquisa(e.target.value);
-                    setIsSearching(e.target.value.trim().length > 0);
-                  }}
-                  placeholder="Pesquisar..."
-                  className="placeholder-sky-900 text-sm font-medium outline-none "
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  fill="#64748b"
-                  className="bi bi-search"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                </svg>
-              </div>
-            </div>
+            <Pesquisa
+              pesquisa={pesquisa}
+              setIsSearching={setIsSearching}
+              setPesquisa={setPesquisa}
+            />
             {/* fim input de pesquisa */}
+
             <button
               onClick={openSalaModal}
               className="px-4 py-1.5 bg-[#18C64F] text-white font-medium flex gap-2 justify-center items-center hover:bg-[#56ab71] rounded-md w-full tablet:w-auto"
@@ -333,9 +344,9 @@ export function Salas() {
               <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                 <form
                   onSubmit={(e) => {
-                  e.preventDefault();
-                  adicionarSalaAPI();
-                }}
+                    e.preventDefault();
+                    adicionarSalaAPI();
+                  }}
                   className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
                 >
                   <div className="flex justify-center mx-auto w-full max-w-[90%]">
@@ -436,18 +447,6 @@ export function Salas() {
                       />
                     </div>
 
-                    <div className="justify-center items-center ml-[40px] mr-8">
-                      <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                        Informe a nova descrição da sala
-                      </p>
-                      <textarea
-                        className="w-full px-2 py-1 rounded-[10px] border border-[#646999] text-[#777DAA] focus:outline-none text-xs font-medium"
-                        placeholder="Descrição do detalhamento sobre a sala"
-                        value={descricao}
-                        onChange={(e) => setDescricao(e.target.value)}
-                      />
-                    </div>
-
                     <div className="flex justify-center items-center mt-[10px] w-full">
                       <button
                         type="submit"
@@ -517,54 +516,12 @@ export function Salas() {
             {/* fim tabela com todas as salas */}
 
             {/* passador de página */}
-            <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
-              <button
-                onClick={voltarPagina}
-                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="#075985"
-                  className="bi bi-chevron-left"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"
-                  />
-                </svg>
-              </button>
-
-              <div className="w-auto gap-1.5 px-1 py-1 flex items-center justify-center">
-                <div className="size-[28px] rounded-full bg-[#8d93c9] text-white text-sm flex items-center justify-center font-semibold">
-                  {paginaAtual}
-                </div>
-                <div className="text-base text-sky-800 font-semibold">
-                  de <strong className="font-bold">{totalPaginas}</strong>
-                </div>
-              </div>
-
-              <button
-                onClick={avancarPagina}
-                className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="#075985"
-                  className="bi bi-chevron-right"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
-                  />
-                </svg>
-              </button>
-            </div>
+            <PassadorPagina
+              avancarPagina={avancarPagina}
+              voltarPagina={voltarPagina}
+              totalPaginas={totalPaginas}
+              paginaAtual={paginaAtual}
+            />
             {/* fim passador de página */}
           </div>
           {/* fim conteudo central tabela*/}
