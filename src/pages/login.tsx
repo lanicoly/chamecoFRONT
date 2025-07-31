@@ -1,12 +1,13 @@
 import axios from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, HtmlHTMLAttributes } from "react";
 import api from "../services/api";
 import { Footer } from "../components/footer";
 import Spinner from "../components/spinner";
 import { limparCPF } from "../utils/limparCPF";
 import { redirectUserTo } from "../utils/tiposUsuarios";
+import { applyCpfMask } from "../utils/applyCpfMask";
 
 export function Login() {
   const navigate = useNavigate();
@@ -19,14 +20,13 @@ export function Login() {
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   const cpfInput = document.getElementById("cpf");
-  //   if (cpfInput) {
-  //     IMask(cpfInput, {
-  //       mask: "000.000.000-00",
-  //     });
-  //   }
-  // }, []);
+  useEffect(() => {
+    const cpfInput = document.querySelector<HTMLInputElement>("#cpf");
+    const cleanup = cpfInput ? applyCpfMask(cpfInput) : undefined;
+
+    // Remove listener ao desmontar o componente
+    return () => cleanup?.();
+  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

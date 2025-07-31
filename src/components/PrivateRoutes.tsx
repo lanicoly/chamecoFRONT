@@ -64,6 +64,7 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
       return <Navigate to="/emprestimos" state={{ from: location }} replace />;
   } else { 
       if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
+          localStorage.clear();
           return <Navigate to="/login" state={{ from: location }} replace />;
       }
   }
