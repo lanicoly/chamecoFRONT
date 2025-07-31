@@ -52,7 +52,6 @@ export function Emprestimos() {
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
   const { responsaveis } = useGetResponsaveis();
-  // const { chaves } = useGetChaves();
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   const {chaves, refetch} = useChaves();
@@ -188,7 +187,7 @@ export function Emprestimos() {
       {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
 
-      {localStorage.getItem("userType") === "vigiliante" ? "" : <MenuTopo text="" backRoute="" />}
+      {localStorage.getItem("userType") === "vigilante" ? <MenuTopo text="" backRoute="" /> : <MenuTopo text="MENU" backRoute="/menu" />}
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
