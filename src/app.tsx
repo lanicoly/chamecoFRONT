@@ -61,7 +61,7 @@ export function App() {
         <Route
           path="/statusChaves"
           element={
-            <PrivateRoute allowedTypes={["admin", "diretor.geral"]}>
+            <PrivateRoute allowedTypes={["admin", "diretor.geral", "professor"]}>
               <StatusChaves />
             </PrivateRoute>
           }
@@ -69,7 +69,7 @@ export function App() {
         <Route
           path="/emprestimos"
           element={
-            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral"]}>
+            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante"]}>
               <Emprestimos />
             </PrivateRoute>
           }

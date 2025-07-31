@@ -6,6 +6,7 @@ import api from "../services/api";
 import { Footer } from "../components/footer";
 import Spinner from "../components/spinner";
 import { limparCPF } from "../utils/limparCPF";
+import { redirectUserTo } from "../utils/tiposUsuarios";
 
 export function Login() {
   const navigate = useNavigate();
@@ -18,20 +19,20 @@ export function Login() {
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    const cpfInput = document.getElementById("cpf");
-    if (cpfInput) {
-      IMask(cpfInput, {
-        mask: "000.000.000-00",
-      });
-    }
-  }, []);
+  // useEffect(() => {
+  //   const cpfInput = document.getElementById("cpf");
+  //   if (cpfInput) {
+  //     IMask(cpfInput, {
+  //       mask: "000.000.000-00",
+  //     });
+  //   }
+  // }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if(!usuario.trim() || !senha.trim()) {
-      setErrorUsuario(!usuario.trim() ? "Por favor, insira o seu CPF!": "");
+      setErrorUsuario(!usuario.trim() ? "Por favor, insira o seu CPF ou matrícula!": "");
       setErrorSenha(!senha.trim() ? "Por favor, insira a sua senha!" : "");
       return;
     }
@@ -48,31 +49,23 @@ export function Login() {
     try {
         const response = await api.post("/chameco/api/v1/login/", body)
 
-        const statusResponse = response.status;
-
-        // Adicionar o console.log para exibir os dados da resposta(obter token)
         console.log("Resposta do login:", response.data);
         
-      if (statusResponse === 200 && response.data?.token) { //testar sem status response
+        if (response.data?.token) {
+          localStorage.setItem("authToken", response.data.token);
 
-        localStorage.setItem("authToken", response.data.token);
+          if (response.data.usuario) {
+            localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+          }
 
-        if(response.data.usuario) {
-          localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+          if (response.data.tipo) {
+            localStorage.setItem("userType", response.data.tipo);
+          }
+
+          const route = redirectUserTo(response.data.tipo?.trim());
+          console.log(route)
+          navigate(route); // redireciona
         }
-
-        if (response.data.tipo) {
-          localStorage.setItem("userType", response.data.tipo);
-        }
-        
-        // Força atualização do estado de autenticação para outros componentes
-        window.dispatchEvent(new Event('storage'));
-        navigate("/menu");
-
-      } else {
-          setErrorSenha("Usuário não registrado no sistema!");
-          return;
-      }
 
     } catch (error) {
       if (axios.isAxiosError(error)) {

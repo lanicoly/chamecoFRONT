@@ -188,7 +188,7 @@ export function Emprestimos() {
       {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
 
-      <MenuTopo text="MENU" backRoute="/menu" />
+      {localStorage.getItem("userType") === "vigiliante" ? "" : <MenuTopo text="" backRoute="" />}
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
