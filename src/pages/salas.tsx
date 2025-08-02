@@ -37,9 +37,7 @@ export function Salas() {
   useEffect(() => {
     async function obterBlocos() {
       try {
-        const response = await api.get("/chameco/api/v1/blocos/", {
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await api.get("/chameco/api/v1/blocos/");
         setBlocos(response.data.results);
       } catch (error) {
         console.error("Erro ao obter blocos:", error);
@@ -55,11 +53,7 @@ export function Salas() {
 
   async function obterSalas() {
     try {
-      const response = await api.get("/chameco/api/v1/salas/", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.get("/chameco/api/v1/salas/");
 
       if (response.status === 200) {
         const data = response.data;
