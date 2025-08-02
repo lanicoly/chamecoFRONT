@@ -23,8 +23,8 @@ api.interceptors.request.use(
         } else if (method === "post" || method === "put") {
             if (typeof config.data === "object" && config.data !== null) {
                 config.data = {
-                ...config.data,
-                token: token,
+                    ...config.data,
+                    token: token,
                 };
             } else {
                 config.data = { token: token };

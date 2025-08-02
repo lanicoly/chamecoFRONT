@@ -36,7 +36,7 @@ export function Usuarios() {
       totalPaginas,
       nextPage,
       prevPage,
-  } = useGetUsuarios();
+  } = useGetUsuarios(5);
 
   const itensPorPagina = 5;
   const paginaAtual = 1;
