@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://chamecoapi2.pythonanywhere.com',
+    baseURL: 'https://chamecoapi3.pythonanywhere.com/',
     headers: {
         'Content-Type': 'Application/json',
     },

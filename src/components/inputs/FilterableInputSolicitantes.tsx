@@ -13,7 +13,6 @@ interface IdropdownResponsavelProps {
 
 const buscarSolicitante = (id: number | null, solicitantes: IoptionSolicitantes[]) => {
     const solicitante = solicitantes.find( solicitante => solicitante.id === id );
-
     return solicitante ? `${solicitante.nome} | ${solicitante.id}` : "";
 };
 

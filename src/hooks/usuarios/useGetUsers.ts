@@ -1,64 +1,62 @@
-import { useEffect, useState, useCallback } from "react";
-import api from "../../services/api";
+import { useEffect, useRef, useState } from "react";
 import { IUsuario } from "../../pages/chaves";
+import api from "../../services/api";
 
-const useGetUsuarios = (limit = 5) => {  
+interface ApiResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: IUsuario[];
+}
+
+const useGetUsers = (limit = 5) => {
   const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [page, setPage] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(0);
-  const [temMais, setTemMais] = useState(true);
+  const [temMais, setTemMais] = useState(true); // permanece interno como no seu código
 
-  const fetchUsuarios = useCallback(async (pagina: number) => {
 
-    setLoading(true);
+  useEffect(() => {
+    const fetchUsuarios = async (pagina: number, pageSize: number) => {
+      setLoading(true);
+      setError(null);
 
-    try {
+      try {
 
-      const cacheKey = `usuarios_page_${pagina}_limit_${limit}`;
-      const cachedData = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+        const url = `/chameco/api/v1/usuarios/?page=${pagina}`;
 
-      if (cachedData.length > 0) { 
-        console.log(`Carregando dados da página ${pagina} do cache`);
-        setUsuarios(cachedData);
-        setLoading(false);
-        return;
-      } else {
-
-        const url = `/chameco/api/v1/usuarios/?limit=${limit}&page=${pagina}`;
-        const response = await api.get(url);
-
-        if (!response.data) throw new Error("Erro ao puxar os usuários");
+        const response = await api.get<ApiResponse>(url);
 
         const { results, count, next } = response.data;
 
-        localStorage.setItem(cacheKey, JSON.stringify(results));
-
-        // Atualiza os estados com os dados
-        setUsuarios(results);
-        setTotalPaginas(Math.ceil(count / limit));  // Total de páginas calculado corretamente
-        setTemMais(!!next); // Se houver 'next', há mais páginas
+        console.log("Response: ", response.data)
+        setUsuarios(results); // sobrescreve: paginação normal
+        setTotalPaginas(Math.max(1, Math.ceil(count / pageSize)));
+        setTemMais(Boolean(next));
+      } catch (err: any) {
+        // ignora erros de cancelamento
+        if (err?.name !== "CanceledError" && err?.code !== "ERR_CANCELED") {
+          setError(err?.message ?? new Error("Erro ao carregar usuários"));
+        }
+      } finally {
+        setLoading(false);
       }
+    };
 
-    } catch (err) {
-      console.error("Erro na requisição:", err);
-      setError(err instanceof Error ? err : new Error("Erro desconhecido"));
-    } finally {
-      setLoading(false);
-    }
-  }, [limit]);
+    fetchUsuarios(page, limit);
 
-  useEffect(() => {
-    fetchUsuarios(page);
-  }, [page, fetchUsuarios]);
+  }, [page, limit]);
 
   const nextPage = () => {
-    if (temMais) setPage((prev) => prev + 1); 
+    console.log(`Avançou para ${page + 1}`);
+    if (temMais) setPage((p) => p + 1);
   };
 
   const prevPage = () => {
-    if (page > 1) setPage((prev) => prev - 1); 
+    console.log(`Voltou para ${page - 1}`);
+    if (page > 1) setPage((p) => p - 1);
   };
 
   return {
@@ -69,9 +67,8 @@ const useGetUsuarios = (limit = 5) => {
     totalPaginas,
     nextPage,
     prevPage,
-    temMais
   };
 };
 
-export default useGetUsuarios;
+export default useGetUsers;
 

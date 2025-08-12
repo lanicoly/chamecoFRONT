@@ -3,7 +3,7 @@ import { MenuTopo } from "../components/menuTopo";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetUsers from "../hooks/usuarios/useGetUsers";
 import AdicionarUsuarioForm from "../components/forms/AdicionarUsuarioForm";
 import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuario";
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
@@ -36,7 +36,7 @@ export function Usuarios() {
       totalPaginas,
       nextPage,
       prevPage,
-  } = useGetUsuarios(5);
+  } = useGetUsers(5);
 
   const itensPorPagina = 5;
   const paginaAtual = 1;
@@ -44,10 +44,11 @@ export function Usuarios() {
   const indexFim = indexInicio + itensPorPagina;
 
   const [pesquisa, setPesquisa] = useState("");
+  const [tipoUsuario, setTipoUsuario] = useState("todos");
   const [_isSearching, setIsSearching] = useState(false);
-  const [filtro, setFiltro] = useState("todos");
 
-  const filtrarUsuario = userFilter(usuarios, pesquisa, filtro, indexInicio, indexFim);
+  const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page, indexInicio, indexFim);
+  console.log("lista de users: ", filtrarUsuario)
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -160,28 +161,21 @@ export function Usuarios() {
 
               <Pesquisa
                 pesquisa={pesquisa}
-                placeholder="Nome ou Setor "
+                placeholder="Nome"
                 setIsSearching={setIsSearching}
                 setPesquisa={setPesquisa}
               />
 
-              <SelectTipoUsuario filtro={filtro} setFiltro={setFiltro} />
+              <SelectTipoUsuario filtro={tipoUsuario} setFiltro={setTipoUsuario} />
             </div>
 
-            {/* botao adicionar usuairo */}
             <BotaoAdicionar text = "ADICIONAR USUÁRIO" onClick={openUserModal}/>
-            {/* fim botao adicionar usuairo */}
 
-            {/* Adicionando pop up de adicionar usuarios */}
             {isUserModalOpen && (
               <AdicionarUsuarioForm closeUserModal={closeUserModal}/>
             )}
-
-            {/* Fim adicionando pop up de adicionar usuarios */}
           </div>
-          {/* fim adicionar usuario + pesquisa */}
 
-          {/* conteudo central tabela*/}
           <div>
             {/* botões editar e excluir */}
             <div className="flex gap-4 justify-end my-2">

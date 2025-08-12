@@ -37,6 +37,7 @@ export interface ISala {
   id: number;
   nome: string;
   bloco?: string | number; 
+  nome_bloco: string
 }
 
 interface IChavesContentProps {
@@ -63,7 +64,7 @@ export function Chaves() {
       setTokenExists(true);
     } else {
       // Se não houver token, pode redirecionar para login ou mostrar mensagem
-      console.error("Token não encontrado no localStorage ao montar o componente Chaves.");
+      console.log("Token não encontrado no localStorage ao montar o componente Chaves.");
       <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>; 
     }
     setHasCheckedToken(true);
@@ -485,13 +486,13 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         <div className="flex justify-center items-center ">
                           <svg className="size-6 ml-2 mr-2  " xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-                          <path d="M15.2572 2.83333V11H2.42391V4C2.42391 3.69058 2.54683 3.39383 2.76562 3.17504C2.98441 2.95625 3.28116 2.83333 3.59058 2.83333H15.2572ZM17.5906 0.5H3.59058C2.66232 0.5 1.77208 0.868749 1.1157 1.52513C0.459325 2.1815 0.0905762 3.07174 0.0905762 4L0.0905762 13.3333H17.5906V0.5Z" fill="#565D8F"/>
-                          <path d="M24.5902 2.83333C24.8996 2.83333 25.1964 2.95625 25.4152 3.17504C25.634 3.39383 25.7569 3.69058 25.7569 4V11H22.2569V2.83333H24.5902ZM24.5902 0.5H19.9236V13.3333H28.0902V4C28.0902 3.07174 27.7215 2.1815 27.0651 1.52513C26.4087 0.868749 25.5185 0.5 24.5902 0.5V0.5Z" fill="#565D8F"/>
-                          <path d="M5.92391 18.0003V26.167H3.59058C3.28116 26.167 2.98441 26.0441 2.76562 25.8253C2.54683 25.6065 2.42391 25.3097 2.42391 25.0003V18.0003H5.92391ZM8.25724 15.667H0.0905762V25.0003C0.0905762 25.9286 0.459325 26.8188 1.1157 27.4752C1.77208 28.1316 2.66232 28.5003 3.59058 28.5003H8.25724V15.667Z" fill="#565D8F"/>
-                          <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
-                        </svg>
+                            <path d="M15.2572 2.83333V11H2.42391V4C2.42391 3.69058 2.54683 3.39383 2.76562 3.17504C2.98441 2.95625 3.28116 2.83333 3.59058 2.83333H15.2572ZM17.5906 0.5H3.59058C2.66232 0.5 1.77208 0.868749 1.1157 1.52513C0.459325 2.1815 0.0905762 3.07174 0.0905762 4L0.0905762 13.3333H17.5906V0.5Z" fill="#565D8F"/>
+                            <path d="M24.5902 2.83333C24.8996 2.83333 25.1964 2.95625 25.4152 3.17504C25.634 3.39383 25.7569 3.69058 25.7569 4V11H22.2569V2.83333H24.5902ZM24.5902 0.5H19.9236V13.3333H28.0902V4C28.0902 3.07174 27.7215 2.1815 27.0651 1.52513C26.4087 0.868749 25.5185 0.5 24.5902 0.5V0.5Z" fill="#565D8F"/>
+                            <path d="M5.92391 18.0003V26.167H3.59058C3.28116 26.167 2.98441 26.0441 2.76562 25.8253C2.54683 25.6065 2.42391 25.3097 2.42391 25.0003V18.0003H5.92391ZM8.25724 15.667H0.0905762V25.0003C0.0905762 25.9286 0.459325 26.8188 1.1157 27.4752C1.77208 28.1316 2.66232 28.5003 3.59058 28.5003H8.25724V15.667Z" fill="#565D8F"/>
+                            <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
+                          </svg>
                         <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate ">
-                          {salas?.find((sala: ISala) => sala.id === chave.sala)?.bloco || "-"}
+                          {salas?.find((sala: ISala) => sala.id === chave.sala)?.nome_bloco || "-"}
                         </p>
                         </div>
                       </td>

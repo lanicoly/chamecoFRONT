@@ -1,13 +1,14 @@
 import axios from "axios";
 import IMask from "imask";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, HtmlHTMLAttributes } from "react";
+import { useState, useEffect} from "react";
 import api from "../services/api";
 import { Footer } from "../components/footer";
 import Spinner from "../components/spinner";
 import { limparCPF } from "../utils/limparCPF";
 import { redirectUserTo } from "../utils/tiposUsuarios";
 import { applyCpfMask } from "../utils/applyCpfMask";
+import { PopUpError } from "../components/popups/PopUpError";
 
 export function Login() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export function Login() {
   const [errorUsuario, setErrorUsuario] = useState<string>("");
   const [errorSenha, setErrorSenha] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     const cpfInput = document.querySelector<HTMLInputElement>("#cpf");
@@ -70,6 +72,7 @@ export function Login() {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
+        setError(true)
 
         if (statusResponse === 400) {
           setErrorSenha("Preencha os campos corretamente!");
@@ -87,15 +90,23 @@ export function Login() {
           setErrorSenha("Erro interno do servidor! Contate o suporte.");
           return;
         }
+
+        setErrorSenha(`Ops, Erro de servidor inesperado!`)
       }
     } finally {
       setLoading(false);
     }
   }
 
+  setTimeout(() => {
+      setError(false)
+  }, 2000)
+
   return (
     <div>
     <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-cover bg-center">
+      
+      {error ? <PopUpError mensagem={errorSenha}/> : ""}
       {/* Adicionando container de login */}
       <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
         {/* Adicionando logo */}
@@ -163,6 +174,7 @@ export function Login() {
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
                 placeholder="CPF"
+                maxLength={14}
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 id="cpf"
