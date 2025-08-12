@@ -3,13 +3,13 @@ import { MenuTopo } from "../components/menuTopo";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
-import useGetUsers from "../hooks/usuarios/useGetUsers";
+import useGenericGetUsers from "../hooks/usuarios/useGenericGetUsers";
 import AdicionarUsuarioForm from "../components/forms/AdicionarUsuarioForm";
 import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuario";
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
-import { userFilter } from "../utils/userFilter";
+import { totalPaginas, userFilter } from "../utils/userFilter";
 import { IUsuario } from "./chaves";
 
 interface Ichaves {
@@ -33,10 +33,9 @@ export function Usuarios() {
     const {
       usuarios,
       page,
-      totalPaginas,
       nextPage,
       prevPage,
-  } = useGetUsers(5);
+  } = useGenericGetUsers();
 
   const itensPorPagina = 5;
   const paginaAtual = 1;
@@ -47,7 +46,7 @@ export function Usuarios() {
   const [tipoUsuario, setTipoUsuario] = useState("todos");
   const [_isSearching, setIsSearching] = useState(false);
 
-  const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page, indexInicio, indexFim);
+  const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
   console.log("lista de users: ", filtrarUsuario)
 
   const [nome, setNome] = useState("");

@@ -8,7 +8,7 @@ import { FilterableInputSolicitantes } from "../components/inputs/FilterableInpu
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
@@ -275,7 +275,6 @@ export function Emprestimos() {
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputSolicitantes
-                        items={usuarios}
                         onSelectItem={(idSelecionado) => {
                           setSolicitanteSelecionadoId(idSelecionado);
                         }}
