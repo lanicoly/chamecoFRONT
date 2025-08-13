@@ -26,8 +26,6 @@ export const userFilter = (
       );
       const { results, count } = response.data;
 
-      console.log("Total pagina atual:", Math.ceil(count/5))
-
       if (results.length < 5) {
         setHasMore(false); // Se o número de resultados for menor que 5, significa que não há mais dados
       }

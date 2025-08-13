@@ -10,10 +10,12 @@ interface ApiResponse {
   results: IUsuario[];
 }
 
-const useGenericGetUsers = () => {
+const useGenericGetUsers = ( nome = "" ) => {
   const [page, setPage] = useState(1);
   const [usuarios, setUsuarios] = useState<IUsuario[]>([])
   const [temMais, setTemMais] = useState(true); // permanece interno como no seu código
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
 
   useEffect(() => {
@@ -21,12 +23,13 @@ const useGenericGetUsers = () => {
 
       try {
 
-        const url = `/chameco/api/v1/usuarios/?page=${pagina}`;
+        const url = `/chameco/api/v1/usuarios/?pagination=${5}&?page=${pagina}&nome=${nome}`;
 
         const response = await api.get<ApiResponse>(url);
 
         const { results, next } = response.data;
 
+        console.log("Generic: ", results)
         setUsuarios(results)
         setTemMais(Boolean(next));
       } catch (err: any) {
@@ -37,7 +40,7 @@ const useGenericGetUsers = () => {
 
     fetchUsuarios(page);
 
-  }, [page]);
+  }, [page, nome]);
 
   const nextPage = () => {
     if (temMais && page !== totalPaginas) setPage((p) => p + 1);
@@ -52,6 +55,8 @@ const useGenericGetUsers = () => {
     page,
     nextPage,
     prevPage,
+    loading,
+    error
   };
 };
 

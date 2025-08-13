@@ -21,8 +21,6 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
   const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
   const usuarios: IUsuario[] = userFilter(searchTerm, "todos", 1);
 
-  console.log("Usuários em filterableSocilictantes: ", usuarios)
-
   const filterdItems = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
     return usuarios.filter((usuario) => usuario.nome && buscarSolicitante(usuario.id, usuarios).toLowerCase().includes(lowerSearch));

@@ -7,12 +7,13 @@ import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import useGetSalas from "../hooks/salas/useGetSalas";
-import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
+import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
 import { useChaves } from "../context/ChavesContext";
 import { AxiosError } from "axios";
+import { userFilter } from "../utils/userFilter";
 
 
 export interface IUsuario {
@@ -96,13 +97,11 @@ export function Chaves() {
 function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps) {
   const navigate = useNavigate();
 
-  const userType=localStorage.getItem("userType");
-  // const { chaves, loading: loadingChaves, error: errorChaves, refetch: refetchChaves } = useChaves();
+  const userType = localStorage.getItem("userType");
   const loadingChaves = loading;
   const errorChaves = error;
   const refetchChaves = refetch;
   const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
-  const { usuarios: allUsuarios, loading: loadingUsuarios, error: errorUsuarios } = useGetUsuarios(); 
   const [chavesList, setChavesList] = useState<IChave[]>([]);
   const [chaveSelecionada, setChaveSelecionada] = useState<IChave | null>(null);
   const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(null);
@@ -126,6 +125,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
   const [usuarioFilter, setUsuarioFilter] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { usuarios: allUsuarios, loading: loadingUsuarios, error: errorUsuarios } = useGenericGetUsuarios(usuarioFilter); 
 
   console.log("Salas", salas)
   console.log("Chaves:", chaves);
@@ -134,8 +134,6 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
     if (chaves && Array.isArray(chaves)) {
       setChavesList(chaves);
     }
-
-    // refetchChaves();
   }, [chaves]);
 
   useEffect(() => {
@@ -273,11 +271,6 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
       if (refetchChaves) refetchChaves(true); 
       handleCloseFeedbackModals();
     } catch (err: unknown) {
-      // console.error("Erro ao atualizar a chave:", err);
-      // const apiErrorMessage = err.response?.data?.detail || JSON.stringify(err.response?.data) || err.message;
-      // setErrorMessage(`Erro ao atualizar chave: ${apiErrorMessage}`);
-      // setIsPopUpErrorOpen(true);
-      // handleCloseFeedbackModals();
 
       let apiErrorMessage = "Erro ao atualizar chave:";
 
@@ -425,6 +418,8 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
        navigate("/login");
   }
 
+  // const allUsuarios = userFilter(usuarioFilter, "todos", 1);
+
   return (
     <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
       <MenuTopo text="MENU" backRoute="/menu" />
@@ -446,9 +441,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
             </div>
             <div className="flex items-center w-full justify-end gap-4 tablet:w-auto">
               
-              {userType === "admin" ? (""
-                
-              ) : (
+              {userType === "admin" ? ("") : (
                 <div className="flex items-center justify-center gap-2">
                   <BotaoAdicionar
                     text="ADICIONAR CHAVE"
@@ -466,7 +459,6 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                  <tr>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Sala</th>
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">Bloco</th>
-                  {/*<th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[7%]">Quantidade</th>*/}
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">Usuários Autorizados</th>
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[14%]">Status da chave</th>
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[5%]">Descrição</th>
@@ -559,17 +551,16 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                             <img src="/fi-rr-pencil (1).svg" alt="Editar" className="w-4 h-4" />
                             Editar
                           </button>
-                          {userType === "admin" ? (""
-                
-                          ) : (
-                          <button
-                            onClick={() => openDeleteModalHandler(chave)}
-                            className="flex gap-1 items-center font-medium text-sm text-rose-600 underline disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={isLoading}
-                          >
-                            <X className="w-4 h-4" />
-                            Excluir
-                          </button>)}
+                          {userType === "admin" ? ("") : (
+                            <button
+                              onClick={() => openDeleteModalHandler(chave)}
+                              className="flex gap-1 items-center font-medium text-sm text-rose-600 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={isLoading}
+                            >
+                              <X className="w-4 h-4" />
+                              Excluir
+                            </button>
+                          )}
                         </div>
                         
                     </td>
@@ -698,8 +689,8 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       ).length === 0 && (
-                      <div className="p-2 text-[#777DAA] text-xs">Nenhum usuário encontrado</div>
-                    )}
+                        <div className="p-2 text-[#777DAA] text-xs">Nenhum usuário encontrado</div>
+                      )}
                   </div>
                 )}
               </div>
@@ -717,6 +708,10 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
           </form>
         </div>
       )}
+
+
+
+
       {/* Modal Editar Chave */} 
       {isEditModalOpen && chaveSelecionada && (
          <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
@@ -732,20 +727,20 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               </button>
             </div>
             {userType === "admin" ? ("") : (
-            <div className="w-full">
-              <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
-               <select
-                className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
-                value={salaSelecionadaId === null ? "" : salaSelecionadaId}
-                onChange={(e) => setSalaSelecionadaId(e.target.value ? Number(e.target.value) : null)}
-                required
-              >
-                <option value="" disabled>Selecione...</option>
-                {salas?.map((sala: ISala) => (
-                  <option key={sala.id} value={sala.id}>{sala.nome}</option>
-                ))}
-              </select>
-            </div>
+              <div className="w-full">
+                <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
+                  <select
+                  className="w-full p-2 rounded-[10px] cursor-pointer border border-[#646999] focus:outline-none text-[#777DAA]"
+                  value={salaSelecionadaId === null ? "" : salaSelecionadaId}
+                  onChange={(e) => setSalaSelecionadaId(e.target.value ? Number(e.target.value) : null)}
+                  required
+                >
+                  <option value="" disabled>Selecione...</option>
+                  {salas?.map((sala: ISala) => (
+                    <option key={sala.id} value={sala.id}>{sala.nome}</option>
+                  ))}
+                </select>
+              </div>
             )}
             {userType === "admin" ? ("") : (
             <div className="w-full">
@@ -761,16 +756,17 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
           
           
             <div className="w-full" ref={dropdownRef}>
-              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados</label>
+              <label className="text-[#192160] text-sm font-medium mb-1 block">Usuários Autorizados*</label>
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
-                  {usuariosAutorizadosIds.map(id => {
-                    const user: IUsuario | undefined = allUsuarios.find((u) => u.id === id);
+                  {/* serve para retornar os usuários autorizados desta chave */}
+                  {usuariosAutorizadosIds.map( (id) => {
+                    const user: IUsuario | undefined = allUsuarios?.find((u) => u.id === id);
                     
                     if (!user) return null; // evita erro se não encontrar o usuário
 
                     return (
-                      <div key={id} className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
+                      <div key={id} className="flex flex-row items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs">
                         {user?.nome}
                         <button
                           type="button"
@@ -784,8 +780,9 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                       </div>
                     );
                   })}
+                  
                   <input
-                    type="text"
+                    type="search"
                     className="flex-grow min-w-[50px] outline-none text-[#777DAA] text-xs"
                     placeholder={usuariosAutorizadosIds.length > 0 ? "" : "Buscar usuário..."}
                     value={usuarioFilter}
@@ -797,7 +794,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
-                      .filter((user: IUsuario) => 
+                      ?.filter((user: IUsuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       )
@@ -813,17 +810,20 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                           {user.nome}
                         </div>
                       ))}
-                    {allUsuarios.filter((user: IUsuario) => 
+
+                    {allUsuarios?.filter((user: IUsuario) => 
                         !usuariosAutorizadosIds.includes(user.id) && 
                         user.nome.toLowerCase().includes(usuarioFilter.toLowerCase())
                       ).length === 0 && (
                       <div className="p-2 text-[#777DAA] text-xs">Nenhum usuário encontrado</div>
                     )}
+
                   </div>
                 )}
               </div>
             </div>
-
+            
+            {/* botão de salvar usuários autorizados */}
             <div className="flex justify-center items-center mt-2 w-full">
               <button
                 type="submit"
