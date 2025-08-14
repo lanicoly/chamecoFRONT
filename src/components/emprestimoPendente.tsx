@@ -12,13 +12,13 @@ import useGetSalas from "../hooks/salas/useGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
-import { useNomeSolicitante } from "../utils/useNomeSolicitante";
+// import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import { IChave, ISala, IUsuario } from "../pages/chaves";
-import { NomeSolicitanteCell } from "./NomeCellSolicitante";
+// import { NomeSolicitanteCell } from "./NomeCellSolicitante";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -67,6 +67,15 @@ export function EmprestimosPendentes({
   });
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
+  function nomeSolicitante(
+  idSolicitante: number | null | undefined,
+  solicitantes: IUsuario[]
+): string {
+  return idSolicitante != null
+    ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
+    : "";
+}
+
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
     .filter((emprestimos) => {
@@ -84,7 +93,7 @@ export function EmprestimosPendentes({
         emprestimos.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = useNomeSolicitante(
+      const solicitanteNome = nomeSolicitante(
         emprestimos.usuario_solicitante,
         solicitantes
       );
@@ -604,7 +613,7 @@ export function EmprestimosPendentes({
                     }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {useNomeSolicitante(
+                      {nomeSolicitante(
                         emprestimo.usuario_solicitante,
                         solicitantes
                       ) || "Solicitante não encontrado"}
