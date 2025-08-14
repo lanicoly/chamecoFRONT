@@ -3,14 +3,14 @@ import { IUsuario } from "../../pages/chaves";
 import api from "../../services/api";
 import { totalPaginas } from "../../utils/userFilter";
 
-interface ApiResponse {
+export interface IApiResponse {
   count: number;
   next: string | null;
   previous: string | null;
   results: IUsuario[];
 }
 
-const useGenericGetUsers = ( nome = "" ) => {
+const useGenericGetUsers = ( nome = "", ) => {
   const [page, setPage] = useState(1);
   const [usuarios, setUsuarios] = useState<IUsuario[]>([])
   const [temMais, setTemMais] = useState(true); // permanece interno como no seu código
@@ -25,7 +25,7 @@ const useGenericGetUsers = ( nome = "" ) => {
 
         const url = `/chameco/api/v1/usuarios/?pagination=${5}&?page=${pagina}&nome=${nome}`;
 
-        const response = await api.get<ApiResponse>(url);
+        const response = await api.get<IApiResponse>(url);
 
         const { results, next } = response.data;
 

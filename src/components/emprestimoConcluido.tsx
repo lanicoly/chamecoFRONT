@@ -11,7 +11,7 @@ import { PassadorPagina } from "./passadorPagina";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
-import { getNomeSolicitante } from "../utils/getNomeSolicitante";
+import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import { useChaves } from "../context/ChavesContext";
 import { ISala, IUsuario } from "../pages/chaves";
 
@@ -70,7 +70,7 @@ export function EmprestimosConcluidos({
         emp.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = getNomeSolicitante(
+      const solicitanteNome = useNomeSolicitante(
         emp.usuario_solicitante,
         solicitantes
       );
@@ -648,7 +648,7 @@ export function EmprestimosConcluidos({
                     )}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeSolicitante(
+                    {useNomeSolicitante(
                       emprestimo.usuario_solicitante,
                       solicitantes
                     ) || "Solicitante não encontrado"}
