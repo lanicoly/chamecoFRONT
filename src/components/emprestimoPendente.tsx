@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
 import { Info, Check } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
@@ -13,19 +12,20 @@ import useGetSalas from "../hooks/salas/useGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
-import { getNomeSolicitante } from "../utils/getNomeSolicitante";
+import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import { IChave, ISala, IUsuario } from "../pages/chaves";
+import { NomeSolicitanteCell } from "./NomeCellSolicitante";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
   salas: ISala[];
   chaves: IChave[];
   responsaveis: IUsuario[];
-  solicitantes: IoptionSolicitantes[];
+  solicitantes: IUsuario[];
   observacao: string | null;
   dataRetirada: string;
   horario_emprestimo: string;
@@ -84,7 +84,7 @@ export function EmprestimosPendentes({
         emprestimos.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = getNomeSolicitante(
+      const solicitanteNome = useNomeSolicitante(
         emprestimos.usuario_solicitante,
         solicitantes
       );
@@ -604,11 +604,12 @@ export function EmprestimosPendentes({
                     }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {getNomeSolicitante(
+                      {useNomeSolicitante(
                         emprestimo.usuario_solicitante,
                         solicitantes
                       ) || "Solicitante não encontrado"}
                     </p>
+                    {/* <NomeSolicitanteCell id={emprestimo.usuario_solicitante}/> */}
                   </td>
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${

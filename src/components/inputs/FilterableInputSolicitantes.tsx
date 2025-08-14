@@ -1,36 +1,34 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { userFilter } from '../../utils/userFilter';
+import { IUsuario } from './FilterableInputResponsaveis';
+import { buscarSolicitante } from '../../utils/buscarSolicitante';
 
 export interface IoptionSolicitantes {
   id: number;
   nome: string;
 }
 
-interface IdropdownResponsavelProps {
-  items: IoptionSolicitantes[];
+interface IdropdownSolicitantesDTO {
+  items?: IUsuario[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
   reset: boolean
 }
 
-const buscarSolicitante = (id: number | null, solicitantes: IoptionSolicitantes[]) => {
-    const solicitante = solicitantes.find( solicitante => solicitante.id === id );
-
-    return solicitante ? `${solicitante.nome} | ${solicitante.id}` : "";
-};
-
-export function FilterableInputSolicitantes({items, onSelectItem, reset}: IdropdownResponsavelProps) {
+export function FilterableInputSolicitantes({items, onSelectItem, reset}: IdropdownSolicitantesDTO) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [_selectedOption, setSelectedOption] = useState<IoptionSolicitantes | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
+  const usuarios: IUsuario[] = userFilter(searchTerm, "todos", 1);
 
   const filterdItems = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.nome && buscarSolicitante(item.id, items).toLowerCase().includes(lowerSearch));
-  }, [items, searchTerm]);
+    return usuarios.filter((usuario) => usuario.nome && buscarSolicitante(usuario.id, usuarios).toLowerCase().includes(lowerSearch));
+  }, [usuarios, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IoptionSolicitantes) => {
+  const handleSelect = (option: IUsuario) => {
     setSelectedOption(option);
     setSearchTerm(option.nome);
     setIsOpen(false);
@@ -72,10 +70,8 @@ export function FilterableInputSolicitantes({items, onSelectItem, reset}: Idropd
             placeholder="Solicitante"
             value={searchTerm || ""}
             onChange={handleInputChange}
-            // className="flex-1 outline-none text-[#646999]"
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
-        {/* <Search size={50} className="text-red-400" /> */}
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
