@@ -32,7 +32,6 @@ interface EmprestimosConcluidosProps {
 
 export function EmprestimosConcluidos({
   new_emprestimos,
-  solicitantes,
   salas,
 }: EmprestimosConcluidosProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
@@ -64,12 +63,12 @@ export function EmprestimosConcluidos({
 
   function nomeSolicitante(
     idSolicitante: number | null | undefined,
-    solicitantes: IUsuario[]
+    solicitantesMap: Record<number, string>
   ): string {
-    return idSolicitante != null
-      ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
-      : "";
+    return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
   }
+
+  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
@@ -85,7 +84,7 @@ export function EmprestimosConcluidos({
       );
       const solicitanteNome = nomeSolicitante(
         emp.usuario_solicitante,
-        solicitantes
+        nomesSolicitantesMap
       );
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
@@ -230,8 +229,6 @@ export function EmprestimosConcluidos({
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
   }
-
-  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
   return (
     <>

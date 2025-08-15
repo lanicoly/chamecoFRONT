@@ -44,7 +44,6 @@ export interface IusuarioResponsavel {
 
 export function EmprestimosPendentes({
   new_emprestimos,
-  solicitantes,
   setRefreshCounter,
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
@@ -71,12 +70,12 @@ export function EmprestimosPendentes({
 
   function nomeSolicitante(
     idSolicitante: number | null | undefined,
-    solicitantes: IUsuario[]
+    solicitantesMap: Record<number, string>
   ): string {
-    return idSolicitante != null
-      ? solicitantes.find((s) => s.id === idSolicitante)?.nome || ""
-      : "";
+    return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
   }
+
+  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
@@ -97,7 +96,7 @@ export function EmprestimosPendentes({
       );
       const solicitanteNome = nomeSolicitante(
         emprestimos.usuario_solicitante,
-        solicitantes
+        nomesSolicitantesMap
       );
       const dataHoraRetirada = emprestimos.horario_emprestimo
         ? formatarDataHora(emprestimos.horario_emprestimo)
@@ -279,7 +278,6 @@ export function EmprestimosPendentes({
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
-  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
   return (
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
