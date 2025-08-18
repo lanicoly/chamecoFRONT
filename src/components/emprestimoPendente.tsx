@@ -12,13 +12,15 @@ import useGetSalas from "../hooks/salas/useGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
-import { useNomeSolicitante } from "../utils/useNomeSolicitante";
+// import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { useChaves } from "../context/ChavesContext";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import { IChave, ISala, IUsuario } from "../pages/chaves";
-import { NomeSolicitanteCell } from "./NomeCellSolicitante";
+// import { NomeSolicitanteCell } from "./NomeCellSolicitante";
+import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
+// import { useEffect } from "react";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -42,8 +44,7 @@ export interface IusuarioResponsavel {
 
 export function EmprestimosPendentes({
   new_emprestimos,
-  solicitantes,
-  setRefreshCounter
+  setRefreshCounter,
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -54,7 +55,7 @@ export function EmprestimosPendentes({
   // const { usuarios } = useGetUsuarios();
   const { salas: salasData } = useGetSalas();
   // const { chaves: chavesData } = useGetChaves();
-  const {chaves: chavesData, refetch} = useChaves();
+  const { chaves: chavesData, refetch } = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
   const [filtroPendente, setFiltroPendente] = useState({
@@ -66,6 +67,15 @@ export function EmprestimosPendentes({
     horaRetirada: "",
   });
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  function nomeSolicitante(
+    idSolicitante: number | null | undefined,
+    solicitantesMap: Record<number, string>
+  ): string {
+    return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
+  }
+
+  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
@@ -84,9 +94,9 @@ export function EmprestimosPendentes({
         emprestimos.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = useNomeSolicitante(
+      const solicitanteNome = nomeSolicitante(
         emprestimos.usuario_solicitante,
-        solicitantes
+        nomesSolicitantesMap
       );
       const dataHoraRetirada = emprestimos.horario_emprestimo
         ? formatarDataHora(emprestimos.horario_emprestimo)
@@ -216,7 +226,6 @@ export function EmprestimosPendentes({
       setRefreshCounter((contadorAtual) => contadorAtual + 1);
       setIsSuccessModalOpen(true);
       refetch();
-      
     } catch (error: unknown) {
       const statusResponse = error as AxiosError<{ message?: string }>;
       const status = statusResponse.response?.status;
@@ -236,7 +245,8 @@ export function EmprestimosPendentes({
         return;
       }
       if (status === 403) {
-        const mensagem = "Você não tem permissão para finalizar este empréstimo!";
+        const mensagem =
+          "Você não tem permissão para finalizar este empréstimo!";
         console.log(mensagem);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(true);
@@ -253,7 +263,6 @@ export function EmprestimosPendentes({
       // window.location.reload();
     }, 5000);
   };
-
 
   function emprestimoPendenteAlerta(emprestimo: {
     horario_emprestimo?: string;
@@ -273,7 +282,7 @@ export function EmprestimosPendentes({
     <>
       <table className=" w-full border-separate border-spacing-y-2 bg-white">
         {isSuccessModalOpen && <PopUpdeDevolucao />}
-        {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
+        {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
 
         <thead className="bg-white top-0 ">
           <tr>
@@ -604,10 +613,11 @@ export function EmprestimosPendentes({
                     }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {useNomeSolicitante(
-                        emprestimo.usuario_solicitante,
-                        solicitantes
-                      ) || "Solicitante não encontrado"}
+                      {emprestimo.usuario_solicitante != null
+                        ? nomesSolicitantesMap[
+                            emprestimo.usuario_solicitante
+                          ] || "Carregando..."
+                        : "Solicitante não informado"}
                     </p>
                     {/* <NomeSolicitanteCell id={emprestimo.usuario_solicitante}/> */}
                   </td>

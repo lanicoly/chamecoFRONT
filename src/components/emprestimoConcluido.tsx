@@ -11,9 +11,10 @@ import { PassadorPagina } from "./passadorPagina";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
-import { useNomeSolicitante } from "../utils/useNomeSolicitante";
+// import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import { useChaves } from "../context/ChavesContext";
 import { ISala, IUsuario } from "../pages/chaves";
+import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
 
 interface EmprestimosConcluidosProps {
   salas: ISala[];
@@ -31,20 +32,22 @@ interface EmprestimosConcluidosProps {
 
 export function EmprestimosConcluidos({
   new_emprestimos,
-  solicitantes,
   salas,
 }: EmprestimosConcluidosProps) {
-  const [emprestimoSelecionado, setEmprestimoSelecionado] = useState<Iemprestimo | null>(null);
+  const [emprestimoSelecionado, setEmprestimoSelecionado] =
+    useState<Iemprestimo | null>(null);
 
   //constantes para filtrar data de devolução/retirada
-  const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<DateRange | undefined>();
-  
+  const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
+    DateRange | undefined
+  >();
+
   const [
     filtroDataEmprestimoRetiradaConcluidos,
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
-  const {chaves: chavesData} = useChaves();
+  const { chaves: chavesData } = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
   const [filtroConcluido, setFiltroConcluido] = useState({
@@ -58,6 +61,15 @@ export function EmprestimosConcluidos({
     horaDevolucao: "",
   });
 
+  function nomeSolicitante(
+    idSolicitante: number | null | undefined,
+    solicitantesMap: Record<number, string>
+  ): string {
+    return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
+  }
+
+  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
+
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
       const salaNome = buscarNomeSalaPorIdChave(emp.chave, chavesData, salas);
@@ -70,9 +82,9 @@ export function EmprestimosConcluidos({
         emp.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = useNomeSolicitante(
+      const solicitanteNome = nomeSolicitante(
         emp.usuario_solicitante,
-        solicitantes
+        nomesSolicitantesMap
       );
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
@@ -110,11 +122,7 @@ export function EmprestimosConcluidos({
       );
     })
     .filter((emp) => {
-      if (
-        !filtroDataDevolucao?.from ||
-        !filtroDataDevolucao?.to
-      )
-        return true;
+      if (!filtroDataDevolucao?.from || !filtroDataDevolucao?.to) return true;
 
       if (!emp.horario_devolucao) return false;
 
@@ -638,7 +646,11 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salas)}
+                    {buscarNomeSalaPorIdChave(
+                      emprestimo.chave,
+                      chavesData,
+                      salas
+                    )}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
                     {`Chave ${buscarNomeSalaPorIdChave(
@@ -648,10 +660,10 @@ export function EmprestimosConcluidos({
                     )}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {useNomeSolicitante(
-                      emprestimo.usuario_solicitante,
-                      solicitantes
-                    ) || "Solicitante não encontrado"}
+                    {emprestimo.usuario_solicitante != null
+                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
+                        "Carregando..."
+                      : "Solicitante não informado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {buscarNomeUsuarioPorId(
