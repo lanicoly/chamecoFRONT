@@ -32,18 +32,44 @@ export interface ISala {
   bloco?: string | number; 
 }
 
+// Função auxiliar para buscar salas específicas
+const buscarSalaEspecifica = async (salaId: number): Promise<ISala | null> => {
+  const token = localStorage.getItem("authToken");
+  if (!token || !salaId) return null;
+  
+  try {
+    const params = new URLSearchParams({ token });
+    const url = `/chameco/api/v1/salas/${salaId}/?${params.toString()}`;
+    
+    const response = await api.get(url, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    
+    return response.data || null;
+  } catch (err) {
+    console.error(`Erro ao buscar sala ${salaId}:`, err);
+    return null;
+  }
+};
+
 interface IChavesContentProps {
   chaves: IChave[];
   loading: boolean;
   error: boolean;
   refetch: any;
+  salasCompletas: ISala[];
 }
 
 export function Chaves() {
   const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useChaves();
-
+  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  
+  // Estado para salas extras
+  const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
   
   // Estado para verificar se o token existe antes de prosseguir
   const [hasCheckedToken, setHasCheckedToken] = useState(false);
@@ -55,9 +81,7 @@ export function Chaves() {
     if (currentToken) {
       setTokenExists(true);
     } else {
-      // Se não houver token, pode redirecionar para login ou mostrar mensagem
       console.error("Token não encontrado no localStorage ao montar o componente Chaves.");
-      <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>; 
     }
     setHasCheckedToken(true);
   }, [navigate]);
@@ -66,6 +90,36 @@ export function Chaves() {
     refetch();
   }, [])
 
+  // UseEffect para buscar salas faltantes
+  useEffect(() => {
+    const buscarSalasFaltantes = async () => {
+      if (!chaves || !Array.isArray(chaves) || !salas) return;
+      
+      const salaIdsNecessarios = [...new Set(chaves.map(chave => chave.sala).filter(Boolean))];
+      const salaIdsDisponiveis = salas.map(sala => sala.id);
+      const salaIdsFaltantes = salaIdsNecessarios.filter(id => !salaIdsDisponiveis.includes(id));
+      
+      if (salaIdsFaltantes.length === 0) return;
+      
+      console.log("Buscando salas faltantes:", salaIdsFaltantes);
+      
+      const promessas = salaIdsFaltantes.map(id => buscarSalaEspecifica(id));
+      const salasEncontradas = await Promise.all(promessas);
+      const salasValidas = salasEncontradas.filter(sala => sala !== null) as ISala[];
+      
+      if (salasValidas.length > 0) {
+        setSalasExtras(salasValidas);
+        console.log("Salas extras encontradas:", salasValidas);
+      }
+    };
+    
+    buscarSalasFaltantes();
+  }, [chaves, salas]);
+
+  // Função para obter salas completas
+  const obterSalasCompletas = (): ISala[] => {
+    return [...(salas || []), ...salasExtras];
+  };
 
   // Se ainda não verificou ou se o token não existe, mostra estado de carregamento/erro
   if (!hasCheckedToken) {
@@ -76,24 +130,31 @@ export function Chaves() {
     return (
       <div>
         Erro: Usuário não autenticado. Por favor, faça login novamente.
-       <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>; 
+       <BotaoAdicionar text="Voltar para Login" onClick={() => navigate("/login")}/>
       </div>
     );
   }
 
   // Se o token existe, renderiza o componente principal que usa os hooks
-  return <ChavesContent chaves={chaves} loading={loading} error={error} refetch={refetch} />;
+  return <ChavesContent 
+    chaves={chaves} 
+    loading={loading} 
+    error={error} 
+    refetch={refetch}
+    salasCompletas={obterSalasCompletas()}
+  />;
 }
 
-function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps) {
+function ChavesContent({ chaves, loading, error, refetch, salasCompletas }: IChavesContentProps) {
   const navigate = useNavigate();
 
   const userType=localStorage.getItem("userType");
-  // const { chaves, loading: loadingChaves, error: errorChaves, refetch: refetchChaves } = useChaves();
   const loadingChaves = loading;
   const errorChaves = error;
   const refetchChaves = refetch;
-  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  const salas = salasCompletas;
+  const loadingSalas = false;
+  const errorSalas = null;
   const { usuarios: allUsuarios, loading: loadingUsuarios, error: errorUsuarios } = useGetUsuarios(); 
   const [chavesList, setChavesList] = useState<IChave[]>([]);
   const [chaveSelecionada, setChaveSelecionada] = useState<IChave | null>(null);
@@ -405,7 +466,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
             </div>
             <div className="flex items-center w-full justify-end gap-4 tablet:w-auto">
               
-              {userType === "admin" ? (""
+              {userType === "diretor.geral" ? (""
                 
               ) : (
                 <div className="flex items-center justify-center gap-2">
@@ -518,7 +579,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                             <img src="/fi-rr-pencil (1).svg" alt="Editar" className="w-4 h-4" />
                             Editar
                           </button>
-                          {userType === "admin" ? (""
+                          {userType === "diretor.geral" ? (""
                 
                           ) : (
                           <button
@@ -690,7 +751,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
                 <X className="text-[#192160]" />
               </button>
             </div>
-            {userType === "admin" ? ("") : (
+            {userType === "diretor.geral" ? ("") : (
             <div className="w-full">
               <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
                <select
@@ -706,7 +767,7 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
               </select>
             </div>
             )}
-            {userType === "admin" ? ("") : (
+            {userType === "diretor.geral" ? ("") : (
             <div className="w-full">
               <label className="text-[#192160] text-sm font-medium mb-1 block">Descrição (opcional)</label>
               <textarea
@@ -913,4 +974,3 @@ function ChavesContent({ chaves, loading, error, refetch }: IChavesContentProps)
     </div>
   );
 }
-

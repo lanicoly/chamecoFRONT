@@ -304,6 +304,7 @@ export function Blocos() {
           {/* input de pesquisa */}
           <Pesquisa
             pesquisa={pesquisa}
+            placeholder="Bloco"
             setIsSearching={setIsSearching}
             setPesquisa={setPesquisa}
           />
