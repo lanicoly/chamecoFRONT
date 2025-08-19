@@ -15,8 +15,6 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
   const token = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
 
-  
-
   //criando estado para validar o token
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
 
@@ -57,18 +55,12 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
   // sem = redireciona para login
   // verifica lista de tipo(se não corresponde) e redireciona para login
      
-  if (isValidToken &&
-      userType === "serv.terceirizado" &&
-      location.pathname !== "/emprestimos" //só se ainda não estiver em emprestimos
-  ) {
-      return <Navigate to="/emprestimos" state={{ from: location }} replace />;
+  if (isValidToken && userType && allowedTypes.includes(userType)) {
+      return children
   } else { 
       if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
           localStorage.clear();
           return <Navigate to="/login" state={{ from: location }} replace />;
       }
   }
-   
-  // se o tipo existir renderiza o componente
-  return children;
 }
