@@ -481,7 +481,7 @@ function ChavesContent({ chaves, loading, error, refetch, salasCompletas }: ICha
             </div>
             <div className="flex items-center w-full justify-end gap-4 tablet:w-auto">
               
-              {userType === "admin" ? ("") : (
+              {userType === "diretor.geral" ? ("") : (
                 <div className="flex items-center justify-center gap-2">
                   <BotaoAdicionar
                     text="ADICIONAR CHAVE"
@@ -591,7 +591,7 @@ function ChavesContent({ chaves, loading, error, refetch, salasCompletas }: ICha
                             <img src="/fi-rr-pencil (1).svg" alt="Editar" className="w-4 h-4" />
                             Editar
                           </button>
-                          {userType === "admin" ? ("") : (
+                          {userType === "diretor.geral" ? ("") : (
                             <button
                               onClick={() => openDeleteModalHandler(chave)}
                               className="flex gap-1 items-center font-medium text-sm text-rose-600 underline disabled:opacity-50 disabled:cursor-not-allowed"
@@ -766,7 +766,7 @@ function ChavesContent({ chaves, loading, error, refetch, salasCompletas }: ICha
                 <X className="text-[#192160]" />
               </button>
             </div>
-            {userType === "admin" ? ("") : (
+            {userType === "diretor.geral" ? ("") : (
               <div className="w-full">
                 <label className="text-[#192160] text-sm font-medium mb-1 block">Selecione uma sala*</label>
                   <select
