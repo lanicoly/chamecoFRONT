@@ -16,13 +16,15 @@ function SelectTipoUsuario({filtro, setFiltro}: IselectTipoUsuario) {
                 className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-sky-900 text-sm font-medium h-fit"
             >
                 <option value="todos" selected>Tipo...</option>
-                <option value="administrativo">Administrativo</option>
+                <option value="tec.administrativo">Tec.Administrativo</option>
                 <option value="codis">Codis</option>
                 <option value="guarita">Guarita</option>
                 <option value="servidor">Servidor</option>
+                <option value="professor">Professor</option>
                 <option value="aluno">Aluno</option>
                 <option value="serv.terceirizado">Serv.terceirizado</option>
                 <option value="diretor.geral">Diretor.geral</option>
+                <option value="enfermeiro">Enfermeiro</option>
             </select>
         </div>
     )

@@ -1,12 +1,6 @@
-import { IoptionChaves } from "../components/inputs/FilterableInputChaves";
+import { IChave, ISala } from "../pages/chaves";
 
-interface Isala {
-    id: number;
-    bloco: number;
-    nome: string;
-}
-
-export function buscarNomeChavePorIdSala(idSala: number, chaves: IoptionChaves[], salas: Isala[]): string {
+export function buscarNomeChavePorIdSala(idSala: number | null, chaves: IChave[], salas: ISala[]): string {
   // Encontra a chave que está associada à sala com o id fornecido
   const chave = chaves.find(chave => chave.sala === idSala);
 

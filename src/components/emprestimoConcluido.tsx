@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { IoptionResponsaveis } from "./inputs/FilterableInputResponsaveis";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
-import { IoptionSalas } from "./inputs/FilterableInputSalas";
-import { IoptionSolicitantes } from "./inputs/FilterableInputSolicitantes";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import { Info } from "lucide-react";
@@ -11,18 +8,19 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-// import { buscarNomeChavePorIdSala } from "../utils/buscarNomeChavePorIdSala";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
-import { getNomeSolicitante } from "../utils/getNomeSolicitante";
+// import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import { useChaves } from "../context/ChavesContext";
+import { ISala, IUsuario } from "../pages/chaves";
+import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
 
 interface EmprestimosConcluidosProps {
-  salas: IoptionSalas[];
+  salas: ISala[];
   chaves: IoptionChaves[];
-  responsaveis: IoptionResponsaveis[];
-  solicitantes: IoptionSolicitantes[];
+  responsaveis: IUsuario[];
+  solicitantes: IUsuario[];
   new_emprestimos: Iemprestimo[];
   observacao: string | null;
   dataRetirada: string;
@@ -34,7 +32,6 @@ interface EmprestimosConcluidosProps {
 
 export function EmprestimosConcluidos({
   new_emprestimos,
-  solicitantes,
   salas,
 }: EmprestimosConcluidosProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
@@ -44,13 +41,13 @@ export function EmprestimosConcluidos({
   const [filtroDataDevolucao, setFiltroDataDevolucao] = useState<
     DateRange | undefined
   >();
+
   const [
     filtroDataEmprestimoRetiradaConcluidos,
     setFiltroDataEmprestimoRetiradaConcluidos,
   ] = useState<DateRange | undefined>();
 
-  // const { chaves } = useChaves();
-  const {chaves: chavesData, refetch} = useChaves();
+  const { chaves: chavesData } = useChaves();
   const { responsaveis } = useGetResponsaveis();
 
   const [filtroConcluido, setFiltroConcluido] = useState({
@@ -63,7 +60,15 @@ export function EmprestimosConcluidos({
     dataDevolucao: "",
     horaDevolucao: "",
   });
-  const [isFiltroConcluido, setIsFiltroConcluido] = useState(true);
+
+  function nomeSolicitante(
+    idSolicitante: number | null | undefined,
+    solicitantesMap: Record<number, string>
+  ): string {
+    return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
+  }
+
+  const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
@@ -77,9 +82,9 @@ export function EmprestimosConcluidos({
         emp.usuario_responsavel,
         responsaveis
       );
-      const solicitanteNome = getNomeSolicitante(
+      const solicitanteNome = nomeSolicitante(
         emp.usuario_solicitante,
-        solicitantes
+        nomesSolicitantesMap
       );
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
@@ -117,12 +122,7 @@ export function EmprestimosConcluidos({
       );
     })
     .filter((emp) => {
-      if (
-        !isFiltroConcluido ||
-        !filtroDataDevolucao?.from ||
-        !filtroDataDevolucao?.to
-      )
-        return true;
+      if (!filtroDataDevolucao?.from || !filtroDataDevolucao?.to) return true;
 
       if (!emp.horario_devolucao) return false;
 
@@ -150,7 +150,6 @@ export function EmprestimosConcluidos({
     })
     .filter((emp) => {
       if (
-        !isFiltroConcluido ||
         !filtroDataEmprestimoRetiradaConcluidos?.from ||
         !filtroDataEmprestimoRetiradaConcluidos?.to
       )
@@ -647,7 +646,11 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {buscarNomeSalaPorIdChave(emprestimo.chave, chavesData, salas)}
+                    {buscarNomeSalaPorIdChave(
+                      emprestimo.chave,
+                      chavesData,
+                      salas
+                    )}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
                     {`Chave ${buscarNomeSalaPorIdChave(
@@ -657,10 +660,10 @@ export function EmprestimosConcluidos({
                     )}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {getNomeSolicitante(
-                      emprestimo.usuario_solicitante,
-                      solicitantes
-                    ) || "Solicitante não encontrado"}
+                    {emprestimo.usuario_solicitante != null
+                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
+                        "Carregando..."
+                      : "Solicitante não informado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {buscarNomeUsuarioPorId(

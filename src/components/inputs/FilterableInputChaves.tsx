@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { buscarNomeChavePorIdSala } from '../../utils/buscarNomeChavePorIdSala';
 import useGetSalas from '../../hooks/salas/useGetSalas';
 import { useChaves } from '../../context/ChavesContext';
+import { IChave } from '../../pages/chaves';
 
 
 export interface IoptionChaves {
@@ -9,12 +10,6 @@ export interface IoptionChaves {
   sala: number;
   disponivel: boolean;
   usuarios: any[]; // Ou o tipo mais adequado para usuários
-}
-
-interface IoptionSalas {
-  id: number;
-  bloco: number;
-  nome: string;
 }
 
 interface IdropdownResponsavelProps {
@@ -26,21 +21,20 @@ interface IdropdownResponsavelProps {
 
 export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
 
-  const {chaves, loading} = useChaves();
-  // console.log(chaves)
+  const {chaves} = useChaves();
   const {salas} = useGetSalas();
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<number | null>(null);
 
-  const filterdItems = useMemo(() => {
-    return chaves?.filter((item) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves, salas).toLowerCase().includes(searchTerm.toLowerCase()));
+  const filterdItems = useMemo<IChave[]>(() => {
+    return chaves?.filter((item: IChave) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves as IChave[], salas).toLowerCase().includes(searchTerm.toLowerCase()));
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IoptionChaves) => {
+  const handleSelect = (option: IChave) => {
     setSelectedOption(option.id);
     setSearchTerm(buscarNomeChavePorIdSala(option.sala, chaves, salas));
     setIsOpen(false);
@@ -105,7 +99,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {buscarNomeChavePorIdSala(option.sala, chaves, salas)}
+              {buscarNomeChavePorIdSala(option.sala, chaves as IChave[], salas)}
             </div>
           ))}
         </div>

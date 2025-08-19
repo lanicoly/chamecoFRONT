@@ -1,10 +1,13 @@
 import axios from "axios";
-import IMask from "imask";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import api from "../services/api";
 import { Footer } from "../components/footer";
-// import Cookies from "js-cookie";
+import Spinner from "../components/spinner";
+import { limparCPF } from "../utils/limparCPF";
+import { redirectUserTo } from "../utils/tiposUsuarios";
+import { applyCpfMask } from "../utils/applyCpfMask";
+import { PopUpError } from "../components/popups/PopUpError";
 
 export function Login() {
   const navigate = useNavigate();
@@ -15,31 +18,22 @@ export function Login() {
   const [senha, setSenha] = useState<string>("");
   const [errorUsuario, setErrorUsuario] = useState<string>("");
   const [errorSenha, setErrorSenha] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    const cpfInput = document.getElementById("cpf");
-    if (cpfInput) {
-      IMask(cpfInput, {
-        mask: "000.000.000-00",
-      });
-    }
+    const cpfInput = document.querySelector<HTMLInputElement>("#cpf");
+    const cleanup = cpfInput ? applyCpfMask(cpfInput) : undefined;
+
+    // Remove listener ao desmontar o componente
+    return () => cleanup?.();
   }, []);
-
-  function limparCPF(cpf: string) {
-    return cpf.replace(/\D/g, "");
-  }
-
-//  export interface LoginResponse{
-//    token:string;
-//    usuario:any;
-//    tipo:string;
-//  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if(!usuario.trim() || !senha.trim()) {
-      setErrorUsuario(!usuario.trim() ? "Por favor, insira o seu CPF!": "");
+      setErrorUsuario(!usuario.trim() ? "Por favor, insira o seu CPF ou matrícula!": "");
       setErrorSenha(!senha.trim() ? "Por favor, insira a sua senha!" : "");
       return;
     }
@@ -51,38 +45,33 @@ export function Login() {
       password: senha,
     };
 
+    setLoading(true);
+
     try {
         const response = await api.post("/chameco/api/v1/login/", body)
 
-        const statusResponse = response.status;
-
-        // Adicionar o console.log para exibir os dados da resposta(obter token)
         console.log("Resposta do login:", response.data);
         
-      if (statusResponse === 200 && response.data?.token) { //testar sem status response
+        if (response.data?.token) {
+          localStorage.setItem("authToken", response.data.token);
 
-        localStorage.setItem("authToken", response.data.token);
+          if (response.data.usuario) {
+            localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+          }
 
-        if(response.data.usuario) {
-          localStorage.setItem("userData", JSON.stringify(response.data.usuario));
+          if (response.data.tipo) {
+            localStorage.setItem("userType", response.data.tipo);
+          }
+
+          const route = redirectUserTo(response.data.tipo?.trim());
+          console.log(route)
+          navigate(route); // redireciona
         }
 
-        if (response.data.tipo) {
-          localStorage.setItem("userType", response.data.tipo);
-        }
-        
-        // Força atualização do estado de autenticação para outros componentes
-        window.dispatchEvent(new Event('storage'));
-        navigate("/menu");
-
-        } else {
-          setErrorSenha("Usuário não registrado no sistema!");
-          return;
-        }
-      }
-     catch (error) {
+    } catch (error) {
       if (axios.isAxiosError(error)) {
         const statusResponse = error.response?.status;
+        setError(true)
 
         if (statusResponse === 400) {
           setErrorSenha("Preencha os campos corretamente!");
@@ -100,13 +89,23 @@ export function Login() {
           setErrorSenha("Erro interno do servidor! Contate o suporte.");
           return;
         }
+
+        setErrorSenha(`Ops, Erro de servidor inesperado!`)
       }
+    } finally {
+      setLoading(false);
     }
   }
+
+  setTimeout(() => {
+      setError(false)
+  }, 2000)
 
   return (
     <div>
     <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-cover bg-center">
+      
+      {error ? <PopUpError mensagem={errorSenha}/> : ""}
       {/* Adicionando container de login */}
       <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
         {/* Adicionando logo */}
@@ -174,6 +173,7 @@ export function Login() {
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
                 placeholder="CPF"
+                maxLength={14}
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 id="cpf"
@@ -221,9 +221,9 @@ export function Login() {
               <div className="mt-[15px] text-center items-center ml-[60px]">
                 <button
                   type="submit"
-                  className="px-2 py-1 w-[115px] rounded-lg h-[35px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
+                  className="px-2 py-1 w-[120px] rounded-lg h-[45px] font-semibold text-[17px] flex gap-[4px] justify-center items-center bg-[#18C64F] text-[#FFF] shadow-[rgba(0, 0, 0, 0.25)]"
                 >
-                  ENTRAR
+                   {loading ? (<Spinner/>) : "ENTRAR"}
                 </button>
               </div>
             </div>

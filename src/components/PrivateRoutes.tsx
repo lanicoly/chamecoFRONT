@@ -4,18 +4,16 @@ import { useState, useEffect } from 'react';
 import api from "../services/api";
 import Spinner from "./spinner"
 
-interface PrivateRouteProps {
+interface PrivateRoutePropsDTO {
   children: JSX.Element; //será exibido se o acesso for permitido
   allowedTypes: string[]; //lista de tipos usuários que podem acessar
 }
 
 
-export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
+export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
   const location = useLocation();
   const token = localStorage.getItem("authToken");
   const userType = localStorage.getItem("userType");
-
-  
 
   //criando estado para validar o token
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
@@ -32,7 +30,9 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
         const response = await api.post("/chameco/api/v1/verify-token/", {
           token: token,
         });
-        setIsValidToken(response.status === 200);
+
+        if (response.status === 200) setIsValidToken(true);
+
       } catch(err){
         if (isAxiosError(err)) {
           console.error('Erro na validação do token:', err.response?.data);
@@ -53,20 +53,14 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRouteProps) {
   }
 
   // sem = redireciona para login
-   // verifica lista de tipo(se não corresponde) e redireciona para login
+  // verifica lista de tipo(se não corresponde) e redireciona para login
      
-    if (isValidToken &&
-      userType === "serv.terceirizado" &&
-      location.pathname !== "/emprestimos" //só se ainda não estiver em emprestimos
-    ) {
-      return <Navigate to="/emprestimos" state={{ from: location }} replace />;
-    }
-      else{ 
-        if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
+  if (isValidToken && userType && allowedTypes.includes(userType)) {
+      return children
+  } else { 
+      if (!isValidToken || !userType || !allowedTypes.includes(userType)) {
+          localStorage.clear();
           return <Navigate to="/login" state={{ from: location }} replace />;
-        }
       }
-   
-  // se o tipo existir renderiza o componente
-  return children;
+  }
 }

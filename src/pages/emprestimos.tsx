@@ -3,24 +3,20 @@ import React, { useState, useEffect } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
-// import { Pesquisa } from "../components/pesquisa";
-// import { FilterableInputSalas } from "../components/inputs/FilterableInputSalas";
 import { FilterableInputResponsaveis } from "../components/inputs/FilterableInputResponsaveis";
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGetSalas";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
-// import { Chaves } from "./chaves";
 import { useChaves } from "../context/ChavesContext";
-
-// deixei o passador comentado pois são duas estruturas para passar página, então so copiei a estrutura, mas assim que forem atualizadas as tabelas deve-se usar esse elemento!!!!!!!
+import { AxiosError } from "axios";
 
 export interface Iemprestimo {
   id?: number | null;
@@ -43,21 +39,19 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos() {
 
-  const [pesquisa, setPesquisa] = useState("");
+  const pesquisa = ""
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
   const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
   const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
   const [observacao, setObservacao] = useState<string | null>();
 
-  const [emprestimos, setEmprestimos] = useState<Iemprestimo[]>([]);
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
   const { responsaveis } = useGetResponsaveis();
-  // const { chaves } = useGetChaves();
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   const {chaves, refetch} = useChaves();
@@ -89,10 +83,6 @@ export function Emprestimos() {
         if (response) {
             setOnReset(true); // ativa o reset
             setTimeout(() => setOnReset(false), 100); // evita reset contínuo
-            setEmprestimos((prevEmprestimos) => [
-              ...prevEmprestimos,
-              response.data,
-            ]);
             setIsSuccesModalOpen(!isSuccesModalOpen);
             setObservacao("");
         }
@@ -102,12 +92,16 @@ export function Emprestimos() {
         setMensagemSucesso("Empréstimo realizado com sucesso!");
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
         refetch();
-      } catch (error) {
-        const mensagem = error.response?.data?.message || "Erro ao criar o empréstimo.";
-        console.error(
-          "Erro ao criar o empréstimo:",
-          error.response?.data || error.message
-        );
+      } catch (error: unknown) {
+
+        let mensagem = "Erro ao criar o empréstimo.";
+
+        if (error && typeof error === "object" && (error as AxiosError).isAxiosError) {
+          const axiosError = error as AxiosError;
+          mensagem = (axiosError.response?.data as any)?.message || mensagem;
+        }
+
+        console.error("Erro ao criar o empréstimo:", error);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
 
@@ -193,7 +187,7 @@ export function Emprestimos() {
       {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
 
-      <MenuTopo text="MENU" backRoute="/menu" />
+      {localStorage.getItem("userType") === "vigilante" ? <MenuTopo text="" backRoute="" /> : <MenuTopo text="MENU" backRoute="/menu" />}
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
@@ -281,7 +275,6 @@ export function Emprestimos() {
                     </td>
                     <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
                       <FilterableInputSolicitantes
-                        items={usuarios}
                         onSelectItem={(idSelecionado) => {
                           setSolicitanteSelecionadoId(idSelecionado);
                         }}
@@ -492,7 +485,7 @@ export function Emprestimos() {
                 responsaveis={usuarios}
                 dataRetirada=""
                 horario_emprestimo=""
-                observacao={observacao}
+                observacao={observacao ?? null}
                 pesquisa={pesquisa}
                 refreshCounter={refreshCounter}
                 setRefreshCounter={setRefreshCounter}
@@ -513,7 +506,7 @@ export function Emprestimos() {
                   chaves={chaves}
                   responsaveis={usuarios}
                   solicitantes={usuarios}
-                  observacao={observacao}
+                  observacao={observacao ?? null}
                   dataRetirada=""
                   horario_emprestimo=""
                   dataDevolucao=""

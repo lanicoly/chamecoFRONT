@@ -5,25 +5,20 @@ import { MenuTopo } from "../components/menuTopo";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
+import { AxiosError } from "axios";
 
 export interface Blocos {
   id: number;
   nome: string;
 }
 
-//essa interface props serve para eu herdar variáveis e funções do componante pai (que nesse caso é o arquivo app.tsx)
-
-//estou usando essa interface para que eu consiga usar a função criada no "App" em todos os arquivos que eu chamar ela e importar do componente pai, realizando uma breve navegação entre as telas
-
 export function Blocos() {
   const navigate = useNavigate();
 
   const [blocos, setBlocos] = useState<Blocos[]>([]);
-  const [nextId, setNextId] = useState(11);
   const [nome, setNome] = useState("");
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
@@ -38,11 +33,7 @@ export function Blocos() {
   //Função para requisição get (obter blocos)
   async function obterBlocos() {
     try {
-      const response = await api.get("/chameco/api/v1/blocos/", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.get("/chameco/api/v1/blocos/");
 
       if (response.status === 200) {
         const data = response.data;
@@ -51,9 +42,6 @@ export function Blocos() {
           const blocos = (data.results as Blocos[]).map((bloco) => ({
             id: bloco.id,
             nome: bloco.nome,
-
-            // descricao: bloco.descricao,
-            // token: bloco.token,
           }));
           console.log("Blocos:", blocos)
           setBlocos(blocos);
@@ -69,11 +57,8 @@ export function Blocos() {
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBloco() {
-    const novoBloco: Blocos = {
-      id: nextId,
+    const novoBloco = {
       nome,
-      // descricao,
-      // token,
     };
 
     if (novoBloco.nome === null) {
@@ -92,14 +77,18 @@ export function Blocos() {
 
         setMensagemSucesso("Bloco adicionado com sucesso!")
       } catch (error) {
+        const errorResponse = error as AxiosError<{ message?: string }>;
+
         const mensagem =
-          error.response?.data?.message || "Erro ao criar bloco.";
+          errorResponse.response?.data?.message || "Erro ao criar bloco.";
+
         console.error(
           "Erro ao criar bloco:",
-          error.response?.data || error.message
+          errorResponse.response?.data || errorResponse.message
         );
+
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(!isPopUpErrorOpen);
+        setIsPopUpErrorOpen(true); 
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -278,8 +267,7 @@ export function Blocos() {
   }
 
   const handleBlockSelect = (blocoSelecionado: Blocos) => {
-    // Navegando para a tela de salas com o bloco selecionado
-    navigate(`/salas?bloco=${blocoSelecionado.id}`);
+    navigate(`/salas/${blocoSelecionado.id}`);
   };
 
   return (

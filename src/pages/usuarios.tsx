@@ -1,17 +1,16 @@
-import { Check, Plus, TriangleAlert, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import { Pesquisa } from "../components/pesquisa";
 import { PassadorPagina } from "../components/passadorPagina";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
-import useGetUsuarios from "../hooks/usuarios/useGetUsers";
+import useGenericGetUsers from "../hooks/usuarios/useGenericGetUsers";
 import AdicionarUsuarioForm from "../components/forms/AdicionarUsuarioForm";
 import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuario";
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
-import { useChaves } from "../context/ChavesContext";
-import { userFilter } from "../utils/userFilter";
+import { totalPaginas, userFilter } from "../utils/userFilter";
+import { IUsuario } from "./chaves";
 
 interface Ichaves {
   id: number,
@@ -29,26 +28,26 @@ export interface Iusuario {
 }
 
 export function Usuarios() {
-  const { usuarios } = useGetUsuarios();
-  const [listaUsers, setListaUsers] = useState<Iusuario[]>([]);
+
+
+    const {
+      usuarios,
+      page,
+      nextPage,
+      prevPage,
+  } = useGenericGetUsers();
+
   const itensPorPagina = 5;
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const totalPaginas = Math.max(
-    1,
-    Math.round(listaUsers.length / itensPorPagina)
-  );
+  const paginaAtual = 1;
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
 
   const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [filtro, setFiltro] = useState("todos");
+  const [tipoUsuario, setTipoUsuario] = useState("todos");
+  const [_isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    setListaUsers(usuarios);
-  }, [usuarios]);
-
-  const filtrarUsuario = userFilter(listaUsers, pesquisa, filtro, indexInicio, indexFim);
+  const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
+  console.log("lista de users: ", filtrarUsuario)
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -71,11 +70,11 @@ export function Usuarios() {
   }
 
   function openEditModal() {
-    const usuario = listaUsers.find((user) => user.id === userSelecionado);
+    const usuario: IUsuario | undefined = usuarios.find((user) => user.id === userSelecionado);
     if (usuario) {
-      setNome(usuario.nome);
-      setEmail(usuario.setor);
-      setTipo(usuario.tipo);
+      setNome(usuario?.nome);
+      setEmail(usuario?.setor);
+      setTipo(usuario?.tipo);
       setIsEditModalOpen(true);
     }
   }
@@ -96,9 +95,6 @@ export function Usuarios() {
 
   function removeUser(e: React.FormEvent) {
     e.preventDefault();
-    setListaUsers(
-      listaUsers.filter((usuario) => usuario.id !== userSelecionado)
-    );
     setUserSelecionado(null);
     closeDeleteModal();
   }
@@ -106,14 +102,12 @@ export function Usuarios() {
   function editaUser(e: React.FormEvent) {
     e.preventDefault();
     if (userSelecionado !== null) {
-      listaUsers.map((usuario) => {
+      usuarios.map((usuario) => {
         if (usuario.id === userSelecionado) {
           if (nome) {
             usuario.nome = nome;
           }
-          // if (email) {
-          //   usuario.email = email;
-          // }
+
           if (tipo) {
             usuario.tipo = tipo;
           }
@@ -143,17 +137,6 @@ export function Usuarios() {
     setUserSelecionado(null);
   }
 
-  function avancarPagina() {
-    if (paginaAtual < totalPaginas) {
-      setPaginaAtual(paginaAtual + 1);
-    }
-  }
-
-  function voltarPagina() {
-    if (paginaAtual > 1) {
-      setPaginaAtual(paginaAtual - 1);
-    }
-  }
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
@@ -177,28 +160,21 @@ export function Usuarios() {
 
               <Pesquisa
                 pesquisa={pesquisa}
-                placeholder="Nome ou Setor "
+                placeholder="Nome"
                 setIsSearching={setIsSearching}
                 setPesquisa={setPesquisa}
               />
 
-              <SelectTipoUsuario filtro={filtro} setFiltro={setFiltro} />
+              <SelectTipoUsuario filtro={tipoUsuario} setFiltro={setTipoUsuario} />
             </div>
 
-            {/* botao adicionar usuairo */}
             <BotaoAdicionar text = "ADICIONAR USUÁRIO" onClick={openUserModal}/>
-            {/* fim botao adicionar usuairo */}
 
-            {/* Adicionando pop up de adicionar usuarios */}
             {isUserModalOpen && (
               <AdicionarUsuarioForm closeUserModal={closeUserModal}/>
             )}
-
-            {/* Fim adicionando pop up de adicionar usuarios */}
           </div>
-          {/* fim adicionar usuario + pesquisa */}
 
-          {/* conteudo central tabela*/}
           <div>
             {/* botões editar e excluir */}
             <div className="flex gap-4 justify-end my-2">
@@ -263,10 +239,10 @@ export function Usuarios() {
             />
 
             <PassadorPagina
-              avancarPagina={avancarPagina}
-              voltarPagina={voltarPagina}
+              avancarPagina={nextPage}
+              voltarPagina={prevPage}
               totalPaginas={totalPaginas}
-              paginaAtual={paginaAtual}
+              paginaAtual={page}
             />
           </div>
         </div>

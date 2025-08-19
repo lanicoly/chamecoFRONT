@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
-import api from "../../services/api";
+
 
 function AdicionarUsuarioForm({closeUserModal}: any) {
 
@@ -48,25 +48,7 @@ function AdicionarUsuarioForm({closeUserModal}: any) {
                         required
                       />
                     </div>
-                    {/* fim seção nome de usuário */}
 
-                    {/*seção email de usuário*/}
-                    {/* <div>
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Digite o e-mail do usuário
-                      </p>
-                      <input
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                        type="text"
-                        placeholder="Email do usuário"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div> */}
-                    {/* fim seção email de usuário*/}
-
-                    {/* seção tipo do usuário*/}
                     <div>
                       <p className="text-[#192160] text-sm font-medium mb-1">
                         Selecione o tipo do usuário

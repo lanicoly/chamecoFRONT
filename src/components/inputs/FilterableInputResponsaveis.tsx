@@ -1,20 +1,21 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 
-export interface IoptionResponsaveis {
+export interface IUsuario {
+  id: number,
   superusuario: number;
   nome: string;
 }
 
 interface IdropdownResponsavelProps {
-  items: IoptionResponsaveis[];
+  items: IUsuario[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
   reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
-const buscarResponsavel = (id: number | null, responsaveis: IoptionResponsaveis[]) => {
-  const responsavel = responsaveis.find(responsavel => responsavel.superusuario === id);
+const buscarResponsavel = (id: number | undefined, responsaveis: IUsuario[]) => {
+  const responsavel = responsaveis.find(responsavel => responsavel.id === id);
 
-  return responsavel ? `${responsavel.nome} | ${responsavel.superusuario}` : "";
+  return responsavel ? `${responsavel.nome} | ${responsavel.id}` : "";
 
 }
 
@@ -22,20 +23,20 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState<IoptionResponsaveis | null>(null);
+  const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
 
-  const filterdItems = useMemo(() => {
+  const filterdItems = useMemo<IUsuario[]>(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.nome && buscarResponsavel(item.superusuario, items).toLowerCase().includes(lowerSearch));
+    return items.filter((item) => item.nome && buscarResponsavel(item.id, items).toLowerCase().includes(lowerSearch));
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IoptionResponsaveis) => {
+  const handleSelect = (option: IUsuario) => {
     setSelectedOption(option);
     setSearchTerm(option.nome);
     setIsOpen(false);
-    onSelectItem(option.superusuario); // Chama o callback com o ID do item selecionado
+    onSelectItem(option.id); // Chama o callback com o ID do item selecionado
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,11 +94,11 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
         <div className="absolute mt-1 w-full bg-white rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
           {filterdItems.map((option) => (
             <div
-              key={option.superusuario}
+              key={option.id}
               onClick={() => handleSelect(option)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {option.nome} | {option.superusuario}
+              {option.nome} | {option.id}
             </div>
           ))}
         </div>

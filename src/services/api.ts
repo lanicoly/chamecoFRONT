@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://chamecoapi2.pythonanywhere.com',
+    baseURL: 'https://chamecoapi3.pythonanywhere.com/',
     headers: {
         'Content-Type': 'Application/json',
     },
@@ -23,8 +23,8 @@ api.interceptors.request.use(
         } else if (method === "post" || method === "put") {
             if (typeof config.data === "object" && config.data !== null) {
                 config.data = {
-                ...config.data,
-                token: token,
+                    ...config.data,
+                    token: token,
                 };
             } else {
                 config.data = { token: token };

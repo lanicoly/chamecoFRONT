@@ -16,7 +16,6 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/menu"
@@ -35,7 +34,7 @@ export function App() {
           }
         />
         <Route
-          path="/salas"
+          path="/salas/:blocoId"
           element={
             <PrivateRoute allowedTypes={["admin", "diretor.geral"]}>
               <Salas />
@@ -61,7 +60,7 @@ export function App() {
         <Route
           path="/statusChaves"
           element={
-            <PrivateRoute allowedTypes={["admin", "diretor.geral"]}>
+            <PrivateRoute allowedTypes={["admin", "diretor.geral", "professor"]}>
               <StatusChaves />
             </PrivateRoute>
           }
@@ -69,7 +68,7 @@ export function App() {
         <Route
           path="/emprestimos"
           element={
-            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral"]}>
+            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante"]}>
               <Emprestimos />
             </PrivateRoute>
           }

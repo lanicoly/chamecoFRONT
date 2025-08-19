@@ -1,3 +1,5 @@
+import { totalPaginas } from "../utils/userFilter";
+
 interface PassadorPaginaProps {
     voltarPagina: () => void;
     avancarPagina: () => void;
