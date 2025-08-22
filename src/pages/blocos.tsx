@@ -3,12 +3,13 @@ import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 import { MenuTopo } from "../components/menuTopo";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
+import useGetBlocos from "../hooks/blocos/useGetBlocos";
 
 export interface Blocos {
   id: number;
@@ -25,35 +26,7 @@ export function Blocos() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  //Começo da integração
-  useEffect(() => {
-    obterBlocos();
-  }, []);
-
-  //Função para requisição get (obter blocos)
-  async function obterBlocos() {
-    try {
-      const response = await api.get("/chameco/api/v1/blocos/");
-
-      if (response.status === 200) {
-        const data = response.data;
-
-        if (data.results && Array.isArray(data.results)) {
-          const blocos = (data.results as Blocos[]).map((bloco) => ({
-            id: bloco.id,
-            nome: bloco.nome,
-          }));
-          console.log("Blocos:", blocos)
-          setBlocos(blocos);
-        } else {
-          setBlocos([]);
-        }
-      }
-    } catch (error) {
-      setBlocos([]);
-      console.error("Erro ao obter blocos:", error);
-    }
-  }
+  const { bloco } = useGetBlocos();
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBloco() {
@@ -75,7 +48,7 @@ export function Blocos() {
           closeAdicionarBlocoModal();
         }
 
-        setMensagemSucesso("Bloco adicionado com sucesso!")
+        setMensagemSucesso("Bloco adicionado com sucesso!");
       } catch (error) {
         const errorResponse = error as AxiosError<{ message?: string }>;
 
@@ -88,7 +61,7 @@ export function Blocos() {
         );
 
         setMensagemErro(mensagem);
-        setIsPopUpErrorOpen(true); 
+        setIsPopUpErrorOpen(true);
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -125,11 +98,11 @@ export function Blocos() {
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
-    ? blocos.filter(
+    ? bloco.filter(
         (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
         // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       )
-    : blocos;
+    : bloco;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
   // Adicionando função de abrir e fechar modal do botão de adicionar bloco
@@ -152,8 +125,8 @@ export function Blocos() {
   const [isBlocoPopUpOpen, setIsBlocoPopUpOpen] = useState(false);
   const [blocoSelecionado, setBlocoSelecionado] = useState<Blocos | null>(null);
 
-  function openBlocoPopUp(blocos: Blocos) {
-    setBlocoSelecionado(blocos);
+  function openBlocoPopUp(bloco: Blocos) {
+    setBlocoSelecionado(bloco);
     setIsBlocoPopUpOpen(true);
   }
 
@@ -180,12 +153,15 @@ export function Blocos() {
   // adicionando função de editar informações de um bloco + função para requisição PATCH
   async function editarBlocoAPI(blocoSelecionado: Blocos) {
     try {
-      const response = await api.put(`/chameco/api/v1/blocos/${blocoSelecionado.id}/`, {
-        nome: blocoSelecionado.nome,
-      });
+      const response = await api.put(
+        `/chameco/api/v1/blocos/${blocoSelecionado.id}/`,
+        {
+          nome: blocoSelecionado.nome,
+        }
+      );
 
       if (response.status === 200) {
-        console.log("Bloco editado", response.data)
+        console.log("Bloco editado", response.data);
         return response.data;
       }
     } catch (error: unknown) {
@@ -202,7 +178,7 @@ export function Blocos() {
       return;
     }
 
-    blocos.forEach((bloco) => {
+    bloco.forEach((bloco) => {
       if (bloco.id === blocoSelecionado.id) {
         if (nome) {
           bloco.nome = nome;
@@ -223,10 +199,9 @@ export function Blocos() {
       });
 
       if (response.status === 200) {
-        console.log("Bloco excluido", response.data)
+        console.log("Bloco excluido", response.data);
         return response.data;
       }
-
     } catch (error: unknown) {
       console.error("Erro ao excluir bloco:", error);
     }
@@ -272,7 +247,7 @@ export function Blocos() {
 
   return (
     <div className="items-center justify-center flex h-screen flex-shrink-0 bg-tijolos">
-      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso} />}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
       {/* Adicionando barra de navegação */}
       <MenuTopo text="MENU" backRoute="/menu" />

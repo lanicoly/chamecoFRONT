@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
@@ -7,9 +7,12 @@ import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import { useParams } from "react-router-dom";
 import { PassadorPagina } from "../components/passadorPagina";
+// import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
-import { Blocos } from "../pages/blocos";
+// import { Blocos } from "../pages/blocos";
+import { useMemo } from "react";
 import useGenericGetSalas from "../hooks/salas/useGetSalas";
+import useGetBlocos from "../hooks/blocos/useGetBlocos";
 
 export interface Sala {
   id: number;
@@ -18,7 +21,7 @@ export interface Sala {
 }
 
 export function Salas() {
-  const [blocos, setBlocos] = useState<Blocos[]>([]);
+  // const [blocos, setBlocos] = useState<Blocos[]>([]);
 
   const { blocoId } = useParams<{ blocoId: string }>();
 
@@ -26,22 +29,27 @@ export function Salas() {
 
   const blocoNumero = blocoId ? Number(blocoId) : 1;
 
-  useEffect(() => {
-    async function obterBlocos() {
-      try {
-        const response = await api.get("/chameco/api/v1/blocos/");
-        setBlocos(response.data.results);
-      } catch (error) {
-        console.error("Erro ao obter blocos:", error);
-      }
-    }
-    obterBlocos();
-  }, []);
+  const { bloco } = useGetBlocos();
 
-  const nomeDoBloco = Array.isArray(blocos)
-    ? blocos.find((bloco) => bloco.id === blocoIdNumber)?.nome.toUpperCase() ||
-      "BLOCO DESCONHECIDO"
-    : "BLOCO DESCONHECIDO";
+  function nomeBloco(
+    idBloco: number | null | undefined,
+    blocosMap: Record<number, string>
+  ): string {
+    return idBloco != null
+      ? blocosMap[idBloco]?.toUpperCase() || "BLOCO DESCONHECIDO"
+      : "BLOCO DESCONHECIDO";
+  }
+
+  const blocosMap = useMemo(
+    () =>
+      bloco.reduce((map, bloco) => {
+        map[bloco.id] = bloco.nome;
+        return map;
+      }, {} as Record<number, string>),
+    [bloco]
+  );
+
+  const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
 
   const { salas } = useGenericGetSalas({ blocoId: blocoIdNumber });
 
