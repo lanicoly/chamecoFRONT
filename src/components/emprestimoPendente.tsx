@@ -8,7 +8,7 @@ import { PassadorPagina } from "./passadorPagina";
 import api from "../services/api";
 import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
-import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";

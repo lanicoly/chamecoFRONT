@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { buscarNomeChavePorIdSala } from '../../utils/buscarNomeChavePorIdSala';
-import useGetSalas from '../../hooks/salas/useGetSalas';
+import useGetSalas from '../../hooks/salas/useGenericGetSalas';
 import { useChaves } from '../../context/ChavesContext';
 import { IChave } from '../../pages/chaves';
 

@@ -7,7 +7,7 @@ import { FilterableInputResponsaveis } from "../components/inputs/FilterableInpu
 import { FilterableInputSolicitantes } from "../components/inputs/FilterableInputSolicitantes";
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
-import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import api from "../services/api";

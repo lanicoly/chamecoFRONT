@@ -11,7 +11,7 @@ import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
 import { useMemo } from "react";
-import useGenericGetSalas from "../hooks/salas/useGetSalas";
+import useGenericGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 
 export interface Sala {

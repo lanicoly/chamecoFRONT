@@ -6,7 +6,7 @@ import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-import useGetSalas from "../hooks/salas/useGetSalas";
+import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
