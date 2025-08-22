@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 import { Blocos } from "../pages/blocos";
+import useGenericGetSalas from "../hooks/salas/useGetSalas";
 
 export interface Sala {
   id: number;
@@ -17,22 +18,13 @@ export interface Sala {
 }
 
 export function Salas() {
-  useEffect(() => {
-    obterSalas();
-  }, []);
-
   const [blocos, setBlocos] = useState<Blocos[]>([]);
 
   const { blocoId } = useParams<{ blocoId: string }>();
 
-  const blocoIdNumber = blocoId ? Number(blocoId) : null;
+  const blocoIdNumber = blocoId ? Number(blocoId) : undefined;
 
-  const [todasSalas, setTodasSalas] = useState<Sala[]>([]);
   const blocoNumero = blocoId ? Number(blocoId) : 1;
-
-  const salasDoBloco = todasSalas.filter(
-    (sala) => sala.bloco === blocoIdNumber
-  );
 
   useEffect(() => {
     async function obterBlocos() {
@@ -51,30 +43,7 @@ export function Salas() {
       "BLOCO DESCONHECIDO"
     : "BLOCO DESCONHECIDO";
 
-  async function obterSalas() {
-    try {
-      const response = await api.get("/chameco/api/v1/salas/");
-
-      if (response.status === 200) {
-        const data = response.data;
-        if (data.results && Array.isArray(data.results)) {
-          const salas = data.results.map((sala: Sala) => ({
-            id: sala.id,
-            nome: sala.nome,
-            bloco: sala.bloco,
-          }));
-
-          setListaSalas(salas);
-          setTodasSalas(salas);
-        } else {
-          setListaSalas([]);
-        }
-      }
-    } catch (error) {
-      setListaSalas([]);
-      console.error("Erro ao obter salas:", error);
-    }
-  }
+  const { salas } = useGenericGetSalas({ blocoId: blocoIdNumber });
 
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
   const itensPorPagina = 5;
@@ -84,17 +53,12 @@ export function Salas() {
 
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const salasFiltradas = isSearching
-    ? salasDoBloco.filter((sala) =>
-        sala.nome.toLowerCase().includes(pesquisa.toLowerCase())
-      )
-    : salasDoBloco;
-  const totalPaginas = Math.max(
-    1,
-    Math.ceil(salasFiltradas.length / itensPorPagina)
-  );
-  const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
+
   const [nome, setNome] = useState("");
+
+  const salasDoBloco = salas.filter((sala) => {
+    return Number(sala.bloco) === Number(blocoIdNumber);
+  });
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -105,6 +69,17 @@ export function Salas() {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   console.log("Salas:", listaSalas);
+
+  const salasFiltradas = isSearching
+    ? salasDoBloco.filter((sala) =>
+        sala.nome.toLowerCase().includes(pesquisa.toLowerCase())
+      )
+    : salasDoBloco;
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(salasFiltradas.length / itensPorPagina)
+  );
+  const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
 
   function openSalaModal() {
     setIsSalaModalOpen(true);
@@ -127,11 +102,11 @@ export function Salas() {
 
   // função para requisição do método post
   async function adicionarSalaAPI() {
-      const novaSala = {
-        nome,
-        bloco: blocoNumero
-      }
-      if (novaSala.nome === null) {
+    const novaSala = {
+      nome,
+      bloco: blocoNumero,
+    };
+    if (novaSala.nome === null) {
       alert("Preencha todos os campos obrigatórios.");
       return;
     } else {
@@ -173,16 +148,14 @@ export function Salas() {
   };
 
   //Adicionando função de excluir sala + função para requisição delete
-  async function excluirSalaAPI(id: number, nome: string, bloco:number) {
-      try {
-        await api.delete(`${URL}${id}/`, {
-          data: { nome, bloco }
-        });
-    
-              
-      } catch (error: unknown) {
-        console.error("Erro ao excluir sala:", error);
-      }
+  async function excluirSalaAPI(id: number, nome: string, bloco: number) {
+    try {
+      await api.delete(`${URL}${id}/`, {
+        data: { nome, bloco },
+      });
+    } catch (error: unknown) {
+      console.error("Erro ao excluir sala:", error);
+    }
   }
 
   function removeSala(e: React.FormEvent) {
