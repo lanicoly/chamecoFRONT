@@ -8,6 +8,7 @@ import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
+import useGenericGetChaves from "../hooks/chaves/useGenericGetChaves";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
@@ -29,6 +30,7 @@ export interface IUsuario {
 export interface IChave {
   id: number;
   sala: number | null;
+  nome_sala: string;
   disponivel: boolean;
   usuarios: IUsuario[];
   descricao?: string | null;
@@ -52,7 +54,7 @@ interface IChavesContentProps {
 export function Chaves() {
   const navigate = useNavigate();
 
-  const { chaves, loading, error, refetch } = useChaves();
+  const { chaves, loading, error, refetch } = useGenericGetChaves();
   const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
   
   // Estado para salas extras
@@ -74,6 +76,8 @@ export function Chaves() {
     }
     setHasCheckedToken(true);
   }, [navigate]);
+
+  
 
   useEffect(() => {
     refetch();
@@ -512,75 +516,66 @@ function ChavesContent({ chaves, loading, error, refetch, salasCompletas }: ICha
                       key={chave.id}
                       className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""}`}
                     >
-                      <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px]  break-words">
-                        {salas?.find((sala:ISala) => sala.id === chave.sala)?.nome || `ID: ${chave.sala}` || "N/A"}
-                      </td>
-                      <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0]  w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                        <div className="flex justify-center items-center ">
-                          <svg className="size-6 ml-2 mr-2  " xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-                            <path d="M15.2572 2.83333V11H2.42391V4C2.42391 3.69058 2.54683 3.39383 2.76562 3.17504C2.98441 2.95625 3.28116 2.83333 3.59058 2.83333H15.2572ZM17.5906 0.5H3.59058C2.66232 0.5 1.77208 0.868749 1.1157 1.52513C0.459325 2.1815 0.0905762 3.07174 0.0905762 4L0.0905762 13.3333H17.5906V0.5Z" fill="#565D8F"/>
-                            <path d="M24.5902 2.83333C24.8996 2.83333 25.1964 2.95625 25.4152 3.17504C25.634 3.39383 25.7569 3.69058 25.7569 4V11H22.2569V2.83333H24.5902ZM24.5902 0.5H19.9236V13.3333H28.0902V4C28.0902 3.07174 27.7215 2.1815 27.0651 1.52513C26.4087 0.868749 25.5185 0.5 24.5902 0.5V0.5Z" fill="#565D8F"/>
-                            <path d="M5.92391 18.0003V26.167H3.59058C3.28116 26.167 2.98441 26.0441 2.76562 25.8253C2.54683 25.6065 2.42391 25.3097 2.42391 25.0003V18.0003H5.92391ZM8.25724 15.667H0.0905762V25.0003C0.0905762 25.9286 0.459325 26.8188 1.1157 27.4752C1.77208 28.1316 2.66232 28.5003 3.59058 28.5003H8.25724V15.667Z" fill="#565D8F"/>
-                            <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
-                          </svg>
-                        <p className="text-[#646999] text-center  text-[15px] font-semibold leading-normal truncate ">
-                          {salas?.find((sala: ISala) => sala.id === chave.sala)?.nome_bloco || "-"}
-                        </p>
-                        </div>
-                      </td>
-                    
-                      <td className="align-center  w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words  ">
-                        <button 
+                      {/* SALA - USA nome_sala DIRETO DA API */}
+                  <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                    {chave.nome_sala || "Nome não disponível"}
+                  </td>
+                  
+                  {/* BLOCO - EXTRAIR DO NOME DA SALA */}
+                  <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                    <div className="flex justify-center items-center">
+                      <svg className="size-6 ml-2 mr-2" xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                        <path d="M15.2572 2.83333V11H2.42391V4C2.42391 3.69058 2.54683 3.39383 2.76562 3.17504C2.98441 2.95625 3.28116 2.83333 3.59058 2.83333H15.2572ZM17.5906 0.5H3.59058C2.66232 0.5 1.77208 0.868749 1.1157 1.52513C0.459325 2.1815 0.0905762 3.07174 0.0905762 4L0.0905762 13.3333H17.5906V0.5Z" fill="#565D8F"/>
+                        <path d="M24.5902 2.83333C24.8996 2.83333 25.1964 2.95625 25.4152 3.17504C25.634 3.39383 25.7569 3.69058 25.7569 4V11H22.2569V2.83333H24.5902ZM24.5902 0.5H19.9236V13.3333H28.0902V4C28.0902 3.07174 27.7215 2.1815 27.0651 1.52513C26.4087 0.868749 25.5185 0.5 24.5902 0.5V0.5Z" fill="#565D8F"/>
+                        <path d="M5.92391 18.0003V26.167H3.59058C3.28116 26.167 2.98441 26.0441 2.76562 25.8253C2.54683 25.6065 2.42391 25.3097 2.42391 25.0003V18.0003H5.92391ZM8.25724 15.667H0.0905762V25.0003C0.0905762 25.9286 0.459325 26.8188 1.1157 27.4752C1.77208 28.1316 2.66232 28.5003 3.59058 28.5003H8.25724V15.667Z" fill="#565D8F"/>
+                        <path d="M25.7572 18.0003V25.0003C25.7572 25.3097 25.6343 25.6065 25.4155 25.8253C25.1967 26.0441 24.9 26.167 24.5906 26.167H12.9239V18.0003H25.7572ZM28.0906 15.667H10.5906V28.5003H24.5906C25.5188 28.5003 26.4091 28.1316 27.0655 27.4752C27.7218 26.8188 28.0906 25.9286 28.0906 25.0003V15.667Z" fill="#565D8F"/>
+                      </svg>
+                      <p className="text-[#646999] text-center text-[15px] font-semibold leading-normal truncate">
+                        {chave.nome_sala?.match(/^([A-Z]\d+)/)?.[1] || "Bloco N/A"}
+                      </p>
+                    </div>
+                  </td>
+
+                  {/* USUÁRIOS - USA usuarios DIRETO DA API */}
+                  <td className="align-center w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                    <button 
                       onClick={() => openViewUsersModalHandler(chave)}
-                      className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center  p-2"
+                      className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center p-2"
                       disabled={isLoading}
-                      title="Ver usuários autorizados">
-                        <div className=" flex justify-center items-center mr-1 ">
-                          <svg
-                            className="size-6 ml-2 mr-2"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 36 35"
-                            fill="none"
-                          >
-                            <g clip-path="url(#clip0_1781_438)">
-                              <path
-                                d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z"
-                                fill="white"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_1781_438">
-                                <rect
-                                  width="35"
-                                  height="35"
-                                  fill="white"
-                                  transform="translate(0.5)"
-                                />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                          <p className=" break-words text-xs text-[#FFFF] text-center  text-[0.8rem] font-semibold leading-normal truncate">
-                            Pessoas autorizadas
-                          </p>
-                        </div>
-                        </button>
-                      </td>
-                      <td className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0]  w-[14%] tablet:max-w-[200px] laptop:max-w-[400px]  break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"}`}>
-                        {chave.disponivel ? "Disponível" : "Indisponível"}
-                      </td>
-                      <td className="align-center  pl-2 pr-2 text-center w-[5%]">
-                        <button
-                          onClick={() => openDescricaoModalHandler(chave.descricao)}
-                          className="bg-[#565D8F] text-white p-1 rounded flex items-center justify-center  w-full h-full min-h-[40px] "
-                          disabled={isLoading}
-                          title="Ver descrição"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                          </svg>
-                        </button>
-                      </td>
+                      title="Ver usuários autorizados"
+                    >
+                      <div className="flex justify-center items-center mr-1">
+                        <svg className="size-6 ml-2 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 35" fill="none">
+                          <g clipPath="url(#clip0_1781_438)">
+                            <path d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z" fill="white"/>
+                          </g>
+                        </svg>
+                        <p className="break-words text-xs text-[#FFFF] text-center text-[0.8rem] font-semibold leading-normal truncate">
+                          {chave.usuarios?.length || 0} pessoa{(chave.usuarios?.length || 0) !== 1 ? 's' : ''} autorizada{(chave.usuarios?.length || 0) !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </button>
+                  </td>
+
+                  {/* STATUS */}
+                  <td className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"}`}>
+                    {chave.disponivel ? "Disponível" : "Indisponível"}
+                  </td>
+
+                  {/* DESCRIÇÃO - USA descricao DIRETO DA API */}
+                  <td className="align-center pl-2 pr-2 text-center w-[5%]">
+                    <button
+                      onClick={() => openDescricaoModalHandler(chave.descricao)}
+                      className="bg-[#565D8F] text-white p-1 rounded flex items-center justify-center w-full h-full min-h-[40px]"
+                      disabled={isLoading}
+                      title={chave.descricao ? "Ver descrição" : "Sem descrição"}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                      </svg>
+                    </button>
+                  </td>
                       <td className="align-center text-xs text-[#646999] font-semibold w-[15%]">
                         <div className="flex justify-center items-center gap-2">
                           <button
