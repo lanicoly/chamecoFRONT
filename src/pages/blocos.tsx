@@ -10,6 +10,7 @@ import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
 import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
+import { useEffect } from "react";
 
 export interface Blocos {
   id: number;
@@ -27,6 +28,11 @@ export function Blocos() {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   const { bloco } = useGetBlocos();
+  useEffect(() => {
+    if (bloco) {
+      setBlocos(bloco);
+    }
+  }, [bloco]);
 
   // Adicionando funcionalidade ao botão de blocos + função para requisição do método post
   async function adicionarBloco() {
@@ -42,7 +48,7 @@ export function Blocos() {
         const response = await api.post("/chameco/api/v1/blocos/", novoBloco);
 
         if (response) {
-          setBlocos((prevBlocos) => [...prevBlocos, response.data]);
+          setBlocos((prev) => [...prev, response.data]);
           setIsSuccesModalOpen(!isSuccesModalOpen);
           setNome("");
           closeAdicionarBlocoModal();
@@ -98,11 +104,11 @@ export function Blocos() {
   const [pesquisa, setPesquisa] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
-    ? bloco.filter(
+    ? blocos.filter(
         (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
         // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       )
-    : bloco;
+    : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
   // Adicionando função de abrir e fechar modal do botão de adicionar bloco
@@ -178,7 +184,7 @@ export function Blocos() {
       return;
     }
 
-    bloco.forEach((bloco) => {
+    blocos.forEach((bloco) => {
       if (bloco.id === blocoSelecionado.id) {
         if (nome) {
           bloco.nome = nome;
@@ -218,9 +224,7 @@ export function Blocos() {
 
     try {
       excluirBlocoAPI(blocoSelecionado.id, blocoSelecionado.nome);
-      setBlocos((prevBlocos) =>
-        prevBlocos.filter((bloco) => bloco.id !== blocoSelecionado.id)
-      );
+      setBlocos((prev) => prev.filter((b) => b.id !== blocoSelecionado.id));
       setBlocoSelecionado(null);
       closeDeleteModal();
     } catch (error) {

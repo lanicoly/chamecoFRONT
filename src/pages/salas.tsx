@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Plus, X, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
@@ -7,7 +7,7 @@ import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import { useParams } from "react-router-dom";
 import { PassadorPagina } from "../components/passadorPagina";
-// import { useEffect } from "react";
+import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
 import { useMemo } from "react";
@@ -50,8 +50,17 @@ export function Salas() {
   const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
 
   const { salas } = useGenericGetSalas({ blocoId: blocoIdNumber });
-
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
+  useEffect(() => {
+  if (salas) {
+    const salasConvertidas: Sala[] = salas.map((s) => ({
+      ...s,
+      bloco: Number(s.bloco), 
+    }));
+    setListaSalas(salasConvertidas);
+  }
+}, [salas]);
+
   const itensPorPagina = 5;
   const [paginaAtual, setPaginaAtual] = useState(1);
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
@@ -62,7 +71,7 @@ export function Salas() {
 
   const [nome, setNome] = useState("");
 
-  const salasDoBloco = salas.filter((sala) => {
+  const salasDoBloco = listaSalas.filter((sala) => {
     return Number(sala.bloco) === Number(blocoIdNumber);
   });
 
@@ -74,7 +83,7 @@ export function Salas() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  console.log("Salas:", listaSalas);
+  console.log("Salas:", salasDoBloco);
 
   const salasFiltradas = isSearching
     ? salasDoBloco.filter((sala) =>
@@ -156,7 +165,7 @@ export function Salas() {
   //Adicionando função de excluir sala + função para requisição delete
   async function excluirSalaAPI(id: number, nome: string, bloco: number) {
     try {
-      await api.delete(`${URL}${id}/`, {
+      await api.delete(`/chameco/api/v1/salas/${id}/`, {
         data: { nome, bloco },
       });
     } catch (error: unknown) {
@@ -165,40 +174,40 @@ export function Salas() {
   }
 
   function removeSala(e: React.FormEvent) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (salaSelecionada === null) {
-      console.error("Nenhuma sala selecionada para excluir.");
-      return;
-    }
-    const salaSelecionadaObj = listaSalas.find(
-      (sala) => sala.id === salaSelecionada
-    );
-
-    if (!salaSelecionadaObj) {
-      console.error("Sala não encontrada.");
-      return;
-    }
-
-    const { id, nome, bloco } = salaSelecionadaObj;
-
-    try {
-      excluirSalaAPI(id, nome, bloco);
-
-      setListaSalas((prevSalas) =>
-        prevSalas.filter((sala) => sala.id !== salaSelecionada)
-      );
-
-      setSalaSelecionada(null);
-    } catch (error) {
-      console.error("Erro ao excluir sala:", error);
-    }
+  if (salaSelecionada === null) {
+    console.error("Nenhuma sala selecionada para excluir.");
+    return;
   }
+
+  const salaSelecionadaObj = salasDoBloco.find(
+    (sala) => sala.id === salaSelecionada
+  );
+
+  if (!salaSelecionadaObj) {
+    console.error("Sala não encontrada.");
+    return;
+  }
+
+  const { id, nome, bloco} = salaSelecionadaObj;
+
+  setListaSalas((prevSalas) =>
+    prevSalas.filter((sala) => sala.id !== salaSelecionada)
+  );
+
+  setSalaSelecionada(null);
+
+  excluirSalaAPI(id, nome, Number(bloco)).catch((error) =>
+    console.error("Erro ao excluir sala:", error)
+  );
+  closeDeleteModal();
+}
 
   // adicionando função de editar informações de uma sala + função para requisição PUT
   async function editarSalaAPI(salaSelecionada: Sala) {
     try {
-      const response = await api.put(`${URL}${salaSelecionada.id}/`, {
+      const response = await api.put(`/chameco/api/v1/salas/${salaSelecionada.id}/`, {
         nome: salaSelecionada.nome,
         bloco: salaSelecionada.bloco,
       });
@@ -212,29 +221,33 @@ export function Salas() {
   }
 
   function editaSala(e: React.FormEvent) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (salaSelecionada !== null) {
-      const salaEditada = listaSalas.find(
-        (sala) => sala.id === salaSelecionada
+  if (salaSelecionada !== null) {
+    const salaEditada = salasDoBloco.find(
+      (sala) => sala.id === salaSelecionada
+    );
+
+    if (salaEditada) {
+      const novaSala: Sala = {
+        ...salaEditada,
+        nome: nome || salaEditada.nome,
+        bloco: Number(salaEditada.bloco), 
+      };
+
+      setListaSalas((prev) =>
+        prev.map((s) => (s.id === novaSala.id ? novaSala : s))
       );
 
-      if (salaEditada) {
-        if (nome) {
-          salaEditada.nome = nome;
-        }
-        // if (descricao) {
-        //   salaEditada.descricao = descricao;
-        // }
-
-        editarSalaAPI(salaEditada);
-      }
-
-      setSalaSelecionada(null);
-      setNome("");
-      closeEditModal();
+      editarSalaAPI(novaSala);
     }
+
+    setSalaSelecionada(null);
+    setNome("");
+    closeEditModal();
   }
+}
+
 
   function statusSala(id: number) {
     if (salaSelecionada !== null) {
@@ -264,6 +277,19 @@ export function Salas() {
     }
   }
 
+  //Adicionando funcão de abrir e fechar modal de excluir salas
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  function openDeleteModal() {
+    if (salaSelecionada !== null) {
+      setIsDeleteModalOpen(true);
+    }
+  }
+
+  function closeDeleteModal() {
+    setIsDeleteModalOpen(false);
+  }
+
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
       {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso} />}
@@ -289,6 +315,7 @@ export function Salas() {
             {/* input de pesquisa */}
             <Pesquisa
               pesquisa={pesquisa}
+              placeholder="Sala"
               setIsSearching={setIsSearching}
               setPesquisa={setPesquisa}
             />
@@ -435,7 +462,7 @@ export function Salas() {
               {/* Fim adicionando pop up de editar sala */}
 
               <button
-                onClick={removeSala}
+                onClick={openDeleteModal}
                 className="flex gap-1 justify-start items-center font-medium text-sm text-rose-600 underline"
               >
                 <svg
@@ -450,6 +477,56 @@ export function Salas() {
                 </svg>
                 Excluir
               </button>
+
+              {/* Adicionando pop up de deletar bloco */}
+                    {isDeleteModalOpen && (
+                      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                        <form
+                          onSubmit={removeSala}
+                          className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                        >
+                          <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                              EXCLUIR SALA
+                            </p>
+                            <button
+                              onClick={closeDeleteModal}
+                              type="button"
+                              className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                            >
+                              <X className=" text-[#192160]" />
+                            </button>
+                          </div>
+                          <TriangleAlert className="size-16 text-red-700" />
+
+                          <p className="text-center px-2">
+                            Essa ação é{" "}
+                            <strong className="font-semibold ">
+                              definitiva
+                            </strong>{" "}
+                            e não pode ser desfeita.{" "}
+                            <strong className="font-semibold">
+                              Tem certeza disso?
+                            </strong>
+                          </p>
+                          <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                            <button
+                              onClick={closeDeleteModal}
+                              type="button"
+                              className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                            >
+                              CANCELAR
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                            >
+                              EXCLUIR
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
             </div>
             {/* fim botões editar e excluir */}
 
