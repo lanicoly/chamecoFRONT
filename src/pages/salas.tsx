@@ -21,8 +21,6 @@ export interface Sala {
 }
 
 export function Salas() {
-  // const [blocos, setBlocos] = useState<Blocos[]>([]);
-
   const { blocoId } = useParams<{ blocoId: string }>();
 
   const blocoIdNumber = blocoId ? Number(blocoId) : undefined;

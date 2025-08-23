@@ -20,45 +20,43 @@ const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchAllSalas = async () => {
+    const fetchSalas = async () => {
       setLoading(true);
       setError(false);
 
       try {
         let allSalas: ISala[] = [];
-        let page = 1;
-        let next: string | null = null;
+        let url = `/chameco/api/v1/salas/?pagination=50&nome=${nome}`;
+        if (blocoId !== undefined) {
+          url += `&bloco_id=${blocoId}`;
+        }
+        
+        let next: string | null = url;
 
-        do {
-          const url = `/chameco/api/v1/salas/?limit=50&page=${page}&nome=${nome}`;
-          const response = await api.get<IApiResponseSalas>(url);
-
-          let results = response.data.results;
-
-          if (blocoId !== undefined) {
-            results = results.filter((sala) => sala.bloco === blocoId);
-          }
-
-          const novosIds = results.map((r) => r.id);
-          const existentesIds = allSalas.map((s) => s.id);
-          const filteredResults = results.filter((r) => !existentesIds.includes(r.id));
-
-          allSalas = [...allSalas, ...filteredResults];
+        while (next) {
+          const response = await api.get<IApiResponseSalas>(next);
+          allSalas = [...allSalas, ...response.data.results];
           next = response.data.next;
-          page++;
-        } while (next);
+        }
 
-        setSalas(allSalas);
+        const uniqueSalas = Array.from(new Set(allSalas.map(s => s.id)))
+            .map(id => {
+                return allSalas.find(s => s.id === id);
+            });
+        
+        setSalas(uniqueSalas as ISala[]); 
+
       } catch (err) {
-        console.error("Erro ao listar salas", err);
+        console.error(err);
         setError(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAllSalas();
+    fetchSalas();
   }, [nome, blocoId]);
+
 
   return { salas, loading, error };
 };
