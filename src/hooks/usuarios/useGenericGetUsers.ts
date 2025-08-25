@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IUsuario } from "../../pages/chaves";
 import api from "../../services/api";
-import { totalPaginas } from "../../utils/userFilter";
+import { totalPaginas } from "../../utils/filters/users/userFilter";
 
 export interface IApiResponse {
   count: number;

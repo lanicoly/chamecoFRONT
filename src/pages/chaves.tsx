@@ -12,10 +12,16 @@ import useGenericGetChaves from "../hooks/chaves/useGenericGetChaves";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
 import Spinner from "../components/spinner";
-import { useChaves } from "../context/ChavesContext";
 import { AxiosError } from "axios";
-import { userFilter } from "../utils/userFilter";
 
+export interface IChave {
+  id: number;
+  sala: number | null;
+  nome_sala: string;
+  disponivel: boolean;
+  usuarios: IUsuario[];
+  descricao?: string | null;
+}
 
 export interface IUsuario {
   autorizado_emprestimo: boolean,
@@ -26,14 +32,6 @@ export interface IUsuario {
   setor: string,
   tipo: string,
   superusuario?: number
-}
-export interface IChave {
-  id: number;
-  sala: number | null;
-  nome_sala: string;
-  disponivel: boolean;
-  usuarios: IUsuario[];
-  descricao?: string | null;
 }
 
 export interface ISala {
@@ -55,7 +53,7 @@ export function Chaves() {
   const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
-  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  const { salas } = useGetSalas();
   
   // Estado para salas extras
   const [salasExtras, setSalasExtras] = useState<ISala[]>([]);

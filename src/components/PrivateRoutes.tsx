@@ -44,7 +44,7 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
     };
 
     validateToken();
-  }, [token]);
+  }, []);
 
   if (isValidToken === null) {
     return(

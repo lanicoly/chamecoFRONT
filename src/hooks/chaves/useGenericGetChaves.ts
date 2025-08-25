@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { IChave } from "../../pages/chaves";
 
 export interface IUsuario {
   autorizado_emprestimo: boolean,
@@ -11,14 +12,6 @@ export interface IUsuario {
   setor: string,
   tipo: string,
   superusuario?: number
-}
-
-export interface IChave {
-  id: number;
-  sala: number | null;
-  disponivel: boolean;
-  usuarios: IUsuario[];
-  descricao?: string | null;
 }
 
 export interface IApiResponseChaves {
@@ -38,16 +31,13 @@ const useGenericGetChaves = () => {
     try {
       setLoading(true);
       setError(false);
-      const currentToken = localStorage.getItem("authToken");
       
       let allChaves: IChave[] = [];
       let nextUrl: string | null = "/chameco/api/v1/chaves/";
       
       // Loop para buscar todas as páginas
       while (nextUrl) {
-        const response = await api.get<IApiResponseChaves>(nextUrl, {
-          params: { token: currentToken }
-        });
+        const response = await api.get<IApiResponseChaves>(nextUrl);
         
         const { results, next } = response.data;
         allChaves = [...allChaves, ...results];

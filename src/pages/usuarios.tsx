@@ -9,7 +9,7 @@ import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuar
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
-import { totalPaginas, userFilter } from "../utils/userFilter";
+import { totalPaginas, userFilter } from "../utils/filters/users/userFilter";
 import { IUsuario } from "./chaves";
 
 interface Ichaves {

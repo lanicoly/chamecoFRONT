@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { IUsuario } from "../pages/chaves";
-import api from "../services/api";
+import { IUsuario } from "../../../pages/chaves";
+import api from "../../../services/api";
 
 const itensPorPagina = 5;
 
