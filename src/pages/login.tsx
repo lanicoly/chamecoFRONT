@@ -173,11 +173,15 @@ export function Login() {
                 className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                 type="text"
                 placeholder="CPF"
-                maxLength={14}
+                inputMode="numeric"
+                pattern="\d{11}"
+                minLength={11}
+                maxLength={11}
                 value={usuario}
-                onChange={(e) => setUsuario(e.target.value)}
+                onChange={(e) => setUsuario(e.target.value.replace(/\D/g, ""))} 
                 id="cpf"
               />
+
               {errorUsuario && (
                 <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
                   {errorUsuario}
