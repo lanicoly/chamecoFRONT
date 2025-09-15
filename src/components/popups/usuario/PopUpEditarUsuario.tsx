@@ -5,13 +5,13 @@ interface IpopUpEditarUsuario {
     closeEditModal: (arg: any) => void,
     nome: string,
     setNome: (arg: string) => void,
-    email: string,
-    setEmail: (arg: string) => void,
+    // email: string,
+    // setEmail: (arg: string) => void,
     tipo: string,
     setTipo: (arg: string) => void,
 }
 
-export function PopUpEditarUsuario({editaUser, closeEditModal, nome, setNome, email, setEmail, tipo, setTipo}: IpopUpEditarUsuario) {
+export function PopUpEditarUsuario({editaUser, closeEditModal, nome, setNome, tipo, setTipo}: IpopUpEditarUsuario) {
     return (
         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
             <form
@@ -45,7 +45,7 @@ export function PopUpEditarUsuario({editaUser, closeEditModal, nome, setNome, em
                         required
                       />
 
-                      <div>
+                      {/* <div>
                         <p className="text-[#192160] text-sm font-medium mb-1">
                           Digite o novo email do usuário
                         </p>
@@ -58,7 +58,7 @@ export function PopUpEditarUsuario({editaUser, closeEditModal, nome, setNome, em
                           onChange={(e) => setEmail(e.target.value)}
                           required
                         />
-                      </div>
+                      </div> */}
 
                       <div>
                         <p className="text-[#192160] text-sm font-medium mb-1">
