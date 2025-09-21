@@ -6,7 +6,7 @@ import { BotaoAdicionar } from "../components/botaoAdicionar";
 import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-import useGetSalas from "../hooks/salas/useGenericGetSalas";
+// import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGenericGetChaves from "../hooks/chaves/useGenericGetChaves";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
@@ -15,6 +15,7 @@ import Spinner from "../components/spinner";
 import { AxiosError } from "axios";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { useMemo } from "react";
+import useGenericGetSalas from "../hooks/salas/useGenericGetSalas";
 
 export interface IChave {
   id: number;
@@ -27,7 +28,7 @@ export interface IChave {
 
 export interface IUsuario {
   autorizado_emprestimo: boolean;
-  chaves: IChave[];
+  salas_autorizadas: ISala[];
   id: number,
   id_cortex: number,
   nome: string,
@@ -41,6 +42,7 @@ export interface ISala {
   nome: string;
   bloco?: string | number;
   nome_bloco: string;
+  usuarios?: IUsuario[];
 }
 
 interface ISalaMap {
@@ -62,7 +64,7 @@ export function Chaves() {
   const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
-  const { salas } = useGetSalas();
+  const { salas } = useGenericGetSalas();
   
   // Estado para salas extras
   const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
@@ -71,13 +73,13 @@ export function Chaves() {
   const [hasCheckedToken, setHasCheckedToken] = useState(false);
   const [tokenExists, setTokenExists] = useState(false);
 
-  // Verifica o token na montagem
+  //Verifica o token na montagem
   useEffect(() => {
     const currentToken = localStorage.getItem("authToken");
     if (currentToken) {
       setTokenExists(true);
     } else {
-      // Se não houver token, pode redirecionar para login ou mostrar mensagem
+  // Se não houver token, pode redirecionar para login ou mostrar mensagem
       console.log(
         "Token não encontrado no localStorage ao montar o componente Chaves."
       );
@@ -91,7 +93,7 @@ export function Chaves() {
 
   useEffect(() => {
     refetch();
-  }, []);
+  }, [refetch]);
 
   useEffect(() => {
     if (!chaves || !Array.isArray(chaves) || !salas) return;
@@ -158,7 +160,7 @@ IChavesContentProps) {
   const loadingChaves = loading;
   const errorChaves = error;
   const refetchChaves = refetch;
-  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  const { salas, loading: loadingSalas, error: errorSalas } = useGenericGetSalas();
   const [chavesList, setChavesList] = useState<IChave[]>([]);
   const [chaveSelecionada, setChaveSelecionada] = useState<IChave | null>(null);
   const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
@@ -523,19 +525,19 @@ IChavesContentProps) {
   }
 
   // Mostra erro se algum hook falhar (exceto o erro de token já tratado no componente pai)
-  if (errorSalas || errorUsuarios) {
-    navigate("/login");
-  }
+  // if (errorSalas || errorUsuarios) {
+  //   navigate("/login");
+  // }
 
   // Tratamento específico para erro do hook useGetChaves que não seja falta de token
-  if (
-    errorChaves &&
-    typeof errorChaves === "object" &&
-    "message" in errorChaves &&
-    (errorChaves as any).message !== "Token não encontrado"
-  ) {
-    navigate("/login");
-  }
+  // if (
+  //   errorChaves &&
+  //   typeof errorChaves === "object" &&
+  //   "message" in errorChaves &&
+  //   (errorChaves as any).message !== "Token não encontrado"
+  // ) {
+  //   navigate("/login");
+  // }
 
   // const allUsuarios = userFilter(usuarioFilter, "todos", 1);
 
@@ -809,7 +811,7 @@ IChavesContentProps) {
                     e.target.value ? Number(e.target.value) : null
                   )
                 }
-                required
+                // required
               >
                 <option value="" disabled>
                   Selecione...

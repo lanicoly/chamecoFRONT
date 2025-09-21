@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
+import { ISala } from "../../pages/chaves";
 // import { IChave } from "../../pages/chaves";
 
 export interface IUsuario {
   autorizado_emprestimo: boolean;
-  chaves: IChave[];
+  salas_autorizadas: ISala[];
   id: number;
   id_cortex: number;
   nome: string;

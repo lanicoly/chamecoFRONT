@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { ISala } from "../../pages/chaves";
+import { Iusuario } from "../../pages/usuarios";
 
 export interface IApiResponseSalas {
   count: number;
@@ -12,6 +13,8 @@ export interface IApiResponseSalas {
 interface IUseSalasProps {
   nome?: string;
   blocoId?: number; 
+  nome_bloco?: string;
+  usuarios?: Iusuario[];
 }
 
 const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
@@ -28,7 +31,7 @@ const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
         let allSalas: ISala[] = [];
         let url = `/chameco/api/v1/salas/?pagination=50&nome=${nome}`;
         if (blocoId !== undefined) {
-          url += `&bloco_id=${blocoId}`;
+          url += `&bloco=${blocoId}`;
         }
         
         let next: string | null = url;

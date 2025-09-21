@@ -1,7 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 
-
 function AdicionarUsuarioForm({closeUserModal}: any) {
 
     const [nome, setNome] = useState<string>("");

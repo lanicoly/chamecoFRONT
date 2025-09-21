@@ -13,14 +13,19 @@ import { totalPaginas, userFilter } from "../utils/filters/users/userFilter";
 import { IUsuario } from "./chaves";
 import api from "../services/api";
 
-interface Ichaves {
-  id: number,
-  nome: string
-}
+// interface Ichaves {
+//   id: number,
+//   nome: string
+// }
 
+interface ISalas {
+  id: number;
+  nome: string;
+}
 export interface Iusuario {
   autorizado_emprestimo: boolean,
-  chaves: Ichaves[];
+  // chaves: Ichaves[];
+  salas_autorizadas: ISalas[];
   id: number,
   id_cortex: number,
   nome: string,

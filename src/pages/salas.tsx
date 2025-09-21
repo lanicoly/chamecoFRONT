@@ -13,12 +13,7 @@ import { Pesquisa } from "../components/pesquisa";
 import { useMemo } from "react";
 import useGenericGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
-
-export interface Sala {
-  id: number;
-  nome: string;
-  bloco: number;
-}
+import { ISala } from "./chaves";
 
 export function Salas() {
   const { blocoId } = useParams<{ blocoId: string }>();
@@ -50,12 +45,14 @@ export function Salas() {
   const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
 
   const { salas } = useGenericGetSalas({ blocoId: blocoIdNumber });
-  const [listaSalas, setListaSalas] = useState<Sala[]>([]);
+  const [listaSalas, setListaSalas] = useState<ISala[]>([]);
   useEffect(() => {
   if (salas) {
-    const salasConvertidas: Sala[] = salas.map((s) => ({
+    const salasConvertidas: ISala[] = salas.map((s) => ({
       ...s,
       bloco: Number(s.bloco), 
+      nome_bloco: s.nome_bloco ?? "",   
+      usuarios: s.usuarios ?? [],
     }));
     setListaSalas(salasConvertidas);
   }
@@ -71,9 +68,10 @@ export function Salas() {
 
   const [nome, setNome] = useState("");
 
-  const salasDoBloco = listaSalas.filter((sala) => {
-    return Number(sala.bloco) === Number(blocoIdNumber);
-  });
+  const salasDoBloco = listaSalas; 
+  console.log("Salas recebidas do backend:", listaSalas);
+
+
 
   const [isSalaModalOpen, setIsSalaModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -205,7 +203,7 @@ export function Salas() {
 }
 
   // adicionando função de editar informações de uma sala + função para requisição PUT
-  async function editarSalaAPI(salaSelecionada: Sala) {
+  async function editarSalaAPI(salaSelecionada: ISala) {
     try {
       const response = await api.put(`/chameco/api/v1/salas/${salaSelecionada.id}/`, {
         nome: salaSelecionada.nome,
@@ -229,7 +227,7 @@ export function Salas() {
     );
 
     if (salaEditada) {
-      const novaSala: Sala = {
+      const novaSala: ISala = {
         ...salaEditada,
         nome: nome || salaEditada.nome,
         bloco: Number(salaEditada.bloco), 
