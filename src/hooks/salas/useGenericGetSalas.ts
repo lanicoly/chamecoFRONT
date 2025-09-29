@@ -26,7 +26,7 @@ const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
 
       try {
         let allSalas: ISala[] = [];
-        let url = `/chameco/api/v1/salas/?pagination=50&nome=${nome}`;
+        let url = `/chameco/api/v1/salas/?pagination=10&nome=${nome}`;
         if (blocoId !== undefined) {
           url += `&bloco_id=${blocoId}`;
         }

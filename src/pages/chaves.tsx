@@ -58,7 +58,7 @@ interface IChavesContentProps {
 }
 
 export function Chaves() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
   const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
@@ -67,26 +67,26 @@ export function Chaves() {
   const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
 
   // Estado para verificar se o token existe antes de prosseguir
-  const [hasCheckedToken, setHasCheckedToken] = useState(false);
+  // const [hasCheckedToken, setHasCheckedToken] = useState(false);
   const [tokenExists, setTokenExists] = useState(false);
 
   // Verifica o token na montagem
-  useEffect(() => {
-    const currentToken = localStorage.getItem("authToken");
-    if (currentToken) {
-      setTokenExists(true);
-    } else {
-      // Se não houver token, pode redirecionar para login ou mostrar mensagem
-      console.log(
-        "Token não encontrado no localStorage ao montar o componente Chaves."
-      );
-      <BotaoAdicionar
-        text="Voltar para Login"
-        onClick={() => navigate("/login")}
-      />;
-    }
-    setHasCheckedToken(true);
-  }, [navigate]);
+  // useEffect(() => {
+  //   const currentToken = localStorage.getItem("authToken");
+  //   if (currentToken) {
+  //     setTokenExists(true);
+  //   } else {
+  //     // Se não houver token, pode redirecionar para login ou mostrar mensagem
+  //     console.log(
+  //       "Token não encontrado no localStorage ao montar o componente Chaves."
+  //     );
+  //     <BotaoAdicionar
+  //       text="Voltar para Login"
+  //       onClick={() => navigate("/login")}
+  //     />;
+  //   }
+  //   setHasCheckedToken(true);
+  // }, [navigate]);
 
   useEffect(() => {
     refetch();
@@ -116,21 +116,21 @@ export function Chaves() {
   const obterSalasCompletas = (): ISala[] => salas || [];
 
   // Se ainda não verificou ou se o token não existe, mostra estado de carregamento/erro
-  if (!hasCheckedToken) {
-    return <Spinner></Spinner>;
-  }
+  // if (!hasCheckedToken) {
+  //   return <Spinner></Spinner>;
+  // }
 
-  if (!tokenExists) {
-    return (
-      <div>
-        Erro: Usuário não autenticado. Por favor, faça login novamente.
-        <BotaoAdicionar
-          text="Voltar para Login"
-          onClick={() => navigate("/login")}
-        />
-      </div>
-    );
-  }
+  // if (!tokenExists) {
+  //   return (
+  //     <div>
+  //       Erro: Usuário não autenticado. Por favor, faça login novamente.
+  //       <BotaoAdicionar
+  //         text="Voltar para Login"
+  //         onClick={() => navigate("/login")}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   // Se o token existe, renderiza o componente principal que usa os hooks
   return (
