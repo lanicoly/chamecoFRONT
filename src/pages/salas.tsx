@@ -13,11 +13,16 @@ import { Pesquisa } from "../components/pesquisa";
 import { useMemo } from "react";
 import useGenericGetSalas from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
+import { IUsuario } from "./chaves";
+import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
+import { useRef } from "react";
 
 export interface Sala {
   id: number;
   nome: string;
   bloco: number;
+  nome_bloco: string;
+  usuarios: IUsuario[];
 }
 
 export function Salas() {
@@ -50,16 +55,22 @@ export function Salas() {
   const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
 
   const { salas } = useGenericGetSalas({ blocoId: blocoIdNumber });
+  const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
+    number[]
+  >([]);
   const [listaSalas, setListaSalas] = useState<Sala[]>([]);
+
   useEffect(() => {
-  if (salas) {
-    const salasConvertidas: Sala[] = salas.map((s) => ({
-      ...s,
-      bloco: Number(s.bloco), 
-    }));
-    setListaSalas(salasConvertidas);
-  }
-}, [salas]);
+    if (salas && Array.isArray(salas)) {
+      const salasConvertidas: Sala[] = salas.map((s) => ({
+        ...s,
+        bloco: Number(s.bloco),
+        nome_bloco: nomeDoBloco,
+        usuarios: s.usuarios || [],
+      }));
+      setListaSalas(salasConvertidas);
+    }
+  }, [salas, nomeDoBloco]);
 
   const itensPorPagina = 5;
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -86,10 +97,17 @@ export function Salas() {
   console.log("Salas:", salasDoBloco);
 
   const salasFiltradas = isSearching
-    ? salasDoBloco.filter((sala) =>
-        sala.nome.toLowerCase().includes(pesquisa.toLowerCase())
-      )
+    ? salasDoBloco.filter((sala) => {
+        const usuariosNomes =
+          sala.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
+
+        return (
+          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+          usuariosNomes.includes(pesquisa.toLowerCase())
+        );
+      })
     : salasDoBloco;
+
   const totalPaginas = Math.max(
     1,
     Math.ceil(salasFiltradas.length / itensPorPagina)
@@ -107,19 +125,50 @@ export function Salas() {
 
   function openEditModal() {
     if (salaSelecionada) {
+      setNome(salaAtual?.nome || "");
+      setUsuariosAutorizadosIds(salaAtual?.usuarios.map((u) => u.id) || []);
       setIsEditModalOpen(true);
     }
   }
 
   function closeEditModal() {
     setIsEditModalOpen(false);
+    setNome("");
+    setUsuariosAutorizadosIds([]);
   }
+
+  const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
+  const [usuarioFilter, setUsuarioFilter] = useState("");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const {
+    usuarios: allUsuarios,
+    // loading: loadingUsuarios,
+    // error: errorUsuarios,
+  } = useGenericGetUsuarios(usuarioFilter);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowUserDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // função para requisição do método post
   async function adicionarSalaAPI() {
     const novaSala = {
       nome,
       bloco: blocoNumero,
+      usuarios_autorizados: usuariosAutorizadosIds,
     };
     if (novaSala.nome === null) {
       alert("Preencha todos os campos obrigatórios.");
@@ -129,7 +178,13 @@ export function Salas() {
         const response = await api.post("/chameco/api/v1/salas/", novaSala);
 
         if (response) {
-          setListaSalas((prevSalas) => [...prevSalas, response.data]);
+          const salaCriada: Sala = {
+            ...response.data,
+            bloco: Number(response.data.bloco),
+            nome_bloco: nomeDoBloco,
+            usuarios: response.data.usuarios || [],
+          };
+          setListaSalas((prevSalas) => [...prevSalas, salaCriada]);
           setIsSuccesModalOpen(!isSuccesModalOpen);
           setNome("");
           closeSalaModal();
@@ -174,43 +229,47 @@ export function Salas() {
   }
 
   function removeSala(e: React.FormEvent) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (salaSelecionada === null) {
-    console.error("Nenhuma sala selecionada para excluir.");
-    return;
+    if (salaSelecionada === null) {
+      console.error("Nenhuma sala selecionada para excluir.");
+      return;
+    }
+
+    const salaSelecionadaObj = salasDoBloco.find(
+      (sala) => sala.id === salaSelecionada
+    );
+
+    if (!salaSelecionadaObj) {
+      console.error("Sala não encontrada.");
+      return;
+    }
+
+    const { id, nome, bloco } = salaSelecionadaObj;
+
+    setListaSalas((prevSalas) =>
+      prevSalas.filter((sala) => sala.id !== salaSelecionada)
+    );
+
+    setSalaSelecionada(null);
+
+    excluirSalaAPI(id, nome, Number(bloco)).catch((error) =>
+      console.error("Erro ao excluir sala:", error)
+    );
+    closeDeleteModal();
   }
-
-  const salaSelecionadaObj = salasDoBloco.find(
-    (sala) => sala.id === salaSelecionada
-  );
-
-  if (!salaSelecionadaObj) {
-    console.error("Sala não encontrada.");
-    return;
-  }
-
-  const { id, nome, bloco} = salaSelecionadaObj;
-
-  setListaSalas((prevSalas) =>
-    prevSalas.filter((sala) => sala.id !== salaSelecionada)
-  );
-
-  setSalaSelecionada(null);
-
-  excluirSalaAPI(id, nome, Number(bloco)).catch((error) =>
-    console.error("Erro ao excluir sala:", error)
-  );
-  closeDeleteModal();
-}
 
   // adicionando função de editar informações de uma sala + função para requisição PUT
   async function editarSalaAPI(salaSelecionada: Sala) {
     try {
-      const response = await api.put(`/chameco/api/v1/salas/${salaSelecionada.id}/`, {
-        nome: salaSelecionada.nome,
-        bloco: salaSelecionada.bloco,
-      });
+      const response = await api.put(
+        `/chameco/api/v1/salas/${salaSelecionada.id}/`,
+        {
+          nome: salaSelecionada.nome,
+          bloco: salaSelecionada.bloco,
+          usuarios_autorizados: usuariosAutorizadosIds,
+        }
+      );
 
       if (response.status === 200) {
         return response.data;
@@ -221,33 +280,47 @@ export function Salas() {
   }
 
   function editaSala(e: React.FormEvent) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (salaSelecionada !== null) {
-    const salaEditada = salasDoBloco.find(
-      (sala) => sala.id === salaSelecionada
-    );
-
-    if (salaEditada) {
-      const novaSala: Sala = {
-        ...salaEditada,
-        nome: nome || salaEditada.nome,
-        bloco: Number(salaEditada.bloco), 
-      };
-
-      setListaSalas((prev) =>
-        prev.map((s) => (s.id === novaSala.id ? novaSala : s))
+    if (salaSelecionada !== null) {
+      const salaEditada = salasDoBloco.find(
+        (sala) => sala.id === salaSelecionada
       );
 
-      editarSalaAPI(novaSala);
+      if (salaEditada) {
+        const novaSala: Sala = {
+          ...salaEditada,
+          nome: nome || salaEditada.nome,
+          bloco: Number(salaEditada.bloco),
+        };
+
+        editarSalaAPI(novaSala)
+          .then((salaAtualizada) => {
+            if (salaAtualizada) {
+              const salaConvertida: Sala = {
+                ...salaAtualizada,
+                bloco: Number(salaAtualizada.bloco),
+                nome_bloco: nomeDoBloco,
+                usuarios: salaAtualizada.usuarios || [],
+              };
+
+              setListaSalas((prev) =>
+                prev.map((s) =>
+                  s.id === salaConvertida.id ? salaConvertida : s
+                )
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Erro ao editar sala:", error);
+          });
+      }
+
+      setSalaSelecionada(null);
+      setNome("");
+      closeEditModal();
     }
-
-    setSalaSelecionada(null);
-    setNome("");
-    closeEditModal();
   }
-}
-
 
   function statusSala(id: number) {
     if (salaSelecionada !== null) {
@@ -277,6 +350,16 @@ export function Salas() {
     }
   }
 
+  const resetFormsAndCloseModals = () => {
+    setUsuariosAutorizadosIds([]);
+    setIsViewUsersModalOpen(false);
+  };
+
+  const openViewUsersModalHandler = (sala: Sala) => {
+    setSalaSelecionada(sala.id);
+    setIsViewUsersModalOpen(true);
+  };
+
   //Adicionando funcão de abrir e fechar modal de excluir salas
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -289,6 +372,10 @@ export function Salas() {
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
   }
+
+  const salaAtual = salaSelecionada
+    ? listaSalas.find((s) => s.id === salaSelecionada)
+    : null;
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
@@ -377,6 +464,105 @@ export function Salas() {
                     />
                   </div>
 
+                  <div
+                    className="justify-center items-center ml-[40px] mr-8"
+                    ref={dropdownRef}
+                  >
+                    <p className="text-[#192160] text-sm font-medium mb-1">
+                      Digite os usuários autorizados
+                    </p>
+                    <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
+                      {usuariosAutorizadosIds.map((id) => {
+                        const user: IUsuario | undefined = allUsuarios.find(
+                          (u) => u.id === id
+                        );
+                        return (
+                          <div
+                            key={id}
+                            className="flex items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs"
+                          >
+                            {user?.nome}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setUsuariosAutorizadosIds((prev) =>
+                                  prev.filter((uid) => uid !== id)
+                                )
+                              }
+                              className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none"
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        );
+                      })}
+                      <input
+                        type="text"
+                        className="flex-grow min-w-[50px] outline-none text-[#777DAA] text-xs"
+                        placeholder={
+                          usuariosAutorizadosIds.length > 0
+                            ? ""
+                            : "Buscar usuário..."
+                        }
+                        value={usuarioFilter}
+                        onChange={(e) => setUsuarioFilter(e.target.value)}
+                        onFocus={() => setShowUserDropdown(true)}
+                      />
+                    </div>
+
+                    {showUserDropdown && (
+                      <div className="relative">
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
+                          {allUsuarios
+                            .filter(
+                              (user) =>
+                                !usuariosAutorizadosIds.includes(user.id) &&
+                                user.nome
+                                  .toLowerCase()
+                                  .includes(usuarioFilter.toLowerCase())
+                            )
+                            .map((user) => (
+                              <div
+                                key={user.id}
+                                className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
+                                onClick={() => {
+                                  setUsuariosAutorizadosIds((prev) => [
+                                    ...prev,
+                                    user.id,
+                                  ]);
+                                  setUsuarioFilter("");
+                                }}
+                              >
+                                {user.nome}
+                              </div>
+                            ))}
+                          {allUsuarios.filter(
+                            (user) =>
+                              !usuariosAutorizadosIds.includes(user.id) &&
+                              user.nome
+                                .toLowerCase()
+                                .includes(usuarioFilter.toLowerCase())
+                          ).length === 0 && (
+                            <div className="p-2 text-[#777DAA] text-xs">
+                              Nenhum usuário encontrado
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex justify-center items-center mt-[10px] w-full">
                     <button
                       type="submit"
@@ -447,6 +633,110 @@ export function Salas() {
                       />
                     </div>
 
+                    <div
+                      className="justify-center items-center ml-[40px] mr-8"
+                      ref={dropdownRef}
+                    >
+                      <label className="text-[#192160] text-sm font-medium mb-1 block">
+                        Usuários Autorizados*
+                      </label>
+                      <div className="relative">
+                        <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
+                          {/* serve para retornar os usuários autorizados desta chave */}
+                          {usuariosAutorizadosIds.map((id) => {
+                            const user: IUsuario | undefined =
+                              allUsuarios?.find((u) => u.id === id);
+
+                            if (!user) return null; // evita erro se não encontrar o usuário
+
+                            return (
+                              <div
+                                key={id}
+                                className="flex flex-row items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs"
+                              >
+                                {user?.nome}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setUsuariosAutorizadosIds((prev) =>
+                                      prev.filter((uid) => uid !== id)
+                                    )
+                                  }
+                                  className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none"
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+                                      fill="currentColor"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            );
+                          })}
+
+                          <input
+                            type="search"
+                            className="flex-grow min-w-[50px] outline-none text-[#777DAA] text-xs"
+                            placeholder={
+                              usuariosAutorizadosIds.length > 0
+                                ? ""
+                                : "Buscar usuário..."
+                            }
+                            value={usuarioFilter}
+                            onChange={(e) => setUsuarioFilter(e.target.value)}
+                            onFocus={() => setShowUserDropdown(true)}
+                          />
+                        </div>
+
+                        {showUserDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
+                            {allUsuarios
+                              ?.filter(
+                                (user: IUsuario) =>
+                                  !usuariosAutorizadosIds.includes(user.id) &&
+                                  user.nome
+                                    .toLowerCase()
+                                    .includes(usuarioFilter.toLowerCase())
+                              )
+                              .map((user: IUsuario) => (
+                                <div
+                                  key={user.id}
+                                  className="p-2 hover:bg-gray-100 cursor-pointer text-[#777DAA] text-xs"
+                                  onClick={() => {
+                                    setUsuariosAutorizadosIds((prev) => [
+                                      ...prev,
+                                      user.id,
+                                    ]);
+                                    setUsuarioFilter("");
+                                  }}
+                                >
+                                  {user.nome}
+                                </div>
+                              ))}
+
+                            {allUsuarios?.filter(
+                              (user: IUsuario) =>
+                                !usuariosAutorizadosIds.includes(user.id) &&
+                                user.nome
+                                  .toLowerCase()
+                                  .includes(usuarioFilter.toLowerCase())
+                            ).length === 0 && (
+                              <div className="p-2 text-[#777DAA] text-xs">
+                                Nenhum usuário encontrado
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="flex justify-center items-center mt-[10px] w-full">
                       <button
                         type="submit"
@@ -479,54 +769,52 @@ export function Salas() {
               </button>
 
               {/* Adicionando pop up de deletar bloco */}
-                    {isDeleteModalOpen && (
-                      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                        <form
-                          onSubmit={removeSala}
-                          className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                        >
-                          <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                              EXCLUIR SALA
-                            </p>
-                            <button
-                              onClick={closeDeleteModal}
-                              type="button"
-                              className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                            >
-                              <X className=" text-[#192160]" />
-                            </button>
-                          </div>
-                          <TriangleAlert className="size-16 text-red-700" />
+              {isDeleteModalOpen && (
+                <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                  <form
+                    onSubmit={removeSala}
+                    className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                  >
+                    <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                      <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                        EXCLUIR SALA
+                      </p>
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                      >
+                        <X className=" text-[#192160]" />
+                      </button>
+                    </div>
+                    <TriangleAlert className="size-16 text-red-700" />
 
-                          <p className="text-center px-2">
-                            Essa ação é{" "}
-                            <strong className="font-semibold ">
-                              definitiva
-                            </strong>{" "}
-                            e não pode ser desfeita.{" "}
-                            <strong className="font-semibold">
-                              Tem certeza disso?
-                            </strong>
-                          </p>
-                          <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                            <button
-                              onClick={closeDeleteModal}
-                              type="button"
-                              className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                            >
-                              CANCELAR
-                            </button>
-                            <button
-                              type="submit"
-                              className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
-                            >
-                              EXCLUIR
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    )}
+                    <p className="text-center px-2">
+                      Essa ação é{" "}
+                      <strong className="font-semibold ">definitiva</strong> e
+                      não pode ser desfeita.{" "}
+                      <strong className="font-semibold">
+                        Tem certeza disso?
+                      </strong>
+                    </p>
+                    <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                      <button
+                        onClick={closeDeleteModal}
+                        type="button"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                      >
+                        CANCELAR
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-red-700 text-[#FFF]"
+                      >
+                        EXCLUIR
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
             {/* fim botões editar e excluir */}
 
@@ -537,6 +825,9 @@ export function Salas() {
                   <tr>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-24  ">
                       Nome da sala
+                    </th>
+                    <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">
+                      Usuários Autorizados
                     </th>
                     {/* <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 sm:flex-1 sm:w-[70%] w-[60%]">
                       Descrição da sala
@@ -555,9 +846,84 @@ export function Salas() {
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[96px] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
                         {sala.nome}
                       </td>
-                      {/* <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-2/4 max-w-[124px] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                        {sala.descricao}
-                      </td> */}
+                      <td className="align-center w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                        <button
+                          onClick={() => openViewUsersModalHandler(sala)}
+                          className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center p-2"
+                          // disabled={isLoading}
+                          title="Ver usuários autorizados"
+                        >
+                          <div className="flex justify-center items-center mr-1">
+                            <svg
+                              className="size-6 ml-2 mr-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 36 35"
+                              fill="none"
+                            >
+                              <g clipPath="url(#clip0_1781_438)">
+                                <path
+                                  d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z"
+                                  fill="white"
+                                />
+                              </g>
+                            </svg>
+                            <p className="break-words text-xs text-[#FFFF] text-center text-[0.8rem] font-semibold leading-normal truncate">
+                              {sala.usuarios?.length || 0} pessoa
+                              {(sala.usuarios?.length || 0) !== 1
+                                ? "s"
+                                : ""}{" "}
+                              autorizada
+                              {(sala.usuarios?.length || 0) !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                        </button>
+                      </td>
+
+                      {isViewUsersModalOpen && salaAtual && (
+                        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                          <div className="container flex flex-col gap-3 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
+                            <div className="flex justify-between items-center w-full">
+                              <h3 className="text-[#192160] text-center text-[20px] font-semibold flex-grow">
+                                USUÁRIOS AUTORIZADOS
+                              </h3>
+                              <button
+                                onClick={resetFormsAndCloseModals}
+                                type="button"
+                                className="p-1 rounded flex-shrink-0"
+                              >
+                                <X className="text-[#192160]" />
+                              </button>
+                            </div>
+
+                            <div className="rounded-md bg-[#B8BCE0] p-2 max-h-48 overflow-y-auto">
+                              {salaAtual?.usuarios?.length ? (
+                                salaAtual.usuarios.map((user: IUsuario) => (
+                                  <p
+                                    key={user.id}
+                                    className="text-sm text-[#192160] py-1"
+                                  >
+                                    - {user.nome}
+                                  </p>
+                                ))
+                              ) : (
+                                <p className="text-sm text-center text-gray-700">
+                                  Nenhum usuário autorizado.
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex justify-center items-center mt-2 w-full">
+                              <button
+                                onClick={resetFormsAndCloseModals}
+                                type="button"
+                                className="px-4 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-1 justify-center items-center bg-slate-500 text-[#FFF]"
+                              >
+                                FECHAR
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </tr>
                   ))}
                 </tbody>

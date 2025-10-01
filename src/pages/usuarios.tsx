@@ -11,15 +11,17 @@ import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsua
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
 import { totalPaginas, userFilter } from "../utils/userFilter";
 import { IUsuario } from "./chaves";
+import api from "../services/api";
 
-interface Ichaves {
+interface Isalas {
   id: number,
   nome: string
 }
 
 export interface Iusuario {
   autorizado_emprestimo: boolean,
-  chaves: Ichaves[];
+  // chaves: Ichaves[];
+  salas_autorizadas: Isalas[];
   id: number,
   id_cortex: number,
   nome: string,
@@ -31,11 +33,12 @@ export function Usuarios() {
 
 
     const {
-      usuarios,
+      // usuarios,
       page,
       nextPage,
       prevPage,
   } = useGenericGetUsers();
+  
 
   const itensPorPagina = 5;
   const paginaAtual = 1;
@@ -70,10 +73,10 @@ export function Usuarios() {
   }
 
   function openEditModal() {
-    const usuario: IUsuario | undefined = usuarios.find((user) => user.id === userSelecionado);
+    const usuario: IUsuario | undefined = filtrarUsuario.find((user) => user.id === userSelecionado);
     if (usuario) {
       setNome(usuario?.nome);
-      setEmail(usuario?.setor);
+      // setEmail(usuario?.setor);
       setTipo(usuario?.tipo);
       setIsEditModalOpen(true);
     }
@@ -99,27 +102,49 @@ export function Usuarios() {
     closeDeleteModal();
   }
 
-  function editaUser(e: React.FormEvent) {
-    e.preventDefault();
-    if (userSelecionado !== null) {
-      usuarios.map((usuario) => {
-        if (usuario.id === userSelecionado) {
-          if (nome) {
-            usuario.nome = nome;
-          }
-
-          if (tipo) {
-            usuario.tipo = tipo;
-          }
+  async function editarUsuarioAPI(userSelecionado: IUsuario) {
+    try {
+      const response = await api.put(
+        `/chameco/api/v1/usuarios/${userSelecionado.id}/`,
+        {
+          id_cortex: userSelecionado.id_cortex,
+          nome: userSelecionado.nome, 
+          tipo: userSelecionado.tipo
         }
-      });
-      setUserSelecionado(null);
+      );
+
+      if (response.status === 200) {
+        console.log("User editado", response.data);
+        return response.data;
+      }
+    } catch (error: unknown) {
+      console.error("Erro ao editar usuario.", error);
     }
-    setNome("");
-    setEmail("");
-    setTipo("");
-    closeEditModal();
   }
+
+  function editaUser(e: React.FormEvent) {
+  e.preventDefault();
+
+  if (userSelecionado !== null) {
+    const usuarioParaEditar = filtrarUsuario.find(u => u.id === userSelecionado);
+
+    if (usuarioParaEditar) {
+      // if (id_cortex) usuarioParaEditar.id_cortex = id_cortex; 
+      if (nome) usuarioParaEditar.nome = nome;
+      if (tipo) usuarioParaEditar.tipo = tipo;
+
+      editarUsuarioAPI(usuarioParaEditar); 
+    }
+
+    setUserSelecionado(null);
+  }
+
+  setNome("");
+  setEmail("");
+  setTipo("");
+  closeEditModal();
+}
+
 
   function statusSelecao(id: number) {
     if (userSelecionado !== null) {
