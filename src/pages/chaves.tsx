@@ -1,5 +1,5 @@
 import { Plus, X, TriangleAlert } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { PassadorPagina } from "../components/passadorPagina";
 import { Pesquisa } from "../components/pesquisa";
 import { BotaoAdicionar } from "../components/botaoAdicionar";
@@ -7,7 +7,7 @@ import { MenuTopo } from "../components/menuTopo";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import useGetSalas from "../hooks/salas/useGenericGetSalas";
-import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
+// import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGenericGetChaves from "../hooks/chaves/useGenericGetChaves";
 import { PopUpdeSucess } from "../components/popups/PopUpSucess";
 import { PopUpdeErro } from "../components/popups/PopUpErro";
@@ -16,6 +16,16 @@ import { AxiosError } from "axios";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { useMemo } from "react";
 
+export interface IUsuario {
+  autorizado_emprestimo: boolean;
+  chaves: IChave[];
+  id: number;
+  id_cortex: number;
+  nome: string;
+  setor: string;
+  tipo: string;
+  superusuario?: number;
+}
 export interface IChave {
   id: number;
   sala: number | null;
@@ -41,6 +51,7 @@ export interface ISala {
   nome: string;
   bloco?: string | number;
   nome_bloco: string;
+  usuarios?: IUsuario[];
 }
 
 interface ISalaMap {
@@ -59,7 +70,7 @@ interface IChavesContentProps {
 }
 
 export function Chaves() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
   const { salas } = useGetSalas();
@@ -68,30 +79,30 @@ export function Chaves() {
   const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
 
   // Estado para verificar se o token existe antes de prosseguir
-  const [hasCheckedToken, setHasCheckedToken] = useState(false);
-  const [tokenExists, setTokenExists] = useState(false);
+  // const [hasCheckedToken, setHasCheckedToken] = useState(false);
+  // const [tokenExists, setTokenExists] = useState(false);
 
   // Verifica o token na montagem
-  useEffect(() => {
-    const currentToken = localStorage.getItem("authToken");
-    if (currentToken) {
-      setTokenExists(true);
-    } else {
-      // Se não houver token, pode redirecionar para login ou mostrar mensagem
-      console.log(
-        "Token não encontrado no localStorage ao montar o componente Chaves."
-      );
-      <BotaoAdicionar
-        text="Voltar para Login"
-        onClick={() => navigate("/login")}
-      />;
-    }
-    setHasCheckedToken(true);
-  }, [navigate]);
+  // useEffect(() => {
+  //   const currentToken = localStorage.getItem("authToken");
+  //   if (currentToken) {
+  //     setTokenExists(true);
+  //   } else {
+  //     // Se não houver token, pode redirecionar para login ou mostrar mensagem
+  //     console.log(
+  //       "Token não encontrado no localStorage ao montar o componente Chaves."
+  //     );
+  //     <BotaoAdicionar
+  //       text="Voltar para Login"
+  //       onClick={() => navigate("/login")}
+  //     />;
+  //   }
+  //   setHasCheckedToken(true);
+  // }, [navigate]);
 
   useEffect(() => {
     refetch();
-  }, []);
+  }, [refetch]);
 
   useEffect(() => {
     if (!chaves || !Array.isArray(chaves) || !salas) return;
@@ -117,21 +128,21 @@ export function Chaves() {
   const obterSalasCompletas = (): ISala[] => salas || [];
 
   // Se ainda não verificou ou se o token não existe, mostra estado de carregamento/erro
-  if (!hasCheckedToken) {
-    return <Spinner></Spinner>;
-  }
+  // if (!hasCheckedToken) {
+  //   return <Spinner></Spinner>;
+  // }
 
-  if (!tokenExists) {
-    return (
-      <div>
-        Erro: Usuário não autenticado. Por favor, faça login novamente.
-        <BotaoAdicionar
-          text="Voltar para Login"
-          onClick={() => navigate("/login")}
-        />
-      </div>
-    );
-  }
+  // if (!tokenExists) {
+  //   return (
+  //     <div>
+  //       Erro: Usuário não autenticado. Por favor, faça login novamente.
+  //       <BotaoAdicionar
+  //         text="Voltar para Login"
+  //         onClick={() => navigate("/login")}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   // Se o token existe, renderiza o componente principal que usa os hooks
   return (
@@ -166,13 +177,13 @@ IChavesContentProps) {
   );
   const [disponivel, setDisponivel] = useState<boolean>(true);
   const [descricao, setDescricao] = useState<string>("");
-  const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
-    number[]
-  >([]);
+  // const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
+  //   number[]
+  // >([]);
   const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
+  // const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -185,14 +196,14 @@ IChavesContentProps) {
     string | null
   >(null);
   const itensPorPagina = 5;
-  const [usuarioFilter, setUsuarioFilter] = useState("");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const {
-    usuarios: allUsuarios,
-    loading: loadingUsuarios,
-    error: errorUsuarios,
-  } = useGenericGetUsuarios(usuarioFilter);
+  // const [usuarioFilter, setUsuarioFilter] = useState("");
+  // const [showUserDropdown, setShowUserDropdown] = useState(false);
+  // const dropdownRef = useRef<HTMLDivElement | null>(null);
+  // const {
+  //   usuarios: allUsuarios,
+  //   loading: loadingUsuarios,
+  //   error: errorUsuarios,
+  // } = useGenericGetUsuarios(usuarioFilter);
 
   const { bloco } = useGetBlocos();
 
@@ -227,21 +238,21 @@ IChavesContentProps) {
     }
   }, [chaves]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowUserDropdown(false);
-      }
-    }
+  // useEffect(() => {
+  //   function handleClickOutside(event: MouseEvent) {
+  //     if (
+  //       dropdownRef.current &&
+      // !dropdownRef.current.contains(event.target as Node)
+  //     ) {
+  //       setShowUserDropdown(false);
+  //     }
+  //   }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   const handleCloseFeedbackModals = () => {
     setTimeout(() => {
@@ -255,12 +266,12 @@ IChavesContentProps) {
     setSalaSelecionadaId(null);
     setDescricao("");
     setDisponivel(true);
-    setUsuariosAutorizadosIds([]);
+    // setUsuariosAutorizadosIds([]);
     setChaveSelecionada(null);
     setIsChavesModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteModalOpen(false);
-    setIsViewUsersModalOpen(false);
+    // setIsViewUsersModalOpen(false);
     setIsDescricaoModalOpen(false);
     setDescricaoSelecionada(null);
   };
@@ -287,7 +298,7 @@ IChavesContentProps) {
     const novaChavePayload = {
       sala: salaSelecionadaId,
       disponivel: true,
-      usuarios_autorizados: usuariosAutorizadosIds,
+      // usuarios_autorizados: usuariosAutorizadosIds,
       descricao: descricao || null,
       token: currentToken, // Usar token lido
     };
@@ -353,7 +364,7 @@ IChavesContentProps) {
     const chaveAtualizadaPayload = {
       sala: salaSelecionadaId,
       disponivel: disponivel,
-      usuarios_autorizados: usuariosAutorizadosIds,
+      // usuarios_autorizados: usuariosAutorizadosIds,
       descricao: descricao || null,
       token: currentToken,
     };
@@ -455,15 +466,15 @@ IChavesContentProps) {
       (s: ISala) => s.id === chave.sala
     );
     const termoPesquisa = pesquisa.toLowerCase();
-    const usuariosNomes =
-      chave.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
+    // const usuariosNomes =
+    //   chave.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
     const nomeBloco = getNomeBloco(chave.sala).toLowerCase();
     return (
       sala?.nome.toLowerCase().includes(termoPesquisa) ||
       chave.id?.toString().includes(termoPesquisa) ||
       (chave.descricao &&
         chave.descricao.toLowerCase().includes(termoPesquisa)) ||
-      usuariosNomes.includes(termoPesquisa) ||
+      // usuariosNomes.includes(termoPesquisa) ||
       nomeBloco.includes(termoPesquisa)
     );
   });
@@ -498,7 +509,7 @@ IChavesContentProps) {
     setSalaSelecionadaId(chave.sala);
     setDisponivel(chave.disponivel);
     setDescricao(chave.descricao || "");
-    setUsuariosAutorizadosIds(chave.usuarios?.map((u) => u.id) || []);
+    // setUsuariosAutorizadosIds(chave.usuarios?.map((u) => u.id) || []);
     setIsEditModalOpen(true);
   };
 
@@ -507,10 +518,10 @@ IChavesContentProps) {
     setIsDeleteModalOpen(true);
   };
 
-  const openViewUsersModalHandler = (chave: IChave) => {
-    setChaveSelecionada(chave);
-    setIsViewUsersModalOpen(true);
-  };
+  // const openViewUsersModalHandler = (chave: IChave) => {
+  //   setChaveSelecionada(chave);
+  //   setIsViewUsersModalOpen(true);
+  // };
 
   const openDescricaoModalHandler = (descricao: string | null | undefined) => {
     setDescricaoSelecionada(descricao || "Nenhuma descrição fornecida.");
@@ -518,12 +529,12 @@ IChavesContentProps) {
   };
 
   // Mostra carregamento enquanto hooks buscam dados
-  if (loadingChaves || loadingSalas || loadingUsuarios) {
+  if (loadingChaves || loadingSalas ) {
     return <Spinner></Spinner>;
   }
 
   // Mostra erro se algum hook falhar (exceto o erro de token já tratado no componente pai)
-  if (errorSalas || errorUsuarios) {
+  if (errorSalas ) {
     navigate("/login");
   }
 
@@ -589,9 +600,9 @@ IChavesContentProps) {
                   <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[17%]">
                     Bloco
                   </th>
-                  <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">
+                  {/* <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[20%]">
                     Usuários Autorizados
-                  </th>
+                  </th> */}
                   <th className="text-center text-[10px] sm:text-[12px] font-medium text-sky-900 p-2 w-[14%]">
                     Status da chave
                   </th>
@@ -650,7 +661,7 @@ IChavesContentProps) {
                       </td>
 
                       {/* USUÁRIOS - USA usuarios DIRETO DA API */}
-                      <td className="align-center w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                      {/* <td className="align-center w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words">
                         <button
                           onClick={() => openViewUsersModalHandler(chave)}
                           className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center p-2"
@@ -681,7 +692,7 @@ IChavesContentProps) {
                             </p>
                           </div>
                         </button>
-                      </td>
+                      </td> */}
 
                       {/* STATUS */}
                       <td
@@ -838,7 +849,7 @@ IChavesContentProps) {
               />
             </div>
 
-            <div className="w-full" ref={dropdownRef}>
+            {/* <div className="w-full" ref={dropdownRef}>
               <label className="text-[#192160] text-sm font-medium mb-1 block">
                 Usuários Autorizados
               </label>
@@ -932,7 +943,7 @@ IChavesContentProps) {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             <div className="flex justify-center items-center mt-2 w-full">
               <button
@@ -1012,14 +1023,14 @@ IChavesContentProps) {
               </div>
             )}
 
-            <div className="w-full" ref={dropdownRef}>
+            {/* <div className="w-full" ref={dropdownRef}>
               <label className="text-[#192160] text-sm font-medium mb-1 block">
                 Usuários Autorizados*
               </label>
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {/* serve para retornar os usuários autorizados desta chave */}
-                  {usuariosAutorizadosIds.map((id) => {
+                  {/* {usuariosAutorizadosIds.map((id) => {
                     const user: IUsuario | undefined = allUsuarios?.find(
                       (u) => u.id === id
                     );
@@ -1069,10 +1080,10 @@ IChavesContentProps) {
                     value={usuarioFilter}
                     onChange={(e) => setUsuarioFilter(e.target.value)}
                     onFocus={() => setShowUserDropdown(true)}
-                  />
-                </div>
+                  /> */}
+                {/* </div>  */}
 
-                {showUserDropdown && (
+                {/* {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
                       ?.filter(
@@ -1110,9 +1121,9 @@ IChavesContentProps) {
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
+                )} */}
+              {/* </div> */}
+            {/* </div> */}
 
             {/* botão de salvar usuários autorizados */}
             <div className="flex justify-center items-center mt-2 w-full">
@@ -1178,7 +1189,7 @@ IChavesContentProps) {
         </div>
       )}
 
-      {isViewUsersModalOpen && chaveSelecionada && (
+      {/* {isViewUsersModalOpen && chaveSelecionada && (
         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
           <div className="container flex flex-col gap-3 w-full p-4 h-auto rounded-[15px] bg-white mx-5 max-w-[400px]">
             <div className="flex justify-between items-center w-full">
@@ -1225,7 +1236,7 @@ IChavesContentProps) {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Modal Ver Descrição */}
       {isDescricaoModalOpen && (

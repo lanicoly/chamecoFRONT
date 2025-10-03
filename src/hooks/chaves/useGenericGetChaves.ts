@@ -34,7 +34,7 @@ interface IUseChavesProps {
   pagination?: number;
 }
 
-const useGenericGetChaves = ({ disponivel, pagination = 50 }: IUseChavesProps = {}) => {
+const useGenericGetChaves = ({ disponivel, pagination = 10 }: IUseChavesProps = {}) => {
   const [chaves, setChaves] = useState<IChave[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
