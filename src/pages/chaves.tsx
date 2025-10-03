@@ -18,7 +18,7 @@ import { useMemo } from "react";
 
 export interface IUsuario {
   autorizado_emprestimo: boolean;
-  chaves: IChave[];
+  salas: ISala[];
   id: number;
   id_cortex: number;
   nome: string;
@@ -33,17 +33,6 @@ export interface IChave {
   disponivel: boolean;
   usuarios: IUsuario[];
   descricao?: string | null;
-}
-
-export interface IUsuario {
-  autorizado_emprestimo: boolean;
-  chaves: IChave[];
-  id: number,
-  id_cortex: number,
-  nome: string,
-  setor: string,
-  tipo: string,
-  superusuario?: number
 }
 
 export interface ISala {
@@ -73,8 +62,8 @@ export function Chaves() {
   // const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
-  const { salas } = useGetSalas();
-  
+  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+
   // Estado para salas extras
   const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
 
