@@ -41,7 +41,7 @@ export const chavesFilter = (
 
       setChaves(results)
       totalPaginas = (Math.max(1, Math.ceil(count/itensPorPagina)));
-      console.log("Aqui as chaves:", results)
+      // console.log("Aqui as chaves:", results)
     } catch (error) {
       console.error("Erro na requisição:", error);
     } finally {

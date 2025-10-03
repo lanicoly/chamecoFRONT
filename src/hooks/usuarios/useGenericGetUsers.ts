@@ -29,12 +29,12 @@ const useGenericGetUsers = ( nome = "", ) => {
 
         const { results, next } = response.data;
 
-        console.log("Generic: ", results)
+        // console.log("Generic: ", results)
         setUsuarios(results)
         setTemMais(Boolean(next));
       } catch (err: any) {
         // ignora erros de cancelamento
-        console.log("erro ao listar usuários")
+        // console.log("erro ao listar usuários")
       }
     };
 

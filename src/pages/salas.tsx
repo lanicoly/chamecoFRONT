@@ -95,7 +95,7 @@ export function Salas() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  console.log("Salas:", salasDoBloco);
+  //   console.log("Salas:", salasDoBloco);
 
   const salasFiltradas = isSearching
     ? salasDoBloco.filter((sala) => {

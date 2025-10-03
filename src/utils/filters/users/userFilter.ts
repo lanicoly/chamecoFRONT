@@ -32,7 +32,7 @@ export const userFilter = (
 
       setUsuarios(results)
       totalPaginas = (Math.max(1, Math.ceil(count/itensPorPagina)));
-      console.log("Aqui:", results)
+      // console.log("Aqui:", results)
     } catch (error) {
       console.error("Erro na requisição:", error);
     } finally {

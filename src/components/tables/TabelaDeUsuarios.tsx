@@ -9,7 +9,7 @@ interface ItabelaDeUsuarios {
 
 export function TabelaDeUsuarios({ filtrarUsuario, userSelecionado, statusSelecao }: ItabelaDeUsuarios) {
 
-  console.log("Lista de usuários: ", filtrarUsuario)
+  // console.log("Lista de usuários: ", filtrarUsuario)
 
   return (
     <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">

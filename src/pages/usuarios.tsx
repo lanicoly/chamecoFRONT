@@ -32,13 +32,13 @@ export interface Iusuario {
 export function Usuarios() {
 
 
-    const {
-      // usuarios,
-      page,
-      nextPage,
-      prevPage,
+  const {
+    // usuarios,
+    page,
+    nextPage,
+    prevPage,
   } = useGenericGetUsers();
-  
+
 
   const itensPorPagina = 5;
   const paginaAtual = 1;
@@ -50,7 +50,7 @@ export function Usuarios() {
   const [_isSearching, setIsSearching] = useState(false);
 
   const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
-  console.log("lista de users: ", filtrarUsuario)
+  // console.log("lista de users: ", filtrarUsuario)
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -108,13 +108,13 @@ export function Usuarios() {
         `/chameco/api/v1/usuarios/${userSelecionado.id}/`,
         {
           id_cortex: userSelecionado.id_cortex,
-          nome: userSelecionado.nome, 
+          nome: userSelecionado.nome,
           tipo: userSelecionado.tipo
         }
       );
 
       if (response.status === 200) {
-        console.log("User editado", response.data);
+        //         console.log("User editado", response.data);
         return response.data;
       }
     } catch (error: unknown) {
@@ -123,27 +123,27 @@ export function Usuarios() {
   }
 
   function editaUser(e: React.FormEvent) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (userSelecionado !== null) {
-    const usuarioParaEditar = filtrarUsuario.find(u => u.id === userSelecionado);
+    if (userSelecionado !== null) {
+      const usuarioParaEditar = filtrarUsuario.find(u => u.id === userSelecionado);
 
-    if (usuarioParaEditar) {
-      // if (id_cortex) usuarioParaEditar.id_cortex = id_cortex; 
-      if (nome) usuarioParaEditar.nome = nome;
-      if (tipo) usuarioParaEditar.tipo = tipo;
+      if (usuarioParaEditar) {
+        // if (id_cortex) usuarioParaEditar.id_cortex = id_cortex; 
+        if (nome) usuarioParaEditar.nome = nome;
+        if (tipo) usuarioParaEditar.tipo = tipo;
 
-      editarUsuarioAPI(usuarioParaEditar); 
+        editarUsuarioAPI(usuarioParaEditar);
+      }
+
+      setUserSelecionado(null);
     }
 
-    setUserSelecionado(null);
+    setNome("");
+    setEmail("");
+    setTipo("");
+    closeEditModal();
   }
-
-  setNome("");
-  setEmail("");
-  setTipo("");
-  closeEditModal();
-}
 
 
   function statusSelecao(id: number) {
@@ -165,7 +165,7 @@ export function Usuarios() {
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
-      <MenuTopo text = "MENU" backRoute="/menu" />
+      <MenuTopo text="MENU" backRoute="/menu" />
 
       {/* parte informativa tela usuarios */}
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8  tablet:top-6 tablet:h-[480px] h-[90%]">
@@ -193,10 +193,10 @@ export function Usuarios() {
               <SelectTipoUsuario filtro={tipoUsuario} setFiltro={setTipoUsuario} />
             </div>
 
-            <BotaoAdicionar text = "ADICIONAR USUÁRIO" onClick={openUserModal}/>
+            <BotaoAdicionar text="ADICIONAR USUÁRIO" onClick={openUserModal} />
 
             {isUserModalOpen && (
-              <AdicionarUsuarioForm closeUserModal={closeUserModal}/>
+              <AdicionarUsuarioForm closeUserModal={closeUserModal} />
             )}
           </div>
 
@@ -222,16 +222,16 @@ export function Usuarios() {
 
               {/* Adicionando pop up de editar usuario */}
               {isEditModalOpen && (
-                  <PopUpEditarUsuario 
-                    editaUser={editaUser} 
-                    closeEditModal={closeEditModal}
-                    nome={nome}
-                    setNome={setNome}
-                    email={email}
-                    setEmail={setEmail}
-                    tipo={tipo}
-                    setTipo={setTipo}
-                  />
+                <PopUpEditarUsuario
+                  editaUser={editaUser}
+                  closeEditModal={closeEditModal}
+                  nome={nome}
+                  setNome={setNome}
+                  email={email}
+                  setEmail={setEmail}
+                  tipo={tipo}
+                  setTipo={setTipo}
+                />
               )}
               {/* Fim adicionando pop up de editar usuario */}
 
@@ -253,13 +253,13 @@ export function Usuarios() {
               </button>
 
               {isDeleteModalOpen && (
-                  <PopUpDeleteUsuario removeUser={removeUser} closeDeleteModal={closeDeleteModal}/>
+                <PopUpDeleteUsuario removeUser={removeUser} closeDeleteModal={closeDeleteModal} />
               )}
             </div>
 
-            <TabelaDeUsuarios 
-              filtrarUsuario={filtrarUsuario} 
-              userSelecionado={userSelecionado} 
+            <TabelaDeUsuarios
+              filtrarUsuario={filtrarUsuario}
+              userSelecionado={userSelecionado}
               statusSelecao={statusSelecao}
             />
 

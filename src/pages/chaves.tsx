@@ -137,8 +137,8 @@ function ChavesContent({
     {} as Record<number, ISalaMap>
   );
 
-  console.log("Salas", salas);
-  console.log("Chaves:", chaves);
+  //   console.log("Salas", salas);
+  //   console.log("Chaves:", chaves);
 
   useEffect(() => {
     if (chaves && Array.isArray(chaves)) {
