@@ -62,76 +62,6 @@ export function Chaves() {
   // const navigate = useNavigate();
 
   const { chaves, loading, error, refetch } = useGenericGetChaves();
-  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
-
-  // Estado para salas extras
-  const [salasExtras, setSalasExtras] = useState<ISala[]>([]);
-
-  // Estado para verificar se o token existe antes de prosseguir
-  // const [hasCheckedToken, setHasCheckedToken] = useState(false);
-  // const [tokenExists, setTokenExists] = useState(false);
-
-  // Verifica o token na montagem
-  // useEffect(() => {
-  //   const currentToken = localStorage.getItem("authToken");
-  //   if (currentToken) {
-  //     setTokenExists(true);
-  //   } else {
-  //     // Se não houver token, pode redirecionar para login ou mostrar mensagem
-  //     console.log(
-  //       "Token não encontrado no localStorage ao montar o componente Chaves."
-  //     );
-  //     <BotaoAdicionar
-  //       text="Voltar para Login"
-  //       onClick={() => navigate("/login")}
-  //     />;
-  //   }
-  //   setHasCheckedToken(true);
-  // }, [navigate]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    if (!chaves || !Array.isArray(chaves) || !salas) return;
-
-    const salaIdsNecessarios: number[] = [
-      ...new Set(
-        chaves
-          .map((chave) => chave.sala)
-          .filter((id): id is number => id !== null)
-      ),
-    ];
-
-    const salaIdsDisponiveis = salas
-      .map((sala) => sala.id)
-      .concat(salasExtras.map((s) => s.id));
-    const salaIdsFaltantes = salaIdsNecessarios.filter(
-      (id) => !salaIdsDisponiveis.includes(id)
-    );
-
-    if (salaIdsFaltantes.length === 0) return;
-  }, [chaves, salas, salasExtras]);
-
-  const obterSalasCompletas = (): ISala[] => salas || [];
-
-  // Se ainda não verificou ou se o token não existe, mostra estado de carregamento/erro
-  // if (!hasCheckedToken) {
-  //   return <Spinner></Spinner>;
-  // }
-
-  // if (!tokenExists) {
-  //   return (
-  //     <div>
-  //       Erro: Usuário não autenticado. Por favor, faça login novamente.
-  //       <BotaoAdicionar
-  //         text="Voltar para Login"
-  //         onClick={() => navigate("/login")}
-  //       />
-  //     </div>
-  //   );
-  // }
 
   // Se o token existe, renderiza o componente principal que usa os hooks
   return (
@@ -140,7 +70,6 @@ export function Chaves() {
       loading={loading}
       error={error}
       refetch={refetch}
-      salasCompletas={obterSalasCompletas()}
     />
   );
 }
@@ -151,7 +80,7 @@ function ChavesContent({
   error,
   refetch,
 }: // salasCompletas,
-IChavesContentProps) {
+  IChavesContentProps) {
   const navigate = useNavigate();
 
   const userType = localStorage.getItem("userType");
@@ -166,9 +95,7 @@ IChavesContentProps) {
   );
   const [disponivel, setDisponivel] = useState<boolean>(true);
   const [descricao, setDescricao] = useState<string>("");
-  // const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
-  //   number[]
-  // >([]);
+
   const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -185,14 +112,6 @@ IChavesContentProps) {
     string | null
   >(null);
   const itensPorPagina = 5;
-  // const [usuarioFilter, setUsuarioFilter] = useState("");
-  // const [showUserDropdown, setShowUserDropdown] = useState(false);
-  // const dropdownRef = useRef<HTMLDivElement | null>(null);
-  // const {
-  //   usuarios: allUsuarios,
-  //   loading: loadingUsuarios,
-  //   error: errorUsuarios,
-  // } = useGenericGetUsuarios(usuarioFilter);
 
   const { bloco } = useGetBlocos();
 
@@ -226,22 +145,6 @@ IChavesContentProps) {
       setChavesList(chaves);
     }
   }, [chaves]);
-
-  // useEffect(() => {
-  //   function handleClickOutside(event: MouseEvent) {
-  //     if (
-  //       dropdownRef.current &&
-      // !dropdownRef.current.contains(event.target as Node)
-  //     ) {
-  //       setShowUserDropdown(false);
-  //     }
-  //   }
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
 
   const handleCloseFeedbackModals = () => {
     setTimeout(() => {
@@ -506,24 +409,13 @@ IChavesContentProps) {
     setChaveSelecionada(chave);
     setIsDeleteModalOpen(true);
   };
-
-  // const openViewUsersModalHandler = (chave: IChave) => {
-  //   setChaveSelecionada(chave);
-  //   setIsViewUsersModalOpen(true);
-  // };
-
   const openDescricaoModalHandler = (descricao: string | null | undefined) => {
     setDescricaoSelecionada(descricao || "Nenhuma descrição fornecida.");
     setIsDescricaoModalOpen(true);
   };
 
-  // Mostra carregamento enquanto hooks buscam dados
-  if (loadingChaves || loadingSalas ) {
-    return <Spinner></Spinner>;
-  }
-
   // Mostra erro se algum hook falhar (exceto o erro de token já tratado no componente pai)
-  if (errorSalas ) {
+  if (errorSalas) {
     navigate("/login");
   }
 
@@ -606,9 +498,8 @@ IChavesContentProps) {
                   itensPaginados.map((chave) => (
                     <tr
                       key={chave.id}
-                      className={`hover:bg-[#d5d8f1] px-2 ${
-                        chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
-                      }`}
+                      className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
+                        }`}
                     >
                       {/* SALA - USA nome_sala DIRETO DA API */}
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
@@ -649,45 +540,10 @@ IChavesContentProps) {
                         </div>
                       </td>
 
-                      {/* USUÁRIOS - USA usuarios DIRETO DA API */}
-                      {/* <td className="align-center w-[20%] h-full tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                        <button
-                          onClick={() => openViewUsersModalHandler(chave)}
-                          className="border-1 border-[#B8BCE0] border-solid bg-[#565D8F] w-full h-full min-h-[40px] flex justify-center items-center p-2"
-                          disabled={isLoading}
-                          title="Ver usuários autorizados"
-                        >
-                          <div className="flex justify-center items-center mr-1">
-                            <svg
-                              className="size-6 ml-2 mr-2"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 36 35"
-                              fill="none"
-                            >
-                              <g clipPath="url(#clip0_1781_438)">
-                                <path
-                                  d="M18 14.5833C17.1347 14.5833 16.2888 14.3267 15.5694 13.846C14.8499 13.3653 14.2892 12.682 13.958 11.8826C13.6269 11.0831 13.5403 10.2035 13.7091 9.35481C13.8779 8.50615 14.2946 7.7266 14.9064 7.11474C15.5183 6.50289 16.2978 6.08621 17.1465 5.9174C17.9951 5.74859 18.8748 5.83523 19.6742 6.16636C20.4737 6.49749 21.1569 7.05825 21.6377 7.77771C22.1184 8.49718 22.375 9.34304 22.375 10.2083C22.375 11.3687 21.9141 12.4815 21.0936 13.3019C20.2731 14.1224 19.1603 14.5833 18 14.5833ZM25.2917 20.4167C25.2917 19.2563 24.8307 18.1435 24.0103 17.3231C23.1898 16.5026 22.077 16.0417 20.9167 16.0417H15.0833C13.923 16.0417 12.8102 16.5026 11.9897 17.3231C11.1693 18.1435 10.7083 19.2563 10.7083 20.4167V23.3333H13.625V20.4167C13.625 20.0299 13.7786 19.659 14.0521 19.3855C14.3256 19.112 14.6966 18.9583 15.0833 18.9583H20.9167C21.3034 18.9583 21.6744 19.112 21.9479 19.3855C22.2214 19.659 22.375 20.0299 22.375 20.4167V23.3333H25.2917V20.4167ZM18.0131 34.5115C17.2937 34.5119 16.5992 34.2477 16.0619 33.7692L10.596 29.1667H0.5V4.375C0.5 3.21468 0.960936 2.10188 1.78141 1.28141C2.60188 0.460936 3.71468 0 4.875 0L31.125 0C32.2853 0 33.3981 0.460936 34.2186 1.28141C35.0391 2.10188 35.5 3.21468 35.5 4.375V29.1667H25.506L19.8958 33.8042C19.3761 34.2626 18.7061 34.5142 18.0131 34.5115ZM3.41667 26.25H11.6621L17.9694 31.5656L24.459 26.25H32.5833V4.375C32.5833 3.98823 32.4297 3.61729 32.1562 3.3438C31.8827 3.07031 31.5118 2.91667 31.125 2.91667H4.875C4.48823 2.91667 4.11729 3.07031 3.8438 3.3438C3.57031 3.61729 3.41667 3.98823 3.41667 4.375V26.25Z"
-                                  fill="white"
-                                />
-                              </g>
-                            </svg>
-                            <p className="break-words text-xs text-[#FFFF] text-center text-[0.8rem] font-semibold leading-normal truncate">
-                              {chave.usuarios?.length || 0} pessoa
-                              {(chave.usuarios?.length || 0) !== 1
-                                ? "s"
-                                : ""}{" "}
-                              autorizada
-                              {(chave.usuarios?.length || 0) !== 1 ? "s" : ""}
-                            </p>
-                          </div>
-                        </button>
-                      </td> */}
-
                       {/* STATUS */}
                       <td
-                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${
-                          chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
-                        }`}
+                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
+                          }`}
                       >
                         {chave.disponivel ? "Disponível" : "Indisponível"}
                       </td>
@@ -750,7 +606,7 @@ IChavesContentProps) {
                   <tr>
                     <td colSpan={5} className="text-center p-4 text-gray-500">
                       {loadingChaves
-                        ? "Carregando chaves..."
+                        ? (<Spinner />)
                         : "Nenhuma chave encontrada."}
                     </td>
                   </tr>
@@ -1019,7 +875,7 @@ IChavesContentProps) {
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {/* serve para retornar os usuários autorizados desta chave */}
-                  {/* {usuariosAutorizadosIds.map((id) => {
+            {/* {usuariosAutorizadosIds.map((id) => {
                     const user: IUsuario | undefined = allUsuarios?.find(
                       (u) => u.id === id
                     );
@@ -1070,9 +926,9 @@ IChavesContentProps) {
                     onChange={(e) => setUsuarioFilter(e.target.value)}
                     onFocus={() => setShowUserDropdown(true)}
                   /> */}
-                {/* </div>  */}
+            {/* </div>  */}
 
-                {/* {showUserDropdown && (
+            {/* {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
                       ?.filter(
@@ -1111,7 +967,7 @@ IChavesContentProps) {
                     )}
                   </div>
                 )} */}
-              {/* </div> */}
+            {/* </div> */}
             {/* </div> */}
 
             {/* botão de salvar usuários autorizados */}
@@ -1245,7 +1101,7 @@ IChavesContentProps) {
             </div>
             <div className=" rounded-md bg-[#B8BCE0] p-2">
               {descricaoSelecionada &&
-              descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
+                descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
                 <p className="text-sm text-[#192160] py-1 whitespace-pre-wrap break-words">
                   {descricaoSelecionada}
                 </p>

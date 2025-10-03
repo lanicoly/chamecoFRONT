@@ -48,7 +48,7 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
 
   if (isValidToken === null) {
     return(
-      <Spinner></Spinner>
+      <Spinner className='h-screen'></Spinner>
     );
   }
 
