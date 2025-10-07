@@ -1,17 +1,17 @@
-import React, { createContext, useCallback, useContext, useEffect, useState} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 import { IChave } from "../pages/chaves";
 
 
 const ChavesContext = createContext<any>([]);
 
-export const ChavesProvider = React.memo(({children}: {children: React.ReactNode}) => {
+export const ChavesProvider = React.memo(({ children }: { children: React.ReactNode }) => {
     const [chaves, setChaves] = useState<IChave[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     const fetchChaves = useCallback(async () => {
-        console.log("Rodando chaves...")
+        // $&
         setLoading(true);
 
         const token = localStorage.getItem("authToken");
@@ -27,7 +27,7 @@ export const ChavesProvider = React.memo(({children}: {children: React.ReactNode
 
         } catch (error) {
             setError(error as Error)
-            console.log(error)
+            // $&
         } finally {
             setLoading(false)
         }
@@ -38,7 +38,7 @@ export const ChavesProvider = React.memo(({children}: {children: React.ReactNode
     }, [fetchChaves]);
 
     return (
-        <ChavesContext.Provider value={{chaves, loading, error, refetch: fetchChaves}}>
+        <ChavesContext.Provider value={{ chaves, loading, error, refetch: fetchChaves }}>
             {children}
         </ChavesContext.Provider>
     )

@@ -49,15 +49,19 @@ export function Emprestimos() {
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const superusuario = Number(localStorage.getItem("userData")) || null;
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
-  const { responsaveis } = useGetResponsaveis();
+  const { responsaveis } = useGetResponsaveis(superusuario);
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
-  const {chaves, refetch} = useChaves();
+  const { chaves, refetch } = useChaves();
 
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+  // console.log("Salas na tela de empréstimos: ", salas)
+  // console.log("superusuario: ", superusuario)
+
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -67,7 +71,7 @@ export function Emprestimos() {
       observacao: observacao,
     };
 
-    console.log("Dados:", JSON.stringify(novoEmprestimo));
+    // $&
 
     if (
       novoEmprestimo.chave === null ||
@@ -81,14 +85,14 @@ export function Emprestimos() {
         const response = await api.post("/chameco/api/v1/realizar-emprestimo/", novoEmprestimo);
 
         if (response) {
-            setOnReset(true); // ativa o reset
-            setTimeout(() => setOnReset(false), 100); // evita reset contínuo
-            setIsSuccesModalOpen(!isSuccesModalOpen);
-            setObservacao("");
+          setOnReset(true); // ativa o reset
+          setTimeout(() => setOnReset(false), 100); // evita reset contínuo
+          setIsSuccesModalOpen(!isSuccesModalOpen);
+          setObservacao("");
         }
-        
+
         //Colocando esse incremento no lugar do reload
-        
+
         setMensagemSucesso("Empréstimo realizado com sucesso!");
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
         refetch();
@@ -179,13 +183,13 @@ export function Emprestimos() {
   useEffect(() => {
     // para garantir que sempre terei as chaves nessa tela
     refetch()
-    console.log("atualizou o context")
+    // $&
   }, [])
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
-      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso}/>}
-      {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro}/>}
+      {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso} />}
+      {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
 
       {localStorage.getItem("userType") === "vigilante" ? <MenuTopo text="" backRoute="" /> : <MenuTopo text="MENU" backRoute="/menu" />}
 
@@ -425,11 +429,10 @@ export function Emprestimos() {
             <div className=" flex gap-2 flex-wrap justify-between items-center">
               <div className="flex items-center gap-4">
                 <h2
-                  className={`${
-                    exibirEmprestimosPendentes
-                      ? "text-red-500"
-                      : "text-[#0240E1]"
-                  } items-center font-semibold text-xl mt-2`}
+                  className={`${exibirEmprestimosPendentes
+                    ? "text-red-500"
+                    : "text-[#0240E1]"
+                    } items-center font-semibold text-xl mt-2`}
                 >
                   Empréstimos{" "}
                   {exibirEmprestimosPendentes ? "pendentes" : "concluídos"}
@@ -473,9 +476,8 @@ export function Emprestimos() {
 
             {/* tabela com emprestimo pendente */}
             <div
-              className={`overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96 ${
-                exibirEmprestimosPendentes ? "block" : "hidden"
-              }`}
+              className={`overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96 ${exibirEmprestimosPendentes ? "block" : "hidden"
+                }`}
             >
               <EmprestimosPendentes
                 new_emprestimos={emprestimosPendentes}

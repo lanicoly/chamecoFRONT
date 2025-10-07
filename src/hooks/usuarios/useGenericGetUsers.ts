@@ -10,7 +10,7 @@ export interface IApiResponse {
   results: IUsuario[];
 }
 
-const useGenericGetUsers = ( nome = "", ) => {
+const useGenericGetUsers = (nome = "",) => {
   const [page, setPage] = useState(1);
   const [usuarios, setUsuarios] = useState<IUsuario[]>([])
   const [temMais, setTemMais] = useState(true); // permanece interno como no seu código
@@ -29,12 +29,12 @@ const useGenericGetUsers = ( nome = "", ) => {
 
         const { results, next } = response.data;
 
-        console.log("Generic: ", results)
+        // $&
         setUsuarios(results)
         setTemMais(Boolean(next));
       } catch (err: any) {
         // ignora erros de cancelamento
-        console.log("erro ao listar usuários")
+        // $&
       }
     };
 

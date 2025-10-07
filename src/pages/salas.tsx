@@ -94,18 +94,18 @@ export function Salas() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  console.log("Salas:", salasDoBloco);
+  // $&
 
   const salasFiltradas = isSearching
     ? salasDoBloco.filter((sala) => {
-        const usuariosNomes =
-          sala.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
+      const usuariosNomes =
+        sala.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
 
-        return (
-          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-          usuariosNomes.includes(pesquisa.toLowerCase())
-        );
-      })
+      return (
+        sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        usuariosNomes.includes(pesquisa.toLowerCase())
+      );
+    })
     : salasDoBloco;
 
   const totalPaginas = Math.max(
@@ -554,10 +554,10 @@ export function Salas() {
                                 .toLowerCase()
                                 .includes(usuarioFilter.toLowerCase())
                           ).length === 0 && (
-                            <div className="p-2 text-[#777DAA] text-xs">
-                              Nenhum usuário encontrado
-                            </div>
-                          )}
+                              <div className="p-2 text-[#777DAA] text-xs">
+                                Nenhum usuário encontrado
+                              </div>
+                            )}
                         </div>
                       </div>
                     )}
@@ -728,10 +728,10 @@ export function Salas() {
                                   .toLowerCase()
                                   .includes(usuarioFilter.toLowerCase())
                             ).length === 0 && (
-                              <div className="p-2 text-[#777DAA] text-xs">
-                                Nenhum usuário encontrado
-                              </div>
-                            )}
+                                <div className="p-2 text-[#777DAA] text-xs">
+                                  Nenhum usuário encontrado
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>
@@ -838,9 +838,8 @@ export function Salas() {
                   {itensAtuais.map((sala) => (
                     <tr
                       key={sala.id}
-                      className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
-                        salaSelecionada === sala.id ? "bg-gray-200" : ""
-                      }`}
+                      className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${salaSelecionada === sala.id ? "bg-gray-200" : ""
+                        }`}
                       onClick={() => statusSala(sala.id)}
                     >
                       <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[96px] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">

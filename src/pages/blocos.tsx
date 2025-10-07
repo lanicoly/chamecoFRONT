@@ -105,9 +105,9 @@ export function Blocos() {
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
     ? blocos.filter(
-        (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
-        // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-      )
+      (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
+      // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+    )
     : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
@@ -167,7 +167,7 @@ export function Blocos() {
       );
 
       if (response.status === 200) {
-        console.log("Bloco editado", response.data);
+        // $&
         return response.data;
       }
     } catch (error: unknown) {
@@ -205,7 +205,7 @@ export function Blocos() {
       });
 
       if (response.status === 200) {
-        console.log("Bloco excluido", response.data);
+        // $&
         return response.data;
       }
     } catch (error: unknown) {

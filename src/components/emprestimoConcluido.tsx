@@ -8,7 +8,7 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
+import { buscarNomeSalaPorIdChave, makeBuscadorSalaPorChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
 // import { useNomeSolicitante } from "../utils/useNomeSolicitante";
@@ -229,6 +229,11 @@ export function EmprestimosConcluidos({
   function closeDeleteModal() {
     setIsDeleteModalOpen(false);
   }
+
+  const buscar = makeBuscadorSalaPorChave(chavesData, salas);
+  // console.log("salas: ", salas)
+  // $&
+  // $&
 
   return (
     <>
@@ -638,7 +643,7 @@ export function EmprestimosConcluidos({
         </thead>
         <tbody>
           {itensAtuaisConcluidos.length > 0 ? (
-            emprestimosFiltradosConcluidos
+            itensAtuaisConcluidos
               .slice(
                 (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
                 paginaAtualConcluidos * itensPorPaginaConcluidos
@@ -646,24 +651,16 @@ export function EmprestimosConcluidos({
               .map((emprestimo, index) => (
                 <tr key={index}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {buscarNomeSalaPorIdChave(
-                      emprestimo.chave,
-                      chavesData,
-                      salas
-                    )}
+                    {buscar(emprestimo.chave)}
                   </td>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
-                    {`Chave ${buscarNomeSalaPorIdChave(
-                      emprestimo.chave,
-                      chavesData,
-                      salas
-                    )}`}
+                    {`Chave ${buscar(emprestimo.chave)}`}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {emprestimo.usuario_solicitante != null
                       ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
-                        "Carregando..."
-                      : "Solicitante não informado"}
+                      "Carregando..."
+                      : "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {buscarNomeUsuarioPorId(

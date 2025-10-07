@@ -151,7 +151,7 @@ function ChavesContent({
   error,
   refetch,
 }: // salasCompletas,
-IChavesContentProps) {
+  IChavesContentProps) {
   const navigate = useNavigate();
 
   const userType = localStorage.getItem("userType");
@@ -218,8 +218,8 @@ IChavesContentProps) {
     {} as Record<number, ISalaMap>
   );
 
-  console.log("Salas", salas);
-  console.log("Chaves:", chaves);
+  // $&
+  // $&
 
   useEffect(() => {
     if (chaves && Array.isArray(chaves)) {
@@ -231,7 +231,7 @@ IChavesContentProps) {
   //   function handleClickOutside(event: MouseEvent) {
   //     if (
   //       dropdownRef.current &&
-      // !dropdownRef.current.contains(event.target as Node)
+  // !dropdownRef.current.contains(event.target as Node)
   //     ) {
   //       setShowUserDropdown(false);
   //     }
@@ -518,12 +518,12 @@ IChavesContentProps) {
   };
 
   // Mostra carregamento enquanto hooks buscam dados
-  if (loadingChaves || loadingSalas ) {
+  if (loadingChaves || loadingSalas) {
     return <Spinner></Spinner>;
   }
 
   // Mostra erro se algum hook falhar (exceto o erro de token já tratado no componente pai)
-  if (errorSalas ) {
+  if (errorSalas) {
     navigate("/login");
   }
 
@@ -606,9 +606,8 @@ IChavesContentProps) {
                   itensPaginados.map((chave) => (
                     <tr
                       key={chave.id}
-                      className={`hover:bg-[#d5d8f1] px-2 ${
-                        chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
-                      }`}
+                      className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
+                        }`}
                     >
                       {/* SALA - USA nome_sala DIRETO DA API */}
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
@@ -685,9 +684,8 @@ IChavesContentProps) {
 
                       {/* STATUS */}
                       <td
-                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${
-                          chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
-                        }`}
+                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
+                          }`}
                       >
                         {chave.disponivel ? "Disponível" : "Indisponível"}
                       </td>
@@ -1019,7 +1017,7 @@ IChavesContentProps) {
               <div className="relative">
                 <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                   {/* serve para retornar os usuários autorizados desta chave */}
-                  {/* {usuariosAutorizadosIds.map((id) => {
+            {/* {usuariosAutorizadosIds.map((id) => {
                     const user: IUsuario | undefined = allUsuarios?.find(
                       (u) => u.id === id
                     );
@@ -1070,9 +1068,9 @@ IChavesContentProps) {
                     onChange={(e) => setUsuarioFilter(e.target.value)}
                     onFocus={() => setShowUserDropdown(true)}
                   /> */}
-                {/* </div>  */}
+            {/* </div>  */}
 
-                {/* {showUserDropdown && (
+            {/* {showUserDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                     {allUsuarios
                       ?.filter(
@@ -1111,7 +1109,7 @@ IChavesContentProps) {
                     )}
                   </div>
                 )} */}
-              {/* </div> */}
+            {/* </div> */}
             {/* </div> */}
 
             {/* botão de salvar usuários autorizados */}
@@ -1245,7 +1243,7 @@ IChavesContentProps) {
             </div>
             <div className=" rounded-md bg-[#B8BCE0] p-2">
               {descricaoSelecionada &&
-              descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
+                descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
                 <p className="text-sm text-[#192160] py-1 whitespace-pre-wrap break-words">
                   {descricaoSelecionada}
                 </p>
