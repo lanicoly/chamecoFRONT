@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { userFilter } from '../../utils/userFilter';
+import { userFilter } from '../../utils/filters/users/userFilter';
 import { IUsuario } from './FilterableInputResponsaveis';
 import { buscarSolicitante } from '../../utils/buscarSolicitante';
 

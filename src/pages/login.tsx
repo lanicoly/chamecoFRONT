@@ -21,14 +21,6 @@ export function Login() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-  useEffect(() => {
-    const cpfInput = document.querySelector<HTMLInputElement>("#cpf");
-    const cleanup = cpfInput ? applyCpfMask(cpfInput) : undefined;
-
-    // Remove listener ao desmontar o componente
-    return () => cleanup?.();
-  }, []);
-
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
@@ -50,13 +42,12 @@ export function Login() {
     try {
       const response = await api.post("/chameco/api/v1/login/", body)
 
-      // console.log("Resposta do login:", response.data);
 
       if (response.data?.token) {
         localStorage.setItem("authToken", response.data.token);
 
         if (response.data.usuario) {
-          localStorage.setItem("userData", response.data.usuario);
+          localStorage.setItem("userData", JSON.stringify(response.data.usuario));
         }
 
         if (response.data.tipo) {
@@ -64,7 +55,7 @@ export function Login() {
         }
 
         const route = redirectUserTo(response.data.tipo?.trim());
-        // $&
+        // console.log(route)
         navigate(route); // redireciona
       }
 
@@ -137,7 +128,7 @@ export function Login() {
               {/* Div com o primeiro input - login */}
               <div className="relative ">
                 <p className="text-[#192160] text-[13px] font-medium mb-[5px]">
-                  Digite seu CPF
+                  Digite seu login
                 </p>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +163,10 @@ export function Login() {
                 <input
                   className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                   type="text"
-                  placeholder="CPF"
+                  placeholder="login"
+                  // inputMode="text"
+                  // pattern="[0-9]{11}"
+                  // minLength={11}
                   maxLength={14}
                   value={usuario}
                   onChange={(e) => setUsuario(e.target.value)}

@@ -11,6 +11,7 @@ import { PopUpError } from "../components/popups/PopUpError";
 import { AxiosError } from "axios";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { useEffect } from "react";
+import Spinner from "../components/spinner";
 
 export interface Blocos {
   id: number;
@@ -27,7 +28,7 @@ export function Blocos() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
-  const { bloco } = useGetBlocos();
+  const { bloco, loading } = useGetBlocos();
   useEffect(() => {
     if (bloco) {
       setBlocos(bloco);
@@ -167,7 +168,7 @@ export function Blocos() {
       );
 
       if (response.status === 200) {
-        // $&
+        //         console.log("Bloco editado", response.data);
         return response.data;
       }
     } catch (error: unknown) {
@@ -205,7 +206,7 @@ export function Blocos() {
       });
 
       if (response.status === 200) {
-        // $&
+        //         console.log("Bloco excluido", response.data);
         return response.data;
       }
     } catch (error: unknown) {
@@ -347,6 +348,7 @@ export function Blocos() {
         <div className="flex flex-col items-center w-full overflow-y-auto mt-[20px]">
           {/* Adicionando blocos de A-J */}
           <div className="flex flex-wrap justify-center gap-[75px] h-[270px] gap-y-[10px]">
+            {itensAtuais.length === 0 ? (<Spinner />) : ""}
             {itensAtuais.map((blocos) => (
               <button
                 onClick={() => openBlocoPopUp(blocos)}

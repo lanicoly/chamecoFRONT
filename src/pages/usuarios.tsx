@@ -9,7 +9,7 @@ import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuar
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
-import { totalPaginas, userFilter } from "../utils/userFilter";
+import { totalPaginas, userFilter } from "../utils/filters/users/userFilter";
 import { IUsuario } from "./chaves";
 import api from "../services/api";
 
@@ -50,7 +50,7 @@ export function Usuarios() {
   const [_isSearching, setIsSearching] = useState(false);
 
   const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
-  // $&
+  // console.log("lista de users: ", filtrarUsuario)
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -114,7 +114,7 @@ export function Usuarios() {
       );
 
       if (response.status === 200) {
-        // $&
+        //         console.log("User editado", response.data);
         return response.data;
       }
     } catch (error: unknown) {

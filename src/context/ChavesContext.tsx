@@ -11,7 +11,7 @@ export const ChavesProvider = React.memo(({ children }: { children: React.ReactN
     const [error, setError] = useState<Error | null>(null);
 
     const fetchChaves = useCallback(async () => {
-        // $&
+        // console.log("Rodando chaves...")
         setLoading(true);
 
         const token = localStorage.getItem("authToken");
@@ -27,7 +27,7 @@ export const ChavesProvider = React.memo(({ children }: { children: React.ReactN
 
         } catch (error) {
             setError(error as Error)
-            // $&
+            // console.log(error)
         } finally {
             setLoading(false)
         }

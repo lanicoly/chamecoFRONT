@@ -71,7 +71,7 @@ export function Emprestimos() {
       observacao: observacao,
     };
 
-    // $&
+    //     console.log("Dados:", JSON.stringify(novoEmprestimo));
 
     if (
       novoEmprestimo.chave === null ||
@@ -183,7 +183,7 @@ export function Emprestimos() {
   useEffect(() => {
     // para garantir que sempre terei as chaves nessa tela
     refetch()
-    // $&
+    // console.log("atualizou o context")
   }, [])
 
   return (
@@ -430,8 +430,8 @@ export function Emprestimos() {
               <div className="flex items-center gap-4">
                 <h2
                   className={`${exibirEmprestimosPendentes
-                    ? "text-red-500"
-                    : "text-[#0240E1]"
+                      ? "text-red-500"
+                      : "text-[#0240E1]"
                     } items-center font-semibold text-xl mt-2`}
                 >
                   Empréstimos{" "}

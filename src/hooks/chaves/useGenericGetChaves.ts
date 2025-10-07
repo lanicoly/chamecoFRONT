@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
+// import { IChave } from "../../pages/chaves";
 
 export interface IUsuario {
   autorizado_emprestimo: boolean;
@@ -69,7 +70,7 @@ const useGenericGetChaves = ({ disponivel, pagination = 10 }: IUseChavesProps = 
         .map(id => allChaves.find(c => c.id === id)) as IChave[];
 
       setChaves(uniqueChaves);
-      // $&
+      //       console.log(`Total de chaves carregadas: ${uniqueChaves.length}`);
     } catch (err) {
       console.error("Erro ao listar chaves:", err);
       setError(true);

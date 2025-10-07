@@ -1,4 +1,5 @@
 import { IUsuario } from "../../pages/chaves"
+import Spinner from "../spinner"
 
 interface ItabelaDeUsuarios {
   filtrarUsuario: IUsuario[],
@@ -8,7 +9,7 @@ interface ItabelaDeUsuarios {
 
 export function TabelaDeUsuarios({ filtrarUsuario, userSelecionado, statusSelecao }: ItabelaDeUsuarios) {
 
-  // $&
+  // console.log("Lista de usuários: ", filtrarUsuario)
 
   return (
     <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
@@ -26,25 +27,36 @@ export function TabelaDeUsuarios({ filtrarUsuario, userSelecionado, statusSeleca
             </th>
           </tr>
         </thead>
+        {/* <div className=" w-full absolute">
+          {filtrarUsuario.length === 0 ? <Spinner /> : ""}
+        </div> */}
         <tbody>
-          {filtrarUsuario.map((usuario: IUsuario) => (
-            <tr
-              key={usuario.id}
-              className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${userSelecionado === usuario.id ? "bg-gray-200" : ""
-                }`}
-              onClick={() => statusSelecao(usuario.id)}
-            >
-              <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%]">
-                {usuario.nome}
-              </td>
-              <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[30%] break-words flex-1">
-                {usuario.setor !== "" ? usuario.setor : "Não informado"}
-              </td>
-              <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
-                {usuario.tipo}
-              </td>
-            </tr>
-          ))}
+          {filtrarUsuario.length > 0 ? (
+            filtrarUsuario.map((usuario: IUsuario) => (
+              <tr
+                key={usuario.id}
+                className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${userSelecionado === usuario.id ? "bg-gray-200" : ""
+                  }`}
+                onClick={() => statusSelecao(usuario.id)}
+              >
+                <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[45%]">
+                  {usuario.nome}
+                </td>
+                <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[30%] break-words flex-1">
+                  {usuario.setor !== "" ? usuario.setor : "Não informado"}
+                </td>
+                <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[25%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
+                  {usuario.tipo}
+                </td>
+              </tr>
+            ))
+          ) : <tr>
+            <td colSpan={5} className="text-center p-4 text-gray-500">
+              {filtrarUsuario.length === 0
+                ? (<Spinner />)
+                : "Nenhum usuário encontrado."}
+            </td>
+          </tr>}
         </tbody>
       </table>
     </div>

@@ -44,11 +44,11 @@ export function PrivateRoute({ children, allowedTypes}: PrivateRoutePropsDTO) {
     };
 
     validateToken();
-  }, [token]);
+  }, []);
 
   if (isValidToken === null) {
     return(
-      <Spinner></Spinner>
+      <Spinner className='h-screen'></Spinner>
     );
   }
 

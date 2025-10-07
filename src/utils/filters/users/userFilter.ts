@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { IUsuario } from "../pages/chaves";
-import api from "../services/api";
+import { IUsuario } from "../../../pages/chaves";
+import api from "../../../services/api";
 
 const itensPorPagina = 5;
 
@@ -31,8 +31,13 @@ export const userFilter = (
       }
 
       setUsuarios(results)
+<<<<<<< HEAD:src/utils/userFilter.ts
       totalPaginas = (Math.max(1, Math.ceil(count / itensPorPagina)));
       // $&
+=======
+      totalPaginas = (Math.max(1, Math.ceil(count/itensPorPagina)));
+      // console.log("Aqui:", results)
+>>>>>>> main:src/utils/filters/users/userFilter.ts
     } catch (error) {
       console.error("Erro na requisição:", error);
     } finally {

@@ -190,7 +190,7 @@ export function EmprestimosPendentes({
 
   const closeDetalhesModal = () => {
     setIsDetalhesModalOpen(false);
-    // console.log("fechou");
+    //     console.log("fechou");
   };
 
   //funcao para editarObservacao
@@ -220,7 +220,7 @@ export function EmprestimosPendentes({
         return;
       }
 
-      // console.log("Empréstimo finalizado com sucesso!", response.data);
+      //       console.log("Empréstimo finalizado com sucesso!", response.data);
 
       //Colocando esse incremento no lugar do reload
       setRefreshCounter((contadorAtual) => contadorAtual + 1);
@@ -232,14 +232,14 @@ export function EmprestimosPendentes({
 
       if (status === 400) {
         const mensagem = "Empréstimo já finalizado!";
-        // $&
+        //         console.log(mensagem, statusResponse.response?.data);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(true);
         return;
       }
       if (status === 401) {
         const mensagem = "Empréstimo não encontrado!";
-        // $&
+        //         console.log(mensagem);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(true);
         return;
@@ -247,7 +247,7 @@ export function EmprestimosPendentes({
       if (status === 403) {
         const mensagem =
           "Você não tem permissão para finalizar este empréstimo!";
-        // $&
+        //         console.log(mensagem);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(true);
         return;
@@ -580,8 +580,8 @@ export function EmprestimosPendentes({
                 <tr key={index}>
                   <td
                     className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500 border-l-red-500"
-                      : "border-[#B8BCE0]"
+                        ? "border-t-red-500 border-b-red-500 border-l-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
@@ -595,8 +595,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0]"
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
@@ -605,8 +605,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0] "
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0] "
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
@@ -620,8 +620,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0]"
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
@@ -633,8 +633,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0]"
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     {emprestimo.horario_emprestimo
@@ -643,8 +643,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                      ? "border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0]"
+                        ? "border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     {emprestimo.horario_emprestimo
@@ -653,8 +653,8 @@ export function EmprestimosPendentes({
                   </td>
                   <td
                     className={`border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words ${emprestimoPendenteAlerta(emprestimo)
-                      ? " border-r-red-500 border-t-red-500 border-b-red-500"
-                      : "border-[#B8BCE0]"
+                        ? " border-r-red-500 border-t-red-500 border-b-red-500"
+                        : "border-[#B8BCE0]"
                       }`}
                   >
                     <div

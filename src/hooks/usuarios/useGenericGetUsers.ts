@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IUsuario } from "../../pages/chaves";
 import api from "../../services/api";
-import { totalPaginas } from "../../utils/userFilter";
+import { totalPaginas } from "../../utils/filters/users/userFilter";
 
 export interface IApiResponse {
   count: number;
@@ -29,12 +29,12 @@ const useGenericGetUsers = (nome = "",) => {
 
         const { results, next } = response.data;
 
-        // $&
+        // console.log("Generic: ", results)
         setUsuarios(results)
         setTemMais(Boolean(next));
       } catch (err: any) {
         // ignora erros de cancelamento
-        // $&
+        // console.log("erro ao listar usuários")
       }
     };
 

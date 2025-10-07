@@ -1,4 +1,4 @@
-import { totalPaginas } from "../utils/userFilter";
+import { totalPaginas } from "../utils/filters/users/userFilter";
 
 interface PassadorPaginaProps {
     voltarPagina: () => void;

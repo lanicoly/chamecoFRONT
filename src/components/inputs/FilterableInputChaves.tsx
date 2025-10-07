@@ -1,8 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { buscarNomeChavePorIdSala } from '../../utils/buscarNomeChavePorIdSala';
-import useGetSalas from '../../hooks/salas/useGenericGetSalas';
-import { useChaves } from '../../context/ChavesContext';
 import { IChave } from '../../pages/chaves';
+import { chavesFilter } from '../../utils/filters/chaves/chavesFilter';
 
 
 export interface IoptionChaves {
@@ -13,7 +11,6 @@ export interface IoptionChaves {
 }
 
 interface IdropdownResponsavelProps {
-  // items: IoptionChaves[];
   onSelectItem: (id: number) => void, // Adicionei esta propriedade para o callback
   reset: boolean
 }
@@ -21,28 +18,26 @@ interface IdropdownResponsavelProps {
 
 export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
 
-  const {chaves} = useChaves();
-  const {salas} = useGetSalas();
-
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [_selectedOption, setSelectedOption] = useState<number | null>(null);
+  const chaves: IChave[] = chavesFilter(searchTerm, "todos", 1)
+
 
   const filterdItems = useMemo<IChave[]>(() => {
-    return chaves?.filter((item: IChave) => item.disponivel && buscarNomeChavePorIdSala(item.sala, chaves as IChave[], salas).toLowerCase().includes(searchTerm.toLowerCase()));
+    return chaves?.filter((chave: IChave) => chave.disponivel && chave.nome_sala.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IChave) => {
-    setSelectedOption(option.id);
-    setSearchTerm(buscarNomeChavePorIdSala(option.sala, chaves, salas));
+  const handleSelect = (chave: IChave) => {
+    setSelectedOption(chave.id);
+    setSearchTerm(chave.nome_sala);
     setIsOpen(false);
-    onSelectItem(option.id); // Chama o callback com o ID da chave selecionada
+    onSelectItem(chave.id); // Chama o callback com o ID da chave selecionada
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setSearchTerm(Number(e.target.value));
     setSearchTerm(e.target.value);
     setIsOpen(true); // Sempre abrir o dropdown ao digitar
   };
@@ -93,13 +88,13 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
 
       {isOpen && filterdItems.length > 0 && (
         <div className="absolute mt-1 w-full bg-white rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
-          {filterdItems.map((option) => (
+          {filterdItems.map((chave) => (
             <div
-              key={option.id}
-              onClick={() => handleSelect(option)}
+              key={chave.id}
+              onClick={() => handleSelect(chave)}
               className="cursor-pointer px-3 py-2 hover:bg-gray-100 text-[#646999]"
             >
-              {buscarNomeChavePorIdSala(option.sala, chaves as IChave[], salas)}
+              {chave.nome_sala}
             </div>
           ))}
         </div>
