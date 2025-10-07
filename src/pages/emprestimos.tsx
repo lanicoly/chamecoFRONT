@@ -49,15 +49,19 @@ export function Emprestimos() {
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
+  const superusuario = Number(localStorage.getItem("userData")) || null;
 
   // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
-  const { responsaveis } = useGetResponsaveis();
+  const { responsaveis } = useGetResponsaveis(superusuario);
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   const { chaves, refetch } = useChaves();
 
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+  // console.log("Salas na tela de empréstimos: ", salas)
+  // console.log("superusuario: ", superusuario)
+
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {

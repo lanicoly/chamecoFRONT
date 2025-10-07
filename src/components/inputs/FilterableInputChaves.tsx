@@ -1,9 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { buscarNomeChavePorIdSala } from '../../utils/buscarNomeChavePorIdSala';
-import useGetSalas from '../../hooks/salas/useGenericGetSalas';
-import { useChaves } from '../../context/ChavesContext';
 import { IChave } from '../../pages/chaves';
-import useGenericGetChaves from '../../hooks/chaves/useGenericGetChaves';
 import { chavesFilter } from '../../utils/filters/chaves/chavesFilter';
 
 

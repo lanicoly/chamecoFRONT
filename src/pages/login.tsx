@@ -21,14 +21,6 @@ export function Login() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   const cpfInput = document.querySelector<HTMLInputElement>("#cpf");
-  //   const cleanup = cpfInput ? applyCpfMask(cpfInput) : undefined;
-
-  //   // Remove listener ao desmontar o componente
-  //   return () => cleanup?.();
-  // }, []);
-
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
@@ -50,7 +42,6 @@ export function Login() {
     try {
       const response = await api.post("/chameco/api/v1/login/", body)
 
-      //         console.log("Resposta do login:", response.data);
 
       if (response.data?.token) {
         localStorage.setItem("authToken", response.data.token);
@@ -181,7 +172,6 @@ export function Login() {
                   onChange={(e) => setUsuario(e.target.value)}
                   id="cpf"
                 />
-
                 {errorUsuario && (
                   <div className="text-red-500 items-center text-[12px] tablet:m-[5px] tablet:text-[14px] font-medium text-center">
                     {errorUsuario}

@@ -10,7 +10,7 @@ import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
-import { buscarNomeSalaPorIdChave } from "../utils/buscarNomeSalaPorIdChave";
+import { buscarNomeSalaPorIdChave, makeBuscadorSalaPorChave } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 // import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
@@ -277,6 +277,9 @@ export function EmprestimosPendentes({
 
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
+
+  const buscar = makeBuscadorSalaPorChave(chavesData, salasData);
+
 
   return (
     <>
@@ -582,11 +585,12 @@ export function EmprestimosPendentes({
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeSalaPorIdChave(
+                      {/* {buscarNomeSalaPorIdChave(
                         emprestimo.chave,
                         chavesData,
                         salasData
-                      )}
+                      )} */}
+                      {buscar(emprestimo.chave)}
                     </p>
                   </td>
                   <td
@@ -596,11 +600,7 @@ export function EmprestimosPendentes({
                       }`}
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {`Chave ${buscarNomeSalaPorIdChave(
-                        emprestimo.chave,
-                        chavesData,
-                        salasData
-                      )}`}
+                      {`Chave ${buscar(emprestimo.chave)}`}
                     </p>
                   </td>
                   <td

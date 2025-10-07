@@ -19,7 +19,7 @@ export const userFilter = (
 
   const fetchUsuarios = async (pesquisa: string, tipo?: string, page?: number) => {
     setLoading(true);
-    
+
     try {
       const response = await api.get(
         `/chameco/api/v1/usuarios/?pagination=${5}&page=${page}&nome=${pesquisa}&tipo=${tipo}`
@@ -31,8 +31,13 @@ export const userFilter = (
       }
 
       setUsuarios(results)
+<<<<<<< HEAD:src/utils/userFilter.ts
+      totalPaginas = (Math.max(1, Math.ceil(count / itensPorPagina)));
+      // $&
+=======
       totalPaginas = (Math.max(1, Math.ceil(count/itensPorPagina)));
       // console.log("Aqui:", results)
+>>>>>>> main:src/utils/filters/users/userFilter.ts
     } catch (error) {
       console.error("Erro na requisição:", error);
     } finally {
@@ -53,9 +58,9 @@ export const userFilter = (
     if (pesquisa || tipoUsuario) {
 
       if (tipoUsuario === "todos") {
-          fetchUsuarios(pesquisa, "", page);
+        fetchUsuarios(pesquisa, "", page);
       } else {
-          fetchUsuarios(pesquisa, tipoUsuario, page);
+        fetchUsuarios(pesquisa, tipoUsuario, page);
       }
     }
   }, [pesquisa, tipoUsuario, page]);
@@ -64,7 +69,7 @@ export const userFilter = (
   if (usuarios) {
     return usuarios?.filter((usuario) => {
       const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());
-    //   const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
+      //   const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
       const filtroMatch = tipoUsuario === "todos" || usuario.tipo.toLowerCase() === tipoUsuario.toLowerCase();
 
       if (!pesquisa) {
