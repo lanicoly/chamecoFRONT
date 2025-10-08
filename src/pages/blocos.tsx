@@ -246,8 +246,8 @@ export function Blocos() {
     setIsDeleteModalOpen(false);
   }
 
-  const handleBlockSelect = (blocoSelecionado: Blocos) => {
-    navigate(`/salas/${blocoSelecionado.id}`);
+  const handleBlockSelect = (blocoSelecionado: Blocos, nome_bloco: string) => {
+    navigate(`/salas/${blocoSelecionado.id}/${nome_bloco}`);
   };
 
   return (
@@ -383,7 +383,7 @@ export function Blocos() {
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
                       className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
-                      onClick={() => handleBlockSelect(blocoSelecionado)}
+                      onClick={() => handleBlockSelect(blocoSelecionado, blocoSelecionado.nome)}
                     >
                       <svg
                         width="25"
@@ -455,18 +455,6 @@ export function Blocos() {
                               onChange={(e) => setNome(e.target.value)}
                             />
                           </div>
-
-                          {/* <div className="justify-center items-center ml-[40px] mr-8">
-                            <p className="text-[#192160] text-sm font-medium mb-1 mt-2">
-                              Informe a nova descrição do bloco
-                            </p>
-                            <textarea
-                              className="w-full px-2 py-1 rounded-[10px] border border-[#646999] text-[#777DAA] focus:outline-none text-xs font-medium"
-                              placeholder="Descrição do detalhamento sobre a sala"
-                              value={descricao}
-                              onChange={(e) => setDescricao(e.target.value)}
-                            />
-                          </div> */}
 
                           <div className="flex justify-center items-center mt-[10px] w-full">
                             <button

@@ -18,6 +18,7 @@ import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 import { useChaves } from "../context/ChavesContext";
 import { AxiosError } from "axios";
 
+
 export interface Iemprestimo {
   id?: number | null;
   sala?: number | null;
@@ -38,7 +39,7 @@ export interface FiltroEmprestimo {
 }
 
 export function Emprestimos() {
-
+  // const tipo = Number(localStorage.getItem("userType"));
   const pesquisa = ""
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
@@ -48,20 +49,18 @@ export function Emprestimos() {
 
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
-  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
-  const superusuario = Number(localStorage.getItem("userData")) || null;
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);;
 
-  // Esses hooks estão acessando a API 16 vezes, o que não é necessário.
-  const { responsaveis } = useGetResponsaveis(superusuario);
+
+  // chame sempre o MESMO hook; mude só o parâmetro
+  const { responsaveis } = useGetResponsaveis();
+
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
   const { chaves, refetch } = useChaves();
 
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
-  // console.log("Salas na tela de empréstimos: ", salas)
-  // console.log("superusuario: ", superusuario)
-
 
   async function criarEmprestimo() {
     const novoEmprestimo: Iemprestimo = {
@@ -430,8 +429,8 @@ export function Emprestimos() {
               <div className="flex items-center gap-4">
                 <h2
                   className={`${exibirEmprestimosPendentes
-                      ? "text-red-500"
-                      : "text-[#0240E1]"
+                    ? "text-red-500"
+                    : "text-[#0240E1]"
                     } items-center font-semibold text-xl mt-2`}
                 >
                   Empréstimos{" "}

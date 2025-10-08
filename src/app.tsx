@@ -34,7 +34,7 @@ export function App() {
           }
         />
         <Route
-          path="/salas/:blocoId"
+          path="/salas/:blocoId/:nomeBloco"
           element={
             <PrivateRoute allowedTypes={["admin", "diretor.geral"]}>
               <Salas />

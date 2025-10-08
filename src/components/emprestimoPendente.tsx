@@ -261,7 +261,7 @@ export function EmprestimosPendentes({
     setTimeout(() => {
       setIsSuccessModalOpen(false);
       // window.location.reload();
-    }, 5000);
+    }, 2000);
   };
 
   function emprestimoPendenteAlerta(emprestimo: {

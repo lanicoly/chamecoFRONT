@@ -27,33 +27,32 @@ export interface Sala {
 }
 
 export function Salas() {
-  const { blocoId } = useParams<{ blocoId: string }>();
+  const { blocoId, nomeBloco: blocoNome } = useParams<{ blocoId: string, nomeBloco: string }>();
 
   const blocoIdNumber = blocoId ? Number(blocoId) : undefined;
 
   const blocoNumero = blocoId ? Number(blocoId) : 1;
 
   const { bloco } = useGetBlocos();
+  const [blocosMap, setBlocosMap] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    if (!bloco?.length) return;
+    const m = new Map<number, string>();
+    for (const b of bloco) m.set(b.id, b.nome.toUpperCase());
+    setBlocosMap(m);
+  }, [bloco]);
 
   function nomeBloco(
     idBloco: number | null | undefined,
-    blocosMap: Record<number, string>
-  ): string {
-    return idBloco != null
-      ? blocosMap[idBloco]?.toUpperCase() || "BLOCO DESCONHECIDO"
-      : "BLOCO DESCONHECIDO";
+    map: Map<number, string>
+  ) {
+    if (idBloco == null) return "BLOCO DESCONHECIDO";
+    return map.get(idBloco) ?? "CARREGANDO...";
   }
 
-  const blocosMap = useMemo(
-    () =>
-      bloco.reduce((map, bloco) => {
-        map[bloco.id] = bloco.nome;
-        return map;
-      }, {} as Record<number, string>),
-    [bloco]
-  );
-
   const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
+
 
   const { salas, loading } = useGenericGetSalas({ blocoId: blocoIdNumber });
   const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
@@ -391,7 +390,7 @@ export function Salas() {
         {/* cabeçalho tela salas */}
         <div className="flex w-full gap-2">
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
-            {nomeDoBloco}
+            {blocoNome ? blocoNome : "CARREGANDO..."}
           </h1>
         </div>
         {/* fim cabeçalho tela salas */}
