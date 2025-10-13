@@ -17,7 +17,7 @@ import { EmprestimosPendentes } from "../components/emprestimoPendente";
 import { EmprestimosConcluidos } from "../components/emprestimoConcluido";
 import { useChaves } from "../context/ChavesContext";
 import { AxiosError } from "axios";
-
+import { useRef } from "react";
 
 export interface Iemprestimo {
   id?: number | null;
@@ -40,17 +40,22 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos() {
   // const tipo = Number(localStorage.getItem("userType"));
-  const pesquisa = ""
+  const pesquisa = "";
 
-  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(null);
-  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<number | null>(null);
-  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<number | null>(null);
+  const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
+    null
+  );
+  const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<
+    number | null
+  >(null);
+  const [responsavelSelecionadoId, setResponsavelSelecionadoId] = useState<
+    number | null
+  >(null);
   const [observacao, setObservacao] = useState<string | null>();
 
   const [onReset, setOnReset] = useState(false);
   const [isSuccesModalOpen, setIsSuccesModalOpen] = useState(false);
-  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);;
-
+  const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
 
   // chame sempre o MESMO hook; mude só o parâmetro
   const { responsaveis } = useGetResponsaveis();
@@ -81,7 +86,10 @@ export function Emprestimos() {
       return;
     } else {
       try {
-        const response = await api.post("/chameco/api/v1/realizar-emprestimo/", novoEmprestimo);
+        const response = await api.post(
+          "/chameco/api/v1/realizar-emprestimo/",
+          novoEmprestimo
+        );
 
         if (response) {
           setOnReset(true); // ativa o reset
@@ -96,10 +104,13 @@ export function Emprestimos() {
         setRefreshCounter((contadorAtual) => contadorAtual + 1);
         refetch();
       } catch (error: unknown) {
-
         let mensagem = "Erro ao criar o empréstimo.";
 
-        if (error && typeof error === "object" && (error as AxiosError).isAxiosError) {
+        if (
+          error &&
+          typeof error === "object" &&
+          (error as AxiosError).isAxiosError
+        ) {
           const axiosError = error as AxiosError;
           mensagem = (axiosError.response?.data as any)?.message || mensagem;
         }
@@ -107,7 +118,6 @@ export function Emprestimos() {
         console.error("Erro ao criar o empréstimo:", error);
         setMensagemErro(mensagem);
         setIsPopUpErrorOpen(!isPopUpErrorOpen);
-
       } finally {
         handleCloseMOdalAndReload();
       }
@@ -121,15 +131,15 @@ export function Emprestimos() {
     }, 2000);
   };
 
-  const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
+  // const [isObservacaoModalOpen, setIsObservacaoModalOpen] = useState(false);
 
-  function openObservacaoModal() {
-    setIsObservacaoModalOpen(true);
-  }
+  // function openObservacaoModal() {
+  //   setIsObservacaoModalOpen(true);
+  // }
 
-  function closeObservacaoModal() {
-    setIsObservacaoModalOpen(false);
-  }
+  // function closeObservacaoModal() {
+  //   setIsObservacaoModalOpen(false);
+  // }
 
   // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -144,15 +154,8 @@ export function Emprestimos() {
 
   const [editarObservacao, setEditarObservacao] = useState("");
 
-  function editarObservacaoCriacao(e: React.FormEvent) {
-    e.preventDefault();
-    setObservacao(editarObservacao);
-    setEditarObservacao("");
-    setIsEditModalOpen(false);
-  }
-
-  // Deixando o botão de alternar entre empréstimos pendentes e concluídos funcional
-  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] = useState(true);
+  const [exibirEmprestimosPendentes, setExibirEmprestimosPendentes] =
+    useState(true);
   const alternarEmprestimos = () => {
     setExibirEmprestimosPendentes(
       (exibirEmprestimoAtual) => !exibirEmprestimoAtual
@@ -181,16 +184,62 @@ export function Emprestimos() {
 
   useEffect(() => {
     // para garantir que sempre terei as chaves nessa tela
-    refetch()
+    refetch();
     // console.log("atualizou o context")
-  }, [])
+  }, []);
+
+  const chavesRef = useRef<HTMLElementTagNameMap["td"]>(null);
+  const solicitanteRef = useRef<HTMLElementTagNameMap["td"]>(null);
+  const responsavelRef = useRef<HTMLElementTagNameMap["td"]>(null);
+  const observacaoRef = useRef<HTMLElementTagNameMap["td"]>(null);
+  const enviarRef = useRef<HTMLElementTagNameMap["td"]>(null);
+  type EnviarRef = React.RefObject<HTMLElementTagNameMap["td"]>;
+
+  function handleSalvarObservacao(e: React.FormEvent, enviarRef: EnviarRef) {
+    e.preventDefault();
+
+    setObservacao(editarObservacao);
+    setEditarObservacao("");
+    setIsEditModalOpen(false);
+
+    if (enviarRef.current) {
+      enviarRef.current.focus();
+    }
+  }
+
+  function handleNavigation(
+    e: React.KeyboardEvent<HTMLElementTagNameMap["td"]>,
+    nextRef?: React.RefObject<HTMLElementTagNameMap["td"]>,
+    actionOnEnter?: () => void
+  ) {
+    if (e.key === "Enter") {
+      e.preventDefault(); 
+
+      if (actionOnEnter) {
+        actionOnEnter(); 
+      }
+
+      if (nextRef?.current) {
+        const inputElement = nextRef.current.querySelector("input");
+        if (inputElement) {
+          inputElement.focus();
+        } else {
+          nextRef.current.focus();
+        }
+      }
+    }
+  }
 
   return (
     <div className="flex-col min-h-screen flex items-center justify-center bg-tijolos h-full bg-no-repeat bg-cover">
       {isSuccesModalOpen && <PopUpdeSucesso mensagem={mensagemSucesso} />}
       {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
 
-      {localStorage.getItem("userType") === "vigilante" ? <MenuTopo text="" backRoute="" /> : <MenuTopo text="MENU" backRoute="/menu" />}
+      {localStorage.getItem("userType") === "vigilante" ? (
+        <MenuTopo text="" backRoute="" />
+      ) : (
+        <MenuTopo text="MENU" backRoute="/menu" />
+      )}
 
       {/* parte informativa tela de empréstimo */}
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6  py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
@@ -268,7 +317,11 @@ export function Emprestimos() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+                    <td
+                      className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[37%]"
+                      ref={chavesRef}
+                      onKeyDown={(e) => handleNavigation(e, solicitanteRef)}
+                    >
                       <FilterableInputChaves
                         onSelectItem={(idSelecionado) => {
                           setChaveSelecionadaId(Number(idSelecionado) || null);
@@ -276,7 +329,12 @@ export function Emprestimos() {
                         reset={onReset}
                       />
                     </td>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[20%]">
+
+                    <td
+                      ref={solicitanteRef}
+                      onKeyDown={(e) => handleNavigation(e, responsavelRef)}
+                      className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[37%]"
+                    >
                       <FilterableInputSolicitantes
                         onSelectItem={(idSelecionado) => {
                           setSolicitanteSelecionadoId(idSelecionado);
@@ -284,7 +342,12 @@ export function Emprestimos() {
                         reset={onReset}
                       />
                     </td>
-                    <td className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
+
+                    <td
+                      className="text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[37%]"
+                      ref={responsavelRef}
+                      onKeyDown={(e) => handleNavigation(e, observacaoRef)}
+                    >
                       <FilterableInputResponsaveis
                         items={responsaveis}
                         onSelectItem={(idSelecionado) => {
@@ -295,39 +358,50 @@ export function Emprestimos() {
                     </td>
 
                     <td
-                      onClick={openObservacaoModal}
-                      className="border-2 border-[#B8BCE0] border-solid bg-primary-blue  p-0.5 font-semibold break-words cursor-pointer"
+                      ref={observacaoRef}
+                      tabIndex={0}
+                      onClick={openEditModal}
+                      onKeyDown={(e) =>
+                        handleNavigation(e, enviarRef, openEditModal)
+                      }
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-blue p-0.5 font-semibold break-words cursor-pointer"
                     >
-                      <div className=" flex justify-center items-center mr-1 gap-2">
+                      <div className="flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
-                        <p className=" text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
+                        <p className="text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
                           OBSERVAÇÃO
                         </p>
                       </div>
                     </td>
+
                     <td
+                      ref={enviarRef}
+                      tabIndex={0}
                       onClick={() => criarEmprestimo()}
-                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green  p-0.5 font-semibold break-words cursor-pointer"
+                      onKeyDown={(e) =>
+                        handleNavigation(e, undefined, criarEmprestimo)
+                      }
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green p-0.5 font-semibold break-words cursor-pointer"
                     >
-                      <div className=" flex justify-center items-center mr-1 gap-2">
+                      <div className="flex justify-center items-center mr-1 gap-2">
                         <Plus color="white" size={18} />
-                        <p className=" text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
+                        <p className="text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
                           CRIAR EMPRÉSTIMO
                         </p>
                       </div>
                     </td>
 
                     {/* Adicionando pop up de observação do empréstimo */}
-                    {isObservacaoModalOpen && (
-                      //  && emprestimo.id === emprestimoSelecionado)
-                      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                    {/* {isObservacaoModalOpen && ( */}
+                    {/* //  && emprestimo.id === emprestimoSelecionado) */}
+                    {/* <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
                         <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
                           <div className="flex justify-center w-full ">
                             <p className="text-[#192160] text-center text-[20px] font-semibold w-[85%]">
                               OBSERVAÇÃO DO EMPRÉSTIMO
                             </p>
                             <button
-                              onClick={closeObservacaoModal}
+                              onClick={openEditModal}
                               type="button"
                               className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
                             >
@@ -356,66 +430,65 @@ export function Emprestimos() {
                                 <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
                               </svg>
                               Editar
+                            </button> */}
+
+                    {/* Começo do pop up de editar emprestimo */}
+                    {isEditModalOpen && (
+                      <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                        <form
+                          onSubmit={(e) => handleSalvarObservacao(e, enviarRef)}
+                          className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
+                        >
+                          <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                            <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
+                              EDITAR OBSERVAÇÃO
+                            </p>
+
+                            <button
+                              onClick={closeEditModal}
+                              type="button"
+                              className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                            >
+                              <X className=" mb-[5px] text-[#192160]" />
                             </button>
+                          </div>
 
-                            {/* Começo do pop up de editar emprestimo */}
-                            {isEditModalOpen && (
-                              <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                                <form
-                                  // onSubmit={editarObservacao}
-                                  className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px]"
-                                >
-                                  <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                                    <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-                                      EDITAR OBSERVAÇÃO
-                                    </p>
+                          <div className="justify-center items-center ml-[40px] mr-8">
+                            <p className="text-[#192160] text-sm font-medium mb-1">
+                              Digite a nova observação
+                            </p>
 
-                                    <button
-                                      onClick={closeEditModal}
-                                      type="button"
-                                      className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                                    >
-                                      <X className=" mb-[5px] text-[#192160]" />
-                                    </button>
-                                  </div>
+                            <input
+                              className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+                              type="text"
+                              placeholder="Observação"
+                              value={
+                                editarObservacao !== null
+                                  ? editarObservacao
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                setEditarObservacao(e.target.value)
+                              }
+                            />
+                          </div>
 
-                                  <div className="justify-center items-center ml-[40px] mr-8">
-                                    <p className="text-[#192160] text-sm font-medium mb-1">
-                                      Digite a nova observação
-                                    </p>
-
-                                    <input
-                                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
-                                      type="text"
-                                      placeholder="Observação"
-                                      value={
-                                        editarObservacao !== null
-                                          ? editarObservacao
-                                          : ""
-                                      }
-                                      onChange={(e) =>
-                                        setEditarObservacao(e.target.value)
-                                      }
-                                    />
-                                  </div>
-
-                                  <div className="flex justify-center items-center mt-[10px] w-full">
-                                    <button
-                                      type="button"
-                                      onClick={editarObservacaoCriacao}
-                                      className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
-                                    >
-                                      SALVAR ALTERAÇÕES
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
-                            {/* Fim do pop up de editar emprestimo */}
+                          <div className="flex justify-center items-center mt-[10px] w-full">
+                            <button
+                              type="submit"
+                              className="px-3 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-[#16C34D] text-[#FFF]"
+                            >
+                              SALVAR ALTERAÇÕES
+                            </button>
                           </div>
                         </form>
                       </div>
                     )}
+                    {/* Fim do pop up de editar emprestimo */}
+                    {/* </div> */}
+                    {/* </form> */}
+                    {/* </div> */}
+                    {/* )} */}
 
                     {/* Fim adicionando pop up de observacao do emprestimo */}
                   </tr>
@@ -428,10 +501,11 @@ export function Emprestimos() {
             <div className=" flex gap-2 flex-wrap justify-between items-center">
               <div className="flex items-center gap-4">
                 <h2
-                  className={`${exibirEmprestimosPendentes
-                    ? "text-red-500"
-                    : "text-[#0240E1]"
-                    } items-center font-semibold text-xl mt-2`}
+                  className={`${
+                    exibirEmprestimosPendentes
+                      ? "text-red-500"
+                      : "text-[#0240E1]"
+                  } items-center font-semibold text-xl mt-2`}
                 >
                   Empréstimos{" "}
                   {exibirEmprestimosPendentes ? "pendentes" : "concluídos"}
@@ -475,8 +549,9 @@ export function Emprestimos() {
 
             {/* tabela com emprestimo pendente */}
             <div
-              className={`overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96 ${exibirEmprestimosPendentes ? "block" : "hidden"
-                }`}
+              className={`overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96 ${
+                exibirEmprestimosPendentes ? "block" : "hidden"
+              }`}
             >
               <EmprestimosPendentes
                 new_emprestimos={emprestimosPendentes}

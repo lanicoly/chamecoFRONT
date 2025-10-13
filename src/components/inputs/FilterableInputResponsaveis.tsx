@@ -34,7 +34,8 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
 
   const handleSelect = (option: IUsuario) => {
     setSelectedOption(option);
-    setSearchTerm(option.nome);
+    const displayValue = `${option.nome} | ${option.id}`;
+    setSearchTerm(displayValue);
     setIsOpen(false);
     onSelectItem(option.id); // Chama o callback com o ID do item selecionado
   }
@@ -75,6 +76,7 @@ export function FilterableInputResponsaveis({items, onSelectItem, reset}: Idropd
             placeholder={"Responsável"}
             value={searchTerm || ""}
             onChange={handleInputChange}
+            onFocus={(e) => e.target.select()}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
 

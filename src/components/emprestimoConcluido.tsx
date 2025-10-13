@@ -240,7 +240,7 @@ export function EmprestimosConcluidos({
       <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
         <thead className="bg-white  top-0 z-10">
           <tr>
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[18%]">
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Nome da sala
@@ -279,7 +279,7 @@ export function EmprestimosConcluidos({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%] align-top">
+            {/* <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%] align-top">
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Tipo de chave
@@ -316,9 +316,9 @@ export function EmprestimosConcluidos({
                   />
                 </FiltroModal>
               </div>
-            </th>
+            </th> */}
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%] align-top">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[14%] align-top">
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Solicitante
@@ -357,7 +357,7 @@ export function EmprestimosConcluidos({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%] align-top">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[14%] align-top">
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Responsável
@@ -396,7 +396,7 @@ export function EmprestimosConcluidos({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[10%]">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
               <div className="flex items-center">
                 <svg
                   width="16"
@@ -454,7 +454,7 @@ export function EmprestimosConcluidos({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
               <div className="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -518,7 +518,7 @@ export function EmprestimosConcluidos({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[10%]">
+            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
               <div className="flex items-center">
                 <svg
                   width="16"
@@ -650,25 +650,25 @@ export function EmprestimosConcluidos({
               )
               .map((emprestimo, index) => (
                 <tr key={index}>
-                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
+                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
                     {buscar(emprestimo.chave)}
                   </td>
-                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
+                  {/* <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
                     {`Chave ${buscar(emprestimo.chave)}`}
-                  </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                  </td> */}
+                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
                     {emprestimo.usuario_solicitante != null
                       ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
                       "Carregando..."
                       : "Solicitante não encontrado"}
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
                     {buscarNomeUsuarioPorId(
                       emprestimo.usuario_responsavel,
                       responsaveis
                     ) || "Responsavel não encontrado"}
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).data
                       : ""}
@@ -678,7 +678,7 @@ export function EmprestimosConcluidos({
                       ? formatarDataHora(emprestimo.horario_emprestimo).hora
                       : ""}
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[10%] break-words flex-1 text-center">
+                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
                     {emprestimo.horario_devolucao &&
                       formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
