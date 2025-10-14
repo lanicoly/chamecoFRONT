@@ -439,7 +439,7 @@ function ChavesContent({
   }
 
   return (
-    <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-chaves">
+    <div className="bg-cover flex flex-col items-center min-h-screen justify-center font-montserrat bg-tijolos">
       <MenuTopo text="MENU" backRoute="/menu" />
       <div className="relative bg-white w-full max-w-[960px] rounded-3xl px-2 py-2 tablet:py-4 desktop:py-6 m-12 top-8 tablet:top-6 tablet:h-auto min-h-[480px] h-auto">
         <div className="relative flex w-full gap-2 mt-5 justify-center items-center content-center flex-wrap tablet:flex-row mb-[30px]">

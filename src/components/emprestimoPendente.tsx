@@ -328,7 +328,7 @@ export function EmprestimosPendentes({
               </div>
             </th>
 
-            <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
+            {/* <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Tipo de chave
@@ -365,7 +365,7 @@ export function EmprestimosPendentes({
                   />
                 </FiltroModal>
               </div>
-            </th>
+            </th> */}
 
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[15%] align-top">
               <div className="flex flex-col items-start gap-1">
@@ -593,7 +593,7 @@ export function EmprestimosPendentes({
                       {buscar(emprestimo.chave)}
                     </p>
                   </td>
-                  <td
+                  {/* <td
                     className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${emprestimoPendenteAlerta(emprestimo)
                         ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
@@ -602,7 +602,7 @@ export function EmprestimosPendentes({
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {`Chave ${buscar(emprestimo.chave)}`}
                     </p>
-                  </td>
+                  </td> */}
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
                         ? "border-t-red-500 border-b-red-500"

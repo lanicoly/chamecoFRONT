@@ -72,6 +72,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
             placeholder="Chave"
             value={searchTerm || ""}
             onChange={handleInputChange}
+            onFocus={(e) => e.target.select()}
             className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
           />
         <svg
