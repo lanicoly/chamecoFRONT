@@ -68,12 +68,15 @@ export function Emprestimos() {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   async function criarEmprestimo() {
+    const observacaoAtual = observacao || ""; 
+    const observacaoParaEnvio = observacaoAtual.trim() === "" ? "Detalhes sobre o empréstimo" : observacaoAtual;
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,
       usuario_responsavel: responsavelSelecionadoId,
       usuario_solicitante: solicitanteSelecionadoId,
-      observacao: observacao,
+      observacao: observacaoParaEnvio,
     };
+    console.log("Chave", chaveSelecionadaId)
 
     //     console.log("Dados:", JSON.stringify(novoEmprestimo));
 
@@ -140,6 +143,7 @@ export function Emprestimos() {
   // function closeObservacaoModal() {
   //   setIsObservacaoModalOpen(false);
   // }
+
 
   // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

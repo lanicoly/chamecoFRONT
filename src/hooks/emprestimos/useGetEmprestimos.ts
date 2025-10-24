@@ -34,7 +34,7 @@ const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
           params.append("finalizados", finalizados.toString()); 
         }
 
-        const url = `/chameco/api/v1/emprestimos/?${params.toString()}`;
+        const url = `/chameco/api/v1/emprestimos/?${params.toString()}&pagination=100`;
 
         try {
           const response = await api.get(url);

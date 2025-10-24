@@ -155,6 +155,7 @@ export function EmprestimosPendentes({
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
     });
 
+    console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
   );
@@ -701,7 +702,7 @@ export function EmprestimosPendentes({
         </tbody>
       </table>
       {/* Começo do passador de página */}
-      <div className=" mt-5 flex justify-end items-center">
+      <div className=" mt-4 flex justify-end items-center">
         <PassadorPagina
           avancarPagina={avancarPaginaPendente}
           voltarPagina={voltarPaginaPendente}

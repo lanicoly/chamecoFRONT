@@ -2,46 +2,65 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import api from "../services/api";
 import { IChave } from "../pages/chaves";
 
+interface ChavesContextType {
+  chaves: IChave[];
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+}
 
-const ChavesContext = createContext<any>([]);
+const ChavesContext = createContext<ChavesContextType | undefined>(undefined);
 
-export const ChavesProvider = React.memo(({ children }: { children: React.ReactNode }) => {
-    const [chaves, setChaves] = useState<IChave[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+export const ChavesProvider = ({ children }: { children: React.ReactNode }) => {
+  const [chaves, setChaves] = useState<IChave[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-    const fetchChaves = useCallback(async () => {
-        // console.log("Rodando chaves...")
-        setLoading(true);
+  const fetchAllPages = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    let allChaves: IChave[] = [];
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setError(new Error("Token não encontrado"));
-            setLoading(false);
-            return;
-        }
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError(new Error("Token não encontrado"));
+      setLoading(false);
+      return;
+    }
 
-        try {
-            const response = await api.get(`/chameco/api/v1/chaves/`);
-            setChaves(response.data.results || []);
+    try {
+      let nextUrl = `/chameco/api/v1/chaves/?pagination=100`;
+      while (nextUrl) {
+        const response = await api.get(nextUrl);
+        const data = response.data;
 
-        } catch (error) {
-            setError(error as Error)
-            // console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }, []);
+        allChaves = [...allChaves, ...(data.results || [])];
+        nextUrl = data.next ? data.next.replace(api.defaults.baseURL || "", "") : null; 
+      }
 
-    useEffect(() => {
-        fetchChaves();
-    }, [fetchChaves]);
+      setChaves(allChaves);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    return (
-        <ChavesContext.Provider value={{ chaves, loading, error, refetch: fetchChaves }}>
-            {children}
-        </ChavesContext.Provider>
-    )
-})
+  useEffect(() => {
+    fetchAllPages();
+  }, [fetchAllPages]);
 
-export const useChaves = () => useContext(ChavesContext);
+  return (
+    <ChavesContext.Provider value={{ chaves, loading, error, refetch: fetchAllPages }}>
+      {children}
+    </ChavesContext.Provider>
+  );
+};
+
+export const useChaves = () => {
+  const context = useContext(ChavesContext);
+  if (!context) {
+    throw new Error("useChaves deve ser usado dentro de ChavesProvider");
+  }
+  return context;
+};
