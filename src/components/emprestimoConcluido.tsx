@@ -18,16 +18,16 @@ import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
 
 interface EmprestimosConcluidosProps {
   salas: ISala[];
-  chaves: IoptionChaves[];
-  responsaveis: IUsuario[];
-  solicitantes: IUsuario[];
   new_emprestimos: Iemprestimo[];
-  observacao: string | null;
-  dataRetirada: string;
-  horario_emprestimo: string;
-  dataDevolucao: string | null;
-  horario_devolucao: string | null;
-  pesquisa: string;
+  chaves?: IoptionChaves[];
+  responsaveis?: IUsuario[];
+  solicitantes?: IUsuario[];
+  observacao?: string | null;
+  dataRetirada?: string;
+  horario_emprestimo?: string;
+  dataDevolucao?: string | null;
+  horario_devolucao?: string | null;
+  pesquisa?: string;
 }
 
 export function EmprestimosConcluidos({
@@ -231,9 +231,6 @@ export function EmprestimosConcluidos({
   }
 
   const buscar = makeBuscadorSalaPorChave(chavesData, salas);
-  // console.log("salas: ", salas)
-  // $&
-  // $&
 
   return (
     <>
@@ -658,8 +655,7 @@ export function EmprestimosConcluidos({
                   </td> */}
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
                     {emprestimo.usuario_solicitante != null
-                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
-                      "Carregando..."
+                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] || "Carregando..."
                       : "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">

@@ -24,16 +24,16 @@ import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
-  salas: ISala[];
-  chaves: IChave[];
-  responsaveis: IUsuario[];
-  solicitantes: IUsuario[];
-  observacao: string | null;
-  dataRetirada: string;
-  horario_emprestimo: string;
-  pesquisa: string;
-  refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
+  salas?: ISala[];
+  chaves?: IChave[];
+  responsaveis?: IUsuario[];
+  solicitantes?: IUsuario[];
+  observacao?: string | null;
+  dataRetirada?: string;
+  horario_emprestimo?: string;
+  pesquisa?: string;
+  refreshCounter?: number;
 }
 
 export interface IusuarioResponsavel {
@@ -155,6 +155,7 @@ export function EmprestimosPendentes({
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
     });
 
+    console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
   );
@@ -571,7 +572,7 @@ export function EmprestimosPendentes({
 
         <tbody>
           {itensAtuaisPendentes.length > 0 ? (
-            emprestimosFiltradosPendentes
+            itensAtuaisPendentes
               .slice(
                 (paginaAtualPendente - 1) * itensPorPaginaPendente,
                 paginaAtualPendente * itensPorPaginaPendente
@@ -611,12 +612,9 @@ export function EmprestimosPendentes({
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {emprestimo.usuario_solicitante != null
-                        ? nomesSolicitantesMap[
-                        emprestimo.usuario_solicitante
-                        ] || "Carregando..."
-                        : "Solicitante não informado"}
+                        ? nomesSolicitantesMap[emprestimo.usuario_solicitante] || "Carregando..."
+                        : "Solicitante não encontrado"}
                     </p>
-                    {/* <NomeSolicitanteCell id={emprestimo.usuario_solicitante}/> */}
                   </td>
                   <td
                     className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
@@ -701,7 +699,7 @@ export function EmprestimosPendentes({
         </tbody>
       </table>
       {/* Começo do passador de página */}
-      <div className=" mt-5 flex justify-end items-center">
+      <div className=" mt-4 flex justify-end items-center">
         <PassadorPagina
           avancarPagina={avancarPaginaPendente}
           voltarPagina={voltarPaginaPendente}

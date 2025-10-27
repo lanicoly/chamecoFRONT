@@ -68,12 +68,15 @@ export function Emprestimos() {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   async function criarEmprestimo() {
+    const observacaoAtual = observacao || ""; 
+    const observacaoParaEnvio = observacaoAtual.trim() === "" ? "Detalhes sobre o empréstimo" : observacaoAtual;
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,
       usuario_responsavel: responsavelSelecionadoId,
       usuario_solicitante: solicitanteSelecionadoId,
-      observacao: observacao,
+      observacao: observacaoParaEnvio,
     };
+    console.log("Chave", chaveSelecionadaId)
 
     //     console.log("Dados:", JSON.stringify(novoEmprestimo));
 
@@ -140,6 +143,7 @@ export function Emprestimos() {
   // function closeObservacaoModal() {
   //   setIsObservacaoModalOpen(false);
   // }
+
 
   // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -555,15 +559,6 @@ export function Emprestimos() {
             >
               <EmprestimosPendentes
                 new_emprestimos={emprestimosPendentes}
-                salas={salas}
-                chaves={chaves}
-                solicitantes={usuarios}
-                responsaveis={usuarios}
-                dataRetirada=""
-                horario_emprestimo=""
-                observacao={observacao ?? null}
-                pesquisa={pesquisa}
-                refreshCounter={refreshCounter}
                 setRefreshCounter={setRefreshCounter}
               />
             </div>
@@ -579,15 +574,6 @@ export function Emprestimos() {
                 <EmprestimosConcluidos
                   new_emprestimos={emprestimosConcluidos}
                   salas={salas}
-                  chaves={chaves}
-                  responsaveis={usuarios}
-                  solicitantes={usuarios}
-                  observacao={observacao ?? null}
-                  dataRetirada=""
-                  horario_emprestimo=""
-                  dataDevolucao=""
-                  horario_devolucao=""
-                  pesquisa={pesquisa}
                 />
                 {/* fim tabela com emprestimo concluido */}
               </div>
