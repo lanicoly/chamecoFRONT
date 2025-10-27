@@ -155,7 +155,7 @@ export function EmprestimosPendentes({
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
     });
 
-    console.log(emprestimosFiltradosPendentes);
+    // console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
   );

@@ -76,7 +76,7 @@ export function Emprestimos() {
       usuario_solicitante: solicitanteSelecionadoId,
       observacao: observacaoParaEnvio,
     };
-    console.log("Chave", chaveSelecionadaId)
+    // console.log("Chave", chaveSelecionadaId)
 
     //     console.log("Dados:", JSON.stringify(novoEmprestimo));
 
