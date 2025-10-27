@@ -31,7 +31,7 @@ const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
       } else {
         const params = new URLSearchParams({ token });
         if (finalizados !== undefined) {
-          params.append("finalizados", finalizados.toString()); 
+          params.append("finalizados", finalizados.toString());
         }
 
         const url = `/chameco/api/v1/emprestimos/?${params.toString()}&pagination=100`;
@@ -46,7 +46,7 @@ const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
 
           localStorage.setItem("emprestimos", JSON.stringify(response.data.results || []));
           localStorage.setItem("emprestimosTimestamp", Date.now().toString());
-          ""        } catch (err) {
+        } catch (err) {
           console.error("Erro na requisição:", err);
           setError(err as Error);
         } finally {
@@ -56,7 +56,7 @@ const useGetEmprestimos = (finalizados?: boolean, refreshTrigger?: number) => {
     };
 
     fetchEmprestimos();
-  }, [finalizados, refreshTrigger]); 
+  }, [finalizados, refreshTrigger]);
 
   return { new_emprestimos: emprestimos, loading, error };
 }

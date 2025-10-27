@@ -559,15 +559,6 @@ export function Emprestimos() {
             >
               <EmprestimosPendentes
                 new_emprestimos={emprestimosPendentes}
-                salas={salas}
-                chaves={chaves}
-                solicitantes={usuarios}
-                responsaveis={usuarios}
-                dataRetirada=""
-                horario_emprestimo=""
-                observacao={observacao ?? null}
-                pesquisa={pesquisa}
-                refreshCounter={refreshCounter}
                 setRefreshCounter={setRefreshCounter}
               />
             </div>
@@ -583,15 +574,6 @@ export function Emprestimos() {
                 <EmprestimosConcluidos
                   new_emprestimos={emprestimosConcluidos}
                   salas={salas}
-                  chaves={chaves}
-                  responsaveis={usuarios}
-                  solicitantes={usuarios}
-                  observacao={observacao ?? null}
-                  dataRetirada=""
-                  horario_emprestimo=""
-                  dataDevolucao=""
-                  horario_devolucao=""
-                  pesquisa={pesquisa}
                 />
                 {/* fim tabela com emprestimo concluido */}
               </div>

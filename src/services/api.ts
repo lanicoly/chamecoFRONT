@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -35,5 +35,22 @@ api.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 );
+
+api.interceptors.response.use(
+    (res) => res,
+    (error) => {
+        if (isAxiosError(error)) {
+            const status = error.response?.status;
+
+            if (status === 401 || status === 403) {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userType");
+                window.location.replace("/")
+            }
+        }
+        return Promise.reject(error);
+
+    }
+)
 
 export default api;

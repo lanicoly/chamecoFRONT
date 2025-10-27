@@ -1,3 +1,4 @@
+import { IChave, ISala } from "../pages/chaves";
 
 export function buscarNomeSalaPorIdChave(idChave: number | null, listaChaves: any[], listaSalas: any[]) {
     const chave = listaChaves.find(chave => chave.id === idChave);
@@ -7,13 +8,10 @@ export function buscarNomeSalaPorIdChave(idChave: number | null, listaChaves: an
     return sala ? sala.nome : 'Carregando sala...';
 }
 
-type Chave = { id: number; sala: number };
-type Sala = { id: number; nome: string };
-
 /** Cria buscador rápido com índices pré-computados */
 export function makeBuscadorSalaPorChave(
-    listaChaves: Chave[],
-    listaSalas: Sala[]
+    listaChaves: IChave[],
+    listaSalas: ISala[]
 ) {
     const chaveById = Object.fromEntries(listaChaves.map(c => [c.id, c]));
     const salaById = Object.fromEntries(listaSalas.map(s => [s.id, s]));
