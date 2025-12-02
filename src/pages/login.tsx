@@ -93,30 +93,30 @@ export function Login() {
   }, 2000)
 
   return (
-    <div>
-      <div className="flex items-center justify-center  w-auto h-screen bg-login-fundo flex-shrink bg-cover bg-center">
+    <div className="flex flex-col h-screen">
+      <div className="flex items-center justify-center w-auto h-full bg-login-fundo flex-shrink bg-cover bg-center">
 
         {error ? <PopUpError mensagem={errorSenha} /> : ""}
         {/* Adicionando container de login */}
-        <div className="container relative max-w-[650px] w-full p-2 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
+        <div className="container relative max-w-[650px] w-full p-2 pb-12 sm:pb-2 pr-4 rounded-[10px] h-auto bg-white flex flex-col sm:flex-row tablet:py-3 desktop:py-6 m-12 tablet:top-6 tablet:h-[400px] ">
           {/* Adicionando logo */}
           <div className="flex items-center justify-center w-full px-[15px] py-[20px] sm:w-[300px] sm:py-[90px]">
             <img
-              src="logo.login.png"
+              src="logo-atual-browser.svg"
               alt=""
-              className="w-[200px] h-auto hidden sm:block sm:w-[350px] sm:mt-[50px] "
+              className="w-[200px] h-auto hidden sm:block sm:w-[350px] "
             />
           </div>
 
           {/* Adicionando div do formulário */}
-          <div className="flex flex-col items-center pt-[12px] ml-[10px] ">
+          <div className="flex flex-col items-center justify-center pt-[12px] ml-[10px] ">
             <h1 className="text-[#16C34D] items-center font-semibold text-[40px] text-center">
               Boas Vindas!
             </h1>
             <img
-              src="logo.login.png"
+              src="logo-sigec.svg"
               alt=""
-              className="w-[150px] h-auto block sm:hidden mt-2 "
+              className="w-[200px] h-auto block sm:hidden"
             />
 
             <p className="text-[#192160] items-center text-[15px] tablet:m-[5px] tablet:text-[17px] font-medium text-center mt-[10px]">
@@ -163,7 +163,7 @@ export function Login() {
                 <input
                   className="w-[250px] p-[4px] pl-[30px] items-center rounded-[10px] border border-[#777DAA] focus:outline-none text-[#777DAA] text-sm font-medium"
                   type="text"
-                  placeholder="login"
+                  placeholder="Login"
                   // inputMode="text"
                   // pattern="[0-9]{11}"
                   // minLength={11}
