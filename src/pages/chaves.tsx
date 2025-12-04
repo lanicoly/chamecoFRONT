@@ -624,12 +624,12 @@ function ChavesContent({
             />
           </div>
         </main>
-        {/* Logo Chameco */}
-        <div className="flex justify-start mt-4 sm:hidden">
+        {/* Logo sigec */}
+        <div className="flex justify-start mt-4 mobile:hidden">
           <img
             className="sm:w-[200px] w-32"
-            src="/logo_lateral.png"
-            alt="logo chameco"
+            src="/logo-sigec.svg"
+            alt="logo sigec"
           />
         </div>
       </div>

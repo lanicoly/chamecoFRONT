@@ -50,7 +50,7 @@ export function MenuTopo({ text, backRoute }:MenuTopoProps) {
       </div>
 
       <div className="flex justify-center">
-        <img className="w-[150px]" src="\logo_lateral.png" alt="logo chameco" />
+        <img className="w-[150px] mobile:block hidden" src="\logo-sigec.svg" alt="logo sigec" />
       </div>
 
       <div className="flex w-[150px] justify-end">

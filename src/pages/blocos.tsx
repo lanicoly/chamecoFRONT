@@ -555,15 +555,15 @@ export function Blocos() {
         />
         {/* fim passador de página */}
 
-        {/* logo chameco lateral */}
-        <div className="flex justify-start bottom-2 left-2 absolute sm:hidden ">
+        {/* logo sigec lateral */}
+        <div className="flex justify-start bottom-2 left-2 absolute mobile:hidden ">
           <img
             className="sm:w-[200px] w-32"
-            src="\logo_lateral.png"
-            alt="logo chameco"
+            src="\logo-sigec.svg"
+            alt="logo sigec"
           />
         </div>
-        {/* fim logo chameco lateral */}
+        {/* fim logo sigec lateral */}
       </div>
       {/* fim do container com informações dos blocos */}
     </div>

@@ -230,6 +230,21 @@ export function EmprestimosConcluidos({
     setIsDeleteModalOpen(false);
   }
 
+  function emprestimoConcluidoAlerta(emprestimo: {
+  horario_emprestimo?: string | null;
+  horario_devolucao?: string | null;
+}) {
+  if (!emprestimo.horario_emprestimo || !emprestimo.horario_devolucao) {
+    return false;
+  }
+
+  const retirada = new Date(emprestimo.horario_emprestimo);
+  const devolucao = new Date(emprestimo.horario_devolucao);
+  const diferencaHoras = devolucao.getTime() - retirada.getTime();
+
+  return diferencaHoras > 24 * 60 * 60 * 1000;
+  }
+
   const buscar = makeBuscadorSalaPorChave(chavesData, salas);
 
   return (
@@ -394,7 +409,7 @@ export function EmprestimosConcluidos({
             </th>
 
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <svg
                   width="16"
                   height="16"
@@ -452,7 +467,7 @@ export function EmprestimosConcluidos({
             </th>
 
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[13%]">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -516,7 +531,7 @@ export function EmprestimosConcluidos({
             </th>
 
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[12%]">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <svg
                   width="16"
                   height="16"
@@ -574,7 +589,7 @@ export function EmprestimosConcluidos({
             </th>
 
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[14%]">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <svg
                   width="16"
                   height="16"
@@ -646,7 +661,8 @@ export function EmprestimosConcluidos({
                 paginaAtualConcluidos * itensPorPaginaConcluidos
               )
               .map((emprestimo, index) => (
-                <tr key={index}>
+                <tr key={index}
+                className={`${index % 2 === 0 ? "bg-white" : "bg-blue-100"} border-b`}>
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
                     {buscar(emprestimo.chave)}
                   </td>
@@ -669,26 +685,29 @@ export function EmprestimosConcluidos({
                       ? formatarDataHora(emprestimo.horario_emprestimo).data
                       : ""}
                   </td>
-                  <td className=" p-2 text-sm text-white bg-[#16C34D] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
+                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).hora
                       : ""}
                   </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                  <td className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center ${index % 2 !== 0 ? "bg-[#DFFFE0]" : ""}`}>
                     {emprestimo.horario_devolucao &&
                       formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
-                  <td className=" p-2 text-sm text-white bg-[#0240E1] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
+                  <td className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${index % 2 !== 0 ? "bg-[#DFFFE0]" : ""}`}>
                     {emprestimo.horario_devolucao &&
                       formatarDataHora(emprestimo.horario_devolucao).hora}
                   </td>
 
-                  <td className="pl-2">
+                  <td className="pl-2 bg-white">
                     <button
                       onClick={() => openDetalhesModal(emprestimo)}
                       className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
                     >
-                      <Info className="size-5 text-[#646999]" />
+                      <Info className={`size-5 ${emprestimoConcluidoAlerta(emprestimo)
+                        ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                        : "text-[#646999]"
+                      }`} />
                     </button>
                   </td>
                   {/* Adicionando pop up de detalhes do empréstimo */}

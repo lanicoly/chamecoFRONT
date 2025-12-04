@@ -254,36 +254,17 @@ export function Emprestimos() {
           </h1>
 
           <button>
-            <svg
-              width="30"
-              height="30"
-              viewBox="0 0 38 36"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                width="30"
-                height="30"
-                transform="translate(0.5)"
-                fill="white"
-              />
-              <g clip-path="url(#clip0_2169_2594)">
-                <path
-                  d="M36.1128 25.0627L32.4671 11.923C31.6886 9.11219 29.9923 6.64257 27.6482 4.90717C25.3041 3.17176 22.4469 2.27029 19.5313 2.34623C16.6157 2.42217 13.8093 3.47116 11.5587 5.32624C9.30811 7.18133 7.74269 9.7359 7.11159 12.5834L4.29182 25.2731C4.15538 25.8878 4.1587 26.5254 4.30156 27.1387C4.44441 27.752 4.72314 28.3254 5.11719 28.8166C5.51123 29.3079 6.01054 29.7043 6.57826 29.9768C7.14599 30.2493 7.76765 30.3908 8.39738 30.391H13.455C13.7768 31.9759 14.6367 33.4007 15.8888 34.4242C17.141 35.4476 18.7085 36.0067 20.3257 36.0067C21.9429 36.0067 23.5104 35.4476 24.7625 34.4242C26.0147 33.4007 26.8745 31.9759 27.1963 30.391H32.0619C32.7098 30.3907 33.349 30.2407 33.9294 29.9528C34.5099 29.6648 35.0159 29.2466 35.4082 28.7309C35.8004 28.2151 36.0682 27.6157 36.1907 26.9795C36.3131 26.3432 36.2869 25.6872 36.1142 25.0627H36.1128ZM20.3257 33.1953C19.4588 33.1917 18.6141 32.9204 17.9073 32.4184C17.2006 31.9164 16.6661 31.2083 16.3772 30.391H24.2742C23.9852 31.2083 23.4508 31.9164 22.744 32.4184C22.0372 32.9204 21.1926 33.1917 20.3257 33.1953ZM33.1766 27.0328C33.0458 27.2062 32.8762 27.3466 32.6814 27.4428C32.4867 27.539 32.2721 27.5882 32.0549 27.5866H8.39738C8.18742 27.5866 7.98015 27.5394 7.79087 27.4486C7.60158 27.3577 7.43512 27.2255 7.30376 27.0617C7.1724 26.8979 7.07951 26.7067 7.03193 26.5022C6.98435 26.2977 6.9833 26.0852 7.02886 25.8802L9.84863 13.1905C10.3455 10.9558 11.5751 8.9512 13.3421 7.49552C15.109 6.03985 17.3119 5.2166 19.6004 5.15665C21.889 5.0967 24.1319 5.80348 25.9727 7.16464C27.8134 8.5258 29.1463 10.4632 29.7595 12.6689L33.4052 25.8087C33.4647 26.0165 33.475 26.2352 33.4353 26.4477C33.3957 26.6602 33.3071 26.8605 33.1766 27.0328Z"
-                  fill="#C6191A"
-                />
+            <div className=" flex items-center justify-center gap-1 px-2 py-1 border-[#0240E1] border-2 rounded bg-[#0240E1] bg-opacity-10 shadow-md shadow-zinc-600">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <mask id="mask0_2949_3868" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+              <rect width="24" height="24" fill="#D9D9D9"/>
+              </mask>
+              <g mask="url(#mask0_2949_3868)">
+              <path d="M4 19V17H6V10C6 8.61667 6.41667 7.3875 7.25 6.3125C8.08333 5.2375 9.16667 4.53333 10.5 4.2V3.5C10.5 3.08333 10.6458 2.72917 10.9375 2.4375C11.2292 2.14583 11.5833 2 12 2C12.4167 2 12.7708 2.14583 13.0625 2.4375C13.3542 2.72917 13.5 3.08333 13.5 3.5V4.2C14.8333 4.53333 15.9167 5.2375 16.75 6.3125C17.5833 7.3875 18 8.61667 18 10V17H20V19H4ZM12 22C11.45 22 10.9792 21.8042 10.5875 21.4125C10.1958 21.0208 10 20.55 10 20H14C14 20.55 13.8042 21.0208 13.4125 21.4125C13.0208 21.8042 12.55 22 12 22Z" fill="#0240E1"/>
               </g>
-              <defs>
-                <clipPath id="clip0_2169_2594">
-                  <rect
-                    width="33.6522"
-                    height="33.6522"
-                    fill="white"
-                    transform="translate(3.5 2.34766)"
-                  />
-                </clipPath>
-              </defs>
-            </svg>
+              </svg>
+            <p className="text-base font-semibold text-[#0240E1]">NOTIFICAÇÕES</p>
+            </div>
           </button>
         </div>
         {/* fim cabeçalho tela de empréstimo */}
@@ -368,9 +349,9 @@ export function Emprestimos() {
                       onKeyDown={(e) =>
                         handleNavigation(e, enviarRef, openEditModal)
                       }
-                      className="border-2 border-[#B8BCE0] border-solid bg-primary-blue p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-[#0240E1] p-0.5 font-semibold break-words cursor-pointer shadow-zinc-500 shadow-md"
                     >
-                      <div className="flex justify-center items-center mr-1 gap-2">
+                      <div className="flex justify-center items-center mr-1 gap-2 px-2">
                         <Plus color="white" size={18} />
                         <p className="text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
                           OBSERVAÇÃO
@@ -385,9 +366,9 @@ export function Emprestimos() {
                       onKeyDown={(e) =>
                         handleNavigation(e, undefined, criarEmprestimo)
                       }
-                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green p-0.5 font-semibold break-words cursor-pointer"
+                      className="border-2 border-[#B8BCE0] border-solid bg-primary-green p-0.5 font-semibold break-words cursor-pointer shadow-zinc-500 shadow-md"
                     >
-                      <div className="flex justify-center items-center mr-1 gap-2">
+                      <div className="flex justify-center items-center mr-1 gap-2 px-2">
                         <Plus color="white" size={18} />
                         <p className="text-sm text-[#FFFF] text-center font-semibold leading-normal truncate">
                           CRIAR EMPRÉSTIMO
@@ -517,35 +498,25 @@ export function Emprestimos() {
 
                 <button
                   onClick={alternarEmprestimos}
-                  className="flex w-[280px] h-[30px] p-3 justify-center items-center gap-2 rounded-[12px] bg-[#B8C1FF]  mt-2"
+                  className={`flex py-1 px-3 justify-center items-center gap-2 rounded-md bg-opacity-10 mt-2 border-2 ${exibirEmprestimosPendentes ? "bg-[#0240E1] border-[#0240E1]" : "bg-red-500 border-red-500"}`}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="25"
-                    height="25"
-                    viewBox="0 0 28 29"
-                    fill="none"
-                  >
-                    <mask
-                      id="mask0_2194_4255"
-                      maskUnits="userSpaceOnUse"
-                      x="0"
-                      y="0"
-                      width="28"
-                      height="29"
-                    >
-                      <rect y="0.5" width="28" height="28" fill="#D9D9D9" />
-                    </mask>
-                    <g mask="url(#mask0_2194_4255)">
-                      <path
-                        d="M14.0582 23.8334C11.4526 23.8334 9.23595 22.9292 7.40817 21.1209C5.58039 19.3126 4.6665 17.1056 4.6665 14.5001V14.2959L2.79984 16.1626L1.1665 14.5292L5.83317 9.86258L10.4998 14.5292L8.8665 16.1626L6.99984 14.2959V14.5001C6.99984 16.4445 7.68525 18.0973 9.05609 19.4584C10.4269 20.8195 12.0943 21.5001 14.0582 21.5001C14.5637 21.5001 15.0596 21.4417 15.5457 21.3251C16.0318 21.2084 16.5082 21.0334 16.9748 20.8001L18.7248 22.5501C17.9859 22.9779 17.2276 23.2987 16.4498 23.5126C15.6721 23.7265 14.8748 23.8334 14.0582 23.8334ZM22.1665 19.1376L17.4998 14.4709L19.1332 12.8376L20.9998 14.7042V14.5001C20.9998 12.5556 20.3144 10.9029 18.9436 9.54175C17.5728 8.18064 15.9054 7.50008 13.9415 7.50008C13.4359 7.50008 12.9401 7.55841 12.454 7.67508C11.9679 7.79175 11.4915 7.96675 11.0248 8.20008L9.27484 6.45008C10.0137 6.0223 10.7721 5.70147 11.5498 5.48758C12.3276 5.27369 13.1248 5.16675 13.9415 5.16675C16.5471 5.16675 18.7637 6.07091 20.5915 7.87925C22.4193 9.68758 23.3332 11.8945 23.3332 14.5001V14.7042L25.1998 12.8376L26.8332 14.4709L22.1665 19.1376Z"
-                        fill="#565D8F"
-                      />
+                  
+                  <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2953_3884)">
+                    <path d="M0.666504 5.46699C3.5465 -0.933008 12.1865 -0.933008 15.0665 5.46699" stroke={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7.86631 8.6667C7.55114 8.6667 7.23905 8.60462 6.94787 8.48401C6.65669 8.3634 6.39211 8.18662 6.16925 7.96376C5.94639 7.74089 5.76961 7.47632 5.649 7.18514C5.52839 6.89396 5.46631 6.58187 5.46631 6.2667C5.46631 5.95153 5.52839 5.63944 5.649 5.34826C5.76961 5.05708 5.94639 4.7925 6.16925 4.56964C6.39211 4.34678 6.65669 4.17 6.94787 4.04939C7.23905 3.92878 7.55114 3.8667 7.86631 3.8667C8.50283 3.8667 9.11328 4.11956 9.56336 4.56964C10.0135 5.01973 10.2663 5.63018 10.2663 6.2667C10.2663 6.90322 10.0135 7.51367 9.56336 7.96376C9.11328 8.41384 8.50283 8.6667 7.86631 8.6667Z" fill={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`} stroke={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`}  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </g>
+                    <defs>
+                    <clipPath id="clip0_2953_3884">
+                    <rect width="16" height="9.33333" fill="white"/>
+                    </clipPath>
+                    </defs>
                   </svg>
-                  <p className="items-center text-[#565D8F] text-[15px] font-semibold">
-                    Ver empréstimos{" "}
-                    {exibirEmprestimosPendentes ? "concluídos" : "pendentes"}
+
+
+                  <p className={`items-center ${exibirEmprestimosPendentes ? "text-[#0240E1]" : "text-[#EF4444]"} text-[15px] font-semibold`}>
+                    {" "}
+                    {exibirEmprestimosPendentes ? "CONCLUÍDOS" : "PENDENTES"}
                   </p>
                 </button>
               </div>
@@ -584,15 +555,15 @@ export function Emprestimos() {
         </div>
         {/* fim conteudo central tela de empréstimo */}
 
-        {/* logo chameco lateral */}
-        <div className="flex justify-start bottom-4 absolute sm:hidden">
+        {/* logo sigec lateral */}
+        <div className="flex justify-start bottom-4 absolute mobile:hidden">
           <img
             className="sm:w-[200px] w-32"
-            src="\logo_lateral.png"
-            alt="logo chameco"
+            src="\logo-sigec.svg"
+            alt="logo sigec"
           />
         </div>
-        {/* fim logo chameco lateral */}
+        {/* fim logo sigec lateral */}
       </div>
       {/* fim parte informativa tela de empréstimo */}
     </div>

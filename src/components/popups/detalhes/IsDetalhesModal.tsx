@@ -58,7 +58,7 @@ export function IsDetalhesModal ( {
 
     return (
         // emprestimo.id === emprestimoSelecionado?.id &&
-        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+        <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-10 z-20">
             <form className="container flex flex-col gap-2 w-full px-4 py-4 h-auto rounded-[15px] bg-white mx-5 max-w-[500px]">
                 <div className="flex justify-between w-full px-3">
                     <p className="text-[#192160] text-left text-[20px] font-semibold pr-6">

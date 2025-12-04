@@ -951,15 +951,15 @@ export function Salas() {
         </div>
         {/* fim conteudo central tela salas */}
 
-        {/* logo chameco lateral */}
-        <div className="flex justify-start bottom-4 absolute sm:hidden">
+        {/* logo sigec lateral */}
+        <div className="flex justify-start bottom-4 absolute mobile:hidden">
           <img
             className="sm:w-[200px] w-32"
-            src="\logo_lateral.png"
-            alt="logo chameco"
+            src="\logo-sigec.svg"
+            alt="logo sigec"
           />
         </div>
-        {/* fim logo chameco lateral */}
+        {/* fim logo sigec lateral */}
       </div>
       {/* fim parte informativa tela salas */}
     </div>

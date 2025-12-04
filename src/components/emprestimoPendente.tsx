@@ -578,12 +578,10 @@ export function EmprestimosPendentes({
                 paginaAtualPendente * itensPorPaginaPendente
               )
               .map((emprestimo, index) => (
-                <tr key={index}>
+                <tr key={index}
+                className={`${index % 2 === 0 ? "bg-white" : "bg-blue-100"} border-b`}>
                   <td
-                    className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${emprestimoPendenteAlerta(emprestimo)
-                        ? "border-t-red-500 border-b-red-500 border-l-red-500"
-                        : "border-[#B8BCE0]"
-                      }`}
+                    className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]"
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {/* {buscarNomeSalaPorIdChave(
@@ -605,10 +603,7 @@ export function EmprestimosPendentes({
                     </p>
                   </td> */}
                   <td
-                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                        ? "border-t-red-500 border-b-red-500"
-                        : "border-[#B8BCE0] "
-                      }`}
+                    className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {emprestimo.usuario_solicitante != null
@@ -617,10 +612,7 @@ export function EmprestimosPendentes({
                     </p>
                   </td>
                   <td
-                    className={`p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                        ? "border-t-red-500 border-b-red-500"
-                        : "border-[#B8BCE0]"
-                      }`}
+                    className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
                   >
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {buscarNomeUsuarioPorId(
@@ -630,30 +622,21 @@ export function EmprestimosPendentes({
                     </p>
                   </td>
                   <td
-                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                        ? "border-t-red-500 border-b-red-500"
-                        : "border-[#B8BCE0]"
-                      }`}
+                    className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
                   >
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).data
                       : ""}
                   </td>
                   <td
-                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center ${emprestimoPendenteAlerta(emprestimo)
-                        ? "border-t-red-500 border-b-red-500"
-                        : "border-[#B8BCE0]"
-                      }`}
+                    className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center"
                   >
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).hora
                       : ""}
                   </td>
                   <td
-                    className={`border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words ${emprestimoPendenteAlerta(emprestimo)
-                        ? " border-r-red-500 border-t-red-500 border-b-red-500"
-                        : "border-[#B8BCE0]"
-                      }`}
+                    className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500"
                   >
                     <div
                       onClick={() => finalizarEmprestimo(emprestimo.id)}
@@ -665,12 +648,15 @@ export function EmprestimosPendentes({
                       </p>
                     </div>
                   </td>
-                  <td className="pl-2">
+                  <td className="pl-2 bg-white">
                     <button
                       onClick={() => openDetalhesModal(emprestimo)}
                       className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
                     >
-                      <Info className="size-5 text-[#646999]" />
+                      <Info className={`size-5 ${emprestimoPendenteAlerta(emprestimo)
+                        ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                        : "text-[#646999]"
+                      }`} />
                     </button>
                   </td>
 

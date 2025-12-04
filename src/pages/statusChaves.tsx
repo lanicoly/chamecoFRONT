@@ -228,11 +228,11 @@ export function StatusChaves() {
                 </div>
                 {/* fim conteudo central tela status chaves */}
 
-                {/* logo chameco lateral */}
-                <div className="flex justify-start bottom-4 absolute sm:hidden">
-                    <img className="sm:w-[200px] w-32" src="\logo_lateral.png" alt="logo chameco" />
+                {/* logo sigec lateral */}
+                <div className="flex justify-start bottom-4 absolute mobile:hidden">
+                    <img className="sm:w-[200px] w-32" src="\logo-sigec.svg" alt="logo sigec" />
                 </div>
-                {/* fim logo chameco lateral */}
+                {/* fim logo sigec lateral */}
             </div>
             {/* fim parte informativa tela status chaves */}
         </div>

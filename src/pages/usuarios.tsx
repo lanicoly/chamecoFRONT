@@ -272,11 +272,11 @@ export function Usuarios() {
           </div>
         </div>
 
-        <div className="flex justify-start bottom-4 absolute sm:hidden">
+        <div className="flex justify-start bottom-4 absolute mobile:hidden">
           <img
             className="sm:w-[200px] w-32"
-            src="\logo_lateral.png"
-            alt="logo chameco"
+            src="\logo-sigec.svg"
+            alt="logo sigec"
           />
         </div>
       </div>
