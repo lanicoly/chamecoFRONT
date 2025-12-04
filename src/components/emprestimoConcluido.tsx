@@ -249,7 +249,7 @@ export function EmprestimosConcluidos({
 
   return (
     <>
-      <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
+      <table className=" flex flex-col w-full table-fixed border-separate border-spacing-y-2 bg-white">
         <thead className="bg-white  top-0 z-10">
           <tr>
             <th className="text-left text-[13px] sm:text-[13px] font-medium text-sky-900 w-[18%]">

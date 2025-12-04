@@ -56,6 +56,28 @@ export function IsDetalhesModal ( {
     closeDeleteModal();
   }
 
+    function emprestimoAlerta(emprestimo: {
+    horario_emprestimo?: string;
+    horario_devolucao?: string | null;
+  }) {
+    if (!emprestimo.horario_emprestimo)
+      return false;
+
+    const retirada = new Date(emprestimo.horario_emprestimo);
+    if (!emprestimo.horario_devolucao){
+
+        const agora = new Date();
+        const diferencaHoras = agora.getTime() - retirada.getTime();
+        
+        return diferencaHoras > 24 * 60 * 60 * 1000;
+    } else {
+        const devolucao = new Date(emprestimo.horario_devolucao);
+        const diferencaHoras = devolucao.getTime() - retirada.getTime();
+
+        return diferencaHoras > 24 * 60 * 60 * 1000;
+    }
+  }
+
     return (
         // emprestimo.id === emprestimoSelecionado?.id &&
         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-10 z-20">
@@ -217,12 +239,22 @@ export function IsDetalhesModal ( {
                     </button>
                 </div>
 
-                <div className="flex w-full h-auto px-[10px] py-2 mb-4 flex-col rounded-lg bg-[#B8BCE0]">
-                    <p className="text-[#192160] font-medium p-1">
-                    {emprestimoSelecionado?.observacao ||
-                        "Detalhes sobre o empréstimo"}
-                    </p>
+                <div className="flex flex-col gap-3">
+                    <div className="flex w-full h-auto px-[10px] py-2 flex-col rounded-lg bg-[#B8BCE0]">
+                        <p className="text-[#192160] font-medium p-1">
+                        {emprestimoSelecionado?.observacao ||
+                            "Detalhes sobre o empréstimo"}
+                        </p>
+                    </div>
+
+                    {emprestimoAlerta(emprestimoSelecionado) && (
+                        <div className="flex w-full h-auto px-[10px] py-2 flex-col rounded-lg bg-[#B8BCE0]">
+                        <p className="text-[#192160] font-medium p-1">
+                        Esse empréstimo ultrapassou <strong className="text-red-600 font-semibold">24h</strong> em aberto!
+                        </p>
+                    </div>)}
                 </div>
+
             </form>
         </div>
     )

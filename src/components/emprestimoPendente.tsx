@@ -283,8 +283,8 @@ export function EmprestimosPendentes({
 
 
   return (
-    <>
-      <table className=" w-full border-separate border-spacing-y-2 bg-white">
+    <div className="flex flex-col gap-2">
+      <table className=" w-full border-separate border-spacing-y-2 bg-white overflow-y-auto max-h-[620px] pb-4">
         {isSuccessModalOpen && <PopUpdeDevolucao />}
         {isPopUpErrorOpen && <PopUpError mensagem={mensagemErro} />}
 
@@ -685,7 +685,7 @@ export function EmprestimosPendentes({
         </tbody>
       </table>
       {/* Começo do passador de página */}
-      <div className=" mt-4 flex justify-end items-center">
+      <div className=" flex justify-end items-center">
         <PassadorPagina
           avancarPagina={avancarPaginaPendente}
           voltarPagina={voltarPaginaPendente}
@@ -694,6 +694,6 @@ export function EmprestimosPendentes({
         />
       </div>
       {/* Fim do passador de página */}
-    </>
+    </div>
   );
 }

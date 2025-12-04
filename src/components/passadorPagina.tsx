@@ -9,7 +9,7 @@ interface PassadorPaginaProps {
 
 export function PassadorPagina ({voltarPagina, avancarPagina, paginaAtual, totalPaginas} : PassadorPaginaProps) {
     return (
-        <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10">
+        <div className=" mt-2 flex justify-end items-center absolute bottom-3 right-8 sm:right-10 pr-4 bg-white rounded-lg w-[87%] md:w-[93%]">
 
             <button onClick={voltarPagina} className="size-[22px] rounded-sm text-white text-sm flex items-center justify-center font-bold">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#075985" className="bi bi-chevron-left" viewBox="0 0 16 16">
