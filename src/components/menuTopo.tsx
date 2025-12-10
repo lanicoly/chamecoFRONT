@@ -5,23 +5,31 @@ interface MenuTopoProps {
   backRoute?: string;
 }
 
-export function MenuTopo({ text, backRoute }:MenuTopoProps) {
+export function MenuTopo({ text, backRoute }: MenuTopoProps) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Limpar o token e os dados do usuário
-     localStorage.removeItem("token");
-     localStorage.removeItem("userType");
-     localStorage.removeItem("userData");
-    
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userName");
+
     // // Disparar evento para notificar a mudança no estado de autenticação
-    window.dispatchEvent(new Event('storage'));
-    
+    window.dispatchEvent(new Event("storage"));
+
     localStorage.clear();
-    
-    // Redirecionar para a página de login
     navigate("/login");
   };
+
+  const getTipoUsuario = () => {
+    const tipoUsuario = localStorage.getItem("userName");
+    if (tipoUsuario) {
+      return tipoUsuario;
+    }
+    return "Usuário";
+  };
+
+  const tipoUsuario = getTipoUsuario();
 
   return (
     <nav className="flex justify-between px-4 py-2 bg-white fixed top-0 w-full z-10 items-center">
@@ -46,14 +54,20 @@ export function MenuTopo({ text, backRoute }:MenuTopoProps) {
             </svg>
             {text}
           </button>
-        ) : <div />}
+        ) : (
+          <div />
+        )}
       </div>
 
       <div className="flex justify-center">
-        <img className="w-[150px] mobile:block hidden" src="\logo-sigec.svg" alt="logo sigec" />
+        <img
+          className="w-[150px] mobile:block hidden"
+          src="\logo-sigec.svg"
+          alt="logo sigec"
+        />
       </div>
 
-      <div className="flex w-[150px] justify-end">
+      <div className="flex w-[250px] justify-end">
         <button className="flex justify-center items-center gap-1 text-[#565D8F] font-semibold text-base bg-[#B8C1FF] rounded-l-md p-2 h-max w-max cursor-default">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +83,7 @@ export function MenuTopo({ text, backRoute }:MenuTopoProps) {
               d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
             />
           </svg>
-          Usuário
+          {tipoUsuario}
         </button>
         <button
           onClick={handleLogout}

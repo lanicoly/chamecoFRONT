@@ -54,6 +54,10 @@ export function Login() {
           localStorage.setItem("userType", response.data.tipo);
         }
 
+        if (response.data.nome) {
+          localStorage.setItem("userName", response.data.nome);
+        }
+
         const route = redirectUserTo(response.data.tipo?.trim());
         // console.log(route)
         navigate(route); // redireciona
