@@ -70,6 +70,12 @@ export function EmprestimosConcluidos({
 
   const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
+  const [ordenarRetiradaConcluidos, setOrdenarRetiradaConcluidos] =
+    useState<"recentes" | "antigos" >("recentes");
+
+  const [ordenarConcluidosPorData, setOrdenarConcluidosPorData] =
+    useState<"recentes" | "antigos" >("recentes");
+
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
       const salaNome = buscarNomeSalaPorIdChave(emp.chave, chavesData, salas);
@@ -178,6 +184,53 @@ export function EmprestimosConcluidos({
       );
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
+    })
+    .sort((a, b) => {
+      const retiradaA = a.horario_emprestimo ? new Date(a.horario_emprestimo) : null;
+      const retiradaB = b.horario_emprestimo ? new Date(b.horario_emprestimo) : null;
+
+      const devolucaoA = a.horario_devolucao ? new Date(a.horario_devolucao) : null;
+      const devolucaoB = b.horario_devolucao ? new Date(b.horario_devolucao) : null;
+
+      const diaTimestamp = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+      if (ordenarRetiradaConcluidos && retiradaA && retiradaB) {
+        const diaA = diaTimestamp(retiradaA);
+        const diaB = diaTimestamp(retiradaB);
+
+        const compDia =
+          ordenarRetiradaConcluidos === "recentes" ? diaB - diaA : diaA - diaB;
+
+        if (compDia !== 0) return compDia;
+      }
+
+      if (ordenarConcluidosPorData && devolucaoA && devolucaoB) {
+        const diaA = diaTimestamp(devolucaoA);
+        const diaB = diaTimestamp(devolucaoB);
+
+        const compDia =
+          ordenarConcluidosPorData === "recentes" ? diaB - diaA : diaA - diaB;
+
+        if (compDia !== 0) return compDia;
+
+        const compHora =
+          ordenarConcluidosPorData === "recentes"
+            ? devolucaoB.getTime() - devolucaoA.getTime()
+            : devolucaoA.getTime() - devolucaoB.getTime();
+
+        if (compHora !== 0) return compHora;
+      }
+
+      if (retiradaA && retiradaB) {
+        const compRetHora =
+          ordenarRetiradaConcluidos === "recentes"
+            ? retiradaB.getTime() - retiradaA.getTime()
+            : retiradaA.getTime() - retiradaB.getTime();
+
+        if (compRetHora !== 0) return compRetHora;
+      }
+
+      return 0;
     });
 
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
@@ -462,6 +515,17 @@ export function EmprestimosConcluidos({
                     locale={ptBR}
                     endMonth={new Date()}
                   />
+
+                  <div className="flex flex-col gap-2 items-center w-full">
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarRetiradaConcluidos("antigos")}>
+                      Mais antigos
+                    </button>
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarRetiradaConcluidos("recentes")}>
+                      Mais recentes
+                    </button>
+                  </div>
                 </FiltroModal>
               </div>
             </th>
@@ -584,6 +648,16 @@ export function EmprestimosConcluidos({
                     locale={ptBR}
                     endMonth={new Date()}
                   />
+                  <div className="flex flex-col gap-2 items-center w-full">
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarConcluidosPorData("antigos")}>
+                      Mais antigos
+                    </button>
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarConcluidosPorData("recentes")}>
+                      Mais recentes
+                    </button>
+                  </div>
                 </FiltroModal>
               </div>
             </th>

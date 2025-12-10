@@ -1,7 +1,7 @@
 export function Footer() {
   return (
     <footer className="w-full bg-white border-t border-gray-100">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4"> 
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-2"> 
         <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 mb-2"> 
           <div className="flex flex-col justify-center items-center">
             <img className="w-80" src="./logo-lateral-sigec.svg" alt="logo lateral sigec" />

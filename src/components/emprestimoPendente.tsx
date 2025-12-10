@@ -66,6 +66,8 @@ export function EmprestimosPendentes({
     dataRetirada: "",
     horaRetirada: "",
   });
+
+  const [ordenarPorDataRetirada, setOrdenarPorDataRetirada] = useState<"antigos" | "recentes" >("recentes");
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   function nomeSolicitante(
@@ -153,6 +155,22 @@ export function EmprestimosPendentes({
       );
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
+    })
+    .sort((a, b) => {
+      const retiradaA = a.horario_emprestimo ? new Date(a.horario_emprestimo) : null;
+      const retiradaB = b.horario_emprestimo ? new Date(b.horario_emprestimo) : null;
+
+      if (ordenarPorDataRetirada && retiradaA && retiradaB) {
+
+        const compRetHora =
+          ordenarPorDataRetirada === "recentes"
+            ? retiradaB.getTime() - retiradaA.getTime()
+            : retiradaA.getTime() - retiradaB.getTime();
+
+        if (compRetHora !== 0) return compRetHora;
+      }
+
+      return 0;
     });
 
     // console.log(emprestimosFiltradosPendentes);
@@ -500,6 +518,17 @@ export function EmprestimosPendentes({
                     locale={ptBR}
                     endMonth={new Date()}
                   />
+
+                  <div className="flex flex-col gap-2 items-center w-full">
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarPorDataRetirada("antigos")}>
+                      Mais antigos
+                    </button>
+
+                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarPorDataRetirada("recentes")}>
+                      Mais recentes
+                    </button>
+                  </div>
                 </FiltroModal>
               </div>
             </th>
