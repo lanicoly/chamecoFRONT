@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { Info, Check } from "lucide-react";
+import { Info, Check, X, CheckCircle } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
@@ -316,6 +316,7 @@ export function EmprestimosPendentes({
   const handleCloseModalAndReload = () => {
     setTimeout(() => {
       setIsSuccessModalOpen(false);
+      setIsConfirmarDevolucaoModalOpen(false);
       // window.location.reload();
     }, 2000);
   };
@@ -335,6 +336,21 @@ export function EmprestimosPendentes({
   }
 
   const buscar = makeBuscadorSalaPorChave(chavesData, salasData);
+
+  const [emprestimoParaDevolver, setEmprestimoParaDevolver] =
+    useState<Iemprestimo | null>(null);
+  const [isConfirmarDevolucaoModalOpen, setIsConfirmarDevolucaoModalOpen] =
+    useState(false);
+
+  function openConfirmarDevolucaoModal(emprestimo: Iemprestimo) {
+    setEmprestimoParaDevolver(emprestimo);
+    setIsConfirmarDevolucaoModalOpen(true);
+  }
+
+  function closeConfirmarDevolucaoModal() {
+    setIsConfirmarDevolucaoModalOpen(false);
+    setEmprestimoParaDevolver(null);
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -703,7 +719,7 @@ export function EmprestimosPendentes({
                   </td>
                   <td className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500">
                     <div
-                      onClick={() => finalizarEmprestimo(emprestimo.id)}
+                      onClick={() => openConfirmarDevolucaoModal(emprestimo)}
                       className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
                     >
                       <Check color="white" size={18} />
@@ -726,6 +742,64 @@ export function EmprestimosPendentes({
                       />
                     </button>
                   </td>
+
+                  {isConfirmarDevolucaoModalOpen && emprestimoParaDevolver && (
+                    <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          finalizarEmprestimo(emprestimoParaDevolver.id);
+                        }}
+                        className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                      >
+                        <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                          <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                            CONFIRMAR DEVOLUÇÃO
+                          </p>
+                          <button
+                            onClick={closeConfirmarDevolucaoModal}
+                            type="button"
+                            className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                          >
+                            <X className=" text-[#192160]" />
+                          </button>
+                        </div>
+                        <CheckCircle className="size-16 text-[#0240E1]" />
+
+                        <p className="text-center font-medium px-2 text-[#192160]">
+                          Deseja devolver a chave da{" "}
+                          <strong className="font-semibold text-[#DC0505]">
+                            {buscar(emprestimoParaDevolver.chave)}
+                          </strong>{" "}
+                          retirada por{" "}
+                          <strong className="font-semibold text-[#DC0505]">
+                            {emprestimoParaDevolver.usuario_solicitante != null
+                              ? nomesSolicitantesMap[
+                                  emprestimoParaDevolver.usuario_solicitante
+                                ] || "Carregando..."
+                              : "Solicitante não encontrado"}
+                          </strong>?
+                          {" "}
+                          Essa ação é definitiva.
+                        </p>
+                        <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                          <button
+                            onClick={closeDeleteModal}
+                            type="button"
+                            className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                          >
+                            CANCELAR
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center bg-[#0240E1]  text-[#FFF]"
+                          >
+                            CONFIRMAR
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
 
                   {/* Adicionando pop up de detalhes do empréstimo */}
                   {isDetalhesModalOpen && (

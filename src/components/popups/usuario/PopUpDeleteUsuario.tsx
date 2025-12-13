@@ -26,7 +26,7 @@ export function PopUpDeleteUsuario({removeUser, closeDeleteModal, }: IpopUpDelet
                     </div>
                     <TriangleAlert className="size-16 text-red-700" />
 
-                    <p className="text-center px-2">
+                    <p className="text-center font-medium px-2 text-[#192160]">
                       Essa ação é{" "}
                       <strong className="font-semibold ">definitiva</strong> e
                       não pode ser desfeita.{" "}
