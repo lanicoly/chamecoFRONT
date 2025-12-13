@@ -8,7 +8,10 @@ import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
-import { buscarNomeSalaPorIdChave, makeBuscadorSalaPorChave } from "../utils/buscarNomeSalaPorIdChave";
+import {
+  buscarNomeSalaPorIdChave,
+  makeBuscadorSalaPorChave,
+} from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
 // import { useNomeSolicitante } from "../utils/useNomeSolicitante";
@@ -28,11 +31,13 @@ interface EmprestimosConcluidosProps {
   dataDevolucao?: string | null;
   horario_devolucao?: string | null;
   pesquisa?: string;
+  termoPesquisa?: string;
 }
 
 export function EmprestimosConcluidos({
   new_emprestimos,
   salas,
+  termoPesquisa,
 }: EmprestimosConcluidosProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -70,11 +75,13 @@ export function EmprestimosConcluidos({
 
   const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
-  const [ordenarRetiradaConcluidos, setOrdenarRetiradaConcluidos] =
-    useState<"recentes" | "antigos" >("recentes");
+  const [ordenarRetiradaConcluidos, setOrdenarRetiradaConcluidos] = useState<
+    "recentes" | "antigos"
+  >("recentes");
 
-  const [ordenarConcluidosPorData, setOrdenarConcluidosPorData] =
-    useState<"recentes" | "antigos" >("recentes");
+  const [ordenarConcluidosPorData, setOrdenarConcluidosPorData] = useState<
+    "recentes" | "antigos"
+  >("recentes");
 
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
@@ -185,14 +192,53 @@ export function EmprestimosConcluidos({
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
     })
+    .filter((emp) => {
+      if (!termoPesquisa || termoPesquisa.trim() === "") return true;
+      const termo = termoPesquisa.toLowerCase();
+      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chavesData, salas);
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emp.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = nomeSolicitante(
+        emp.usuario_solicitante,
+        nomesSolicitantesMap
+      );
+      const dataHoraRetirada = emp.horario_emprestimo
+        ? formatarDataHora(emp.horario_emprestimo)
+        : { data: "", hora: "" };
+
+      const dataHoraEmprestimoDevolucao = emp.horario_devolucao
+        ? formatarDataHora(emp.horario_devolucao)
+        : { data: "", hora: "" };
+
+      return (
+        salaNome.toLowerCase().includes(termo) ||
+        responsavelNome.toLowerCase().includes(termo) ||
+        solicitanteNome.toLowerCase().includes(termo) ||
+        dataHoraRetirada.data.toLowerCase().includes(termo) ||
+        dataHoraRetirada.hora.toLowerCase().includes(termo) ||
+        dataHoraEmprestimoDevolucao.data.toLowerCase().includes(termo) ||
+        dataHoraEmprestimoDevolucao.hora.toLowerCase().includes(termo)
+      );
+    })
     .sort((a, b) => {
-      const retiradaA = a.horario_emprestimo ? new Date(a.horario_emprestimo) : null;
-      const retiradaB = b.horario_emprestimo ? new Date(b.horario_emprestimo) : null;
+      const retiradaA = a.horario_emprestimo
+        ? new Date(a.horario_emprestimo)
+        : null;
+      const retiradaB = b.horario_emprestimo
+        ? new Date(b.horario_emprestimo)
+        : null;
 
-      const devolucaoA = a.horario_devolucao ? new Date(a.horario_devolucao) : null;
-      const devolucaoB = b.horario_devolucao ? new Date(b.horario_devolucao) : null;
+      const devolucaoA = a.horario_devolucao
+        ? new Date(a.horario_devolucao)
+        : null;
+      const devolucaoB = b.horario_devolucao
+        ? new Date(b.horario_devolucao)
+        : null;
 
-      const diaTimestamp = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const diaTimestamp = (d: Date) =>
+        new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
       if (ordenarRetiradaConcluidos && retiradaA && retiradaB) {
         const diaA = diaTimestamp(retiradaA);
@@ -284,18 +330,18 @@ export function EmprestimosConcluidos({
   }
 
   function emprestimoConcluidoAlerta(emprestimo: {
-  horario_emprestimo?: string | null;
-  horario_devolucao?: string | null;
-}) {
-  if (!emprestimo.horario_emprestimo || !emprestimo.horario_devolucao) {
-    return false;
-  }
+    horario_emprestimo?: string | null;
+    horario_devolucao?: string | null;
+  }) {
+    if (!emprestimo.horario_emprestimo || !emprestimo.horario_devolucao) {
+      return false;
+    }
 
-  const retirada = new Date(emprestimo.horario_emprestimo);
-  const devolucao = new Date(emprestimo.horario_devolucao);
-  const diferencaHoras = devolucao.getTime() - retirada.getTime();
+    const retirada = new Date(emprestimo.horario_emprestimo);
+    const devolucao = new Date(emprestimo.horario_devolucao);
+    const diferencaHoras = devolucao.getTime() - retirada.getTime();
 
-  return diferencaHoras > 24 * 60 * 60 * 1000;
+    return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
   const buscar = makeBuscadorSalaPorChave(chavesData, salas);
@@ -517,12 +563,17 @@ export function EmprestimosConcluidos({
                   />
 
                   <div className="flex flex-col gap-2 items-center w-full">
-
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarRetiradaConcluidos("antigos")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarRetiradaConcluidos("antigos")}
+                    >
                       Mais antigos
                     </button>
 
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarRetiradaConcluidos("recentes")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarRetiradaConcluidos("recentes")}
+                    >
                       Mais recentes
                     </button>
                   </div>
@@ -649,12 +700,17 @@ export function EmprestimosConcluidos({
                     endMonth={new Date()}
                   />
                   <div className="flex flex-col gap-2 items-center w-full">
-
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarConcluidosPorData("antigos")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarConcluidosPorData("antigos")}
+                    >
                       Mais antigos
                     </button>
 
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarConcluidosPorData("recentes")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarConcluidosPorData("recentes")}
+                    >
                       Mais recentes
                     </button>
                   </div>
@@ -735,8 +791,12 @@ export function EmprestimosConcluidos({
                 paginaAtualConcluidos * itensPorPaginaConcluidos
               )
               .map((emprestimo, index) => (
-                <tr key={index}
-                className={`${index % 2 === 0 ? "bg-white" : "bg-blue-100"} border-b`}>
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0 ? "bg-white" : "bg-blue-100"
+                  } border-b`}
+                >
                   <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
                     {buscar(emprestimo.chave)}
                   </td>
@@ -745,7 +805,8 @@ export function EmprestimosConcluidos({
                   </td> */}
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
                     {emprestimo.usuario_solicitante != null
-                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] || "Carregando..."
+                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
+                        "Carregando..."
                       : "Solicitante não encontrado"}
                   </td>
                   <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
@@ -764,11 +825,19 @@ export function EmprestimosConcluidos({
                       ? formatarDataHora(emprestimo.horario_emprestimo).hora
                       : ""}
                   </td>
-                  <td className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center ${index % 2 !== 0 ? "bg-[#DFFFE0]" : ""}`}>
+                  <td
+                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center ${
+                      index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
+                    }`}
+                  >
                     {emprestimo.horario_devolucao &&
                       formatarDataHora(emprestimo.horario_devolucao).data}
                   </td>
-                  <td className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${index % 2 !== 0 ? "bg-[#DFFFE0]" : ""}`}>
+                  <td
+                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${
+                      index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
+                    }`}
+                  >
                     {emprestimo.horario_devolucao &&
                       formatarDataHora(emprestimo.horario_devolucao).hora}
                   </td>
@@ -778,10 +847,13 @@ export function EmprestimosConcluidos({
                       onClick={() => openDetalhesModal(emprestimo)}
                       className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
                     >
-                      <Info className={`size-5 ${emprestimoConcluidoAlerta(emprestimo)
-                        ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
-                        : "text-[#646999]"
-                      }`} />
+                      <Info
+                        className={`size-5 ${
+                          emprestimoConcluidoAlerta(emprestimo)
+                            ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                            : "text-[#646999]"
+                        }`}
+                      />
                     </button>
                   </td>
                   {/* Adicionando pop up de detalhes do empréstimo */}

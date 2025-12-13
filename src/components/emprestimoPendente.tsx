@@ -10,7 +10,10 @@ import { PopUpdeDevolucao } from "./popups/PopUpdeDevolucao";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
-import { buscarNomeSalaPorIdChave, makeBuscadorSalaPorChave } from "../utils/buscarNomeSalaPorIdChave";
+import {
+  buscarNomeSalaPorIdChave,
+  makeBuscadorSalaPorChave,
+} from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 // import { useNomeSolicitante } from "../utils/useNomeSolicitante";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
@@ -34,6 +37,7 @@ interface EmprestimosPendentesProps {
   horario_emprestimo?: string;
   pesquisa?: string;
   refreshCounter?: number;
+  termoPesquisa?: string;
 }
 
 export interface IusuarioResponsavel {
@@ -45,6 +49,7 @@ export interface IusuarioResponsavel {
 export function EmprestimosPendentes({
   new_emprestimos,
   setRefreshCounter,
+  termoPesquisa,
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -67,7 +72,9 @@ export function EmprestimosPendentes({
     horaRetirada: "",
   });
 
-  const [ordenarPorDataRetirada, setOrdenarPorDataRetirada] = useState<"antigos" | "recentes" >("recentes");
+  const [ordenarPorDataRetirada, setOrdenarPorDataRetirada] = useState<
+    "antigos" | "recentes"
+  >("recentes");
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   function nomeSolicitante(
@@ -156,12 +163,42 @@ export function EmprestimosPendentes({
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
     })
+    .filter((emp) => {
+      if (!termoPesquisa || termoPesquisa.trim() === "") return true;
+      const termo = termoPesquisa.toLowerCase();
+      const salaNome = buscarNomeSalaPorIdChave(
+        emp.chave,
+        chavesData,
+        salasData
+      );
+      const responsavelNome = buscarNomeUsuarioPorId(
+        emp.usuario_responsavel,
+        responsaveis
+      );
+      const solicitanteNome = nomeSolicitante(
+        emp.usuario_solicitante,
+        nomesSolicitantesMap
+      );
+      const dataHoraRetirada = emp.horario_emprestimo
+        ? formatarDataHora(emp.horario_emprestimo)
+        : { data: "", hora: "" };
+      return (
+        salaNome.toLowerCase().includes(termo) ||
+        responsavelNome.toLowerCase().includes(termo) ||
+        solicitanteNome.toLowerCase().includes(termo) ||
+        dataHoraRetirada.data.toLowerCase().includes(termo) ||
+        dataHoraRetirada.hora.toLowerCase().includes(termo)
+      );
+    })
     .sort((a, b) => {
-      const retiradaA = a.horario_emprestimo ? new Date(a.horario_emprestimo) : null;
-      const retiradaB = b.horario_emprestimo ? new Date(b.horario_emprestimo) : null;
+      const retiradaA = a.horario_emprestimo
+        ? new Date(a.horario_emprestimo)
+        : null;
+      const retiradaB = b.horario_emprestimo
+        ? new Date(b.horario_emprestimo)
+        : null;
 
       if (ordenarPorDataRetirada && retiradaA && retiradaB) {
-
         const compRetHora =
           ordenarPorDataRetirada === "recentes"
             ? retiradaB.getTime() - retiradaA.getTime()
@@ -173,7 +210,7 @@ export function EmprestimosPendentes({
       return 0;
     });
 
-    // console.log(emprestimosFiltradosPendentes);
+  // console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
     null
   );
@@ -298,7 +335,6 @@ export function EmprestimosPendentes({
   }
 
   const buscar = makeBuscadorSalaPorChave(chavesData, salasData);
-
 
   return (
     <div className="flex flex-col gap-2">
@@ -520,12 +556,17 @@ export function EmprestimosPendentes({
                   />
 
                   <div className="flex flex-col gap-2 items-center w-full">
-
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarPorDataRetirada("antigos")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarPorDataRetirada("antigos")}
+                    >
                       Mais antigos
                     </button>
 
-                    <button className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100" onClick={() => setOrdenarPorDataRetirada("recentes")}>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
+                      onClick={() => setOrdenarPorDataRetirada("recentes")}
+                    >
                       Mais recentes
                     </button>
                   </div>
@@ -607,11 +648,13 @@ export function EmprestimosPendentes({
                 paginaAtualPendente * itensPorPaginaPendente
               )
               .map((emprestimo, index) => (
-                <tr key={index}
-                className={`${index % 2 === 0 ? "bg-white" : "bg-blue-100"} border-b`}>
-                  <td
-                    className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]"
-                  >
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0 ? "bg-white" : "bg-blue-100"
+                  } border-b`}
+                >
+                  <td className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {/* {buscarNomeSalaPorIdChave(
                         emprestimo.chave,
@@ -631,18 +674,16 @@ export function EmprestimosPendentes({
                       {`Chave ${buscar(emprestimo.chave)}`}
                     </p>
                   </td> */}
-                  <td
-                    className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
-                  >
+                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {emprestimo.usuario_solicitante != null
-                        ? nomesSolicitantesMap[emprestimo.usuario_solicitante] || "Carregando..."
+                        ? nomesSolicitantesMap[
+                            emprestimo.usuario_solicitante
+                          ] || "Carregando..."
                         : "Solicitante não encontrado"}
                     </p>
                   </td>
-                  <td
-                    className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
-                  >
+                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
                       {buscarNomeUsuarioPorId(
                         emprestimo.usuario_responsavel,
@@ -650,23 +691,17 @@ export function EmprestimosPendentes({
                       ) || "Responsavel não encontrado"}
                     </p>
                   </td>
-                  <td
-                    className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center"
-                  >
+                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).data
                       : ""}
                   </td>
-                  <td
-                    className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center"
-                  >
+                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
                     {emprestimo.horario_emprestimo
                       ? formatarDataHora(emprestimo.horario_emprestimo).hora
                       : ""}
                   </td>
-                  <td
-                    className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500"
-                  >
+                  <td className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500">
                     <div
                       onClick={() => finalizarEmprestimo(emprestimo.id)}
                       className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
@@ -682,10 +717,13 @@ export function EmprestimosPendentes({
                       onClick={() => openDetalhesModal(emprestimo)}
                       className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
                     >
-                      <Info className={`size-5 ${emprestimoPendenteAlerta(emprestimo)
-                        ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
-                        : "text-[#646999]"
-                      }`} />
+                      <Info
+                        className={`size-5 ${
+                          emprestimoPendenteAlerta(emprestimo)
+                            ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                            : "text-[#646999]"
+                        }`}
+                      />
                     </button>
                   </td>
 

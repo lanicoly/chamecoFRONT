@@ -19,6 +19,7 @@ import { useChaves } from "../context/ChavesContext";
 import { AxiosError } from "axios";
 import { useRef } from "react";
 import { Relogio } from "../components/relogio";
+import { Pesquisa } from "../components/pesquisa";
 
 export interface Iemprestimo {
   id?: number | null;
@@ -41,7 +42,7 @@ export interface FiltroEmprestimo {
 
 export function Emprestimos() {
   // const tipo = Number(localStorage.getItem("userType"));
-  const pesquisa = "";
+  // const pesquisa = "";
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
     null
@@ -65,12 +66,18 @@ export function Emprestimos() {
   const { usuarios } = useGetUsuarios();
   const { chaves, refetch } = useChaves();
 
+  const [pesquisa, setPesquisa] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   async function criarEmprestimo() {
-    const observacaoAtual = observacao || ""; 
-    const observacaoParaEnvio = observacaoAtual.trim() === "" ? "Detalhes sobre o empréstimo" : observacaoAtual;
+    const observacaoAtual = observacao || "";
+    const observacaoParaEnvio =
+      observacaoAtual.trim() === ""
+        ? "Detalhes sobre o empréstimo"
+        : observacaoAtual;
     const novoEmprestimo: Iemprestimo = {
       chave: chaveSelecionadaId,
       usuario_responsavel: responsavelSelecionadoId,
@@ -145,7 +152,6 @@ export function Emprestimos() {
   //   setIsObservacaoModalOpen(false);
   // }
 
-
   // Adicionando função de abrir e fechar modal de editar observacao de um emprestimo
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -165,6 +171,9 @@ export function Emprestimos() {
     setExibirEmprestimosPendentes(
       (exibirEmprestimoAtual) => !exibirEmprestimoAtual
     );
+
+    setPesquisa("");
+    setIsSearching(false);
   };
 
   // Ainda está faltando o loading e o error
@@ -218,10 +227,10 @@ export function Emprestimos() {
     actionOnEnter?: () => void
   ) {
     if (e.key === "Enter") {
-      e.preventDefault(); 
+      e.preventDefault();
 
       if (actionOnEnter) {
-        actionOnEnter(); 
+        actionOnEnter();
       }
 
       if (nextRef?.current) {
@@ -250,22 +259,40 @@ export function Emprestimos() {
       <div className="relative bg-white w-full max-w-[80%] rounded-3xl px-6 py-2 tablet:py-3 desktop:py-6 m-12 top-8 tablet:top-10 desktop:top-8">
         {/* cabeçalho tela de empréstimo*/}
         <div className="flex w-full px-4">
-        <Relogio/>
+          <Relogio />
           <h1 className="flex w-full justify-center text-sky-900 text-2xl font-semibold">
             EMPRÉSTIMOS
           </h1>
 
           <button>
             <div className=" flex items-center justify-center gap-1 px-2 py-1 border-[#0240E1] border-2 rounded bg-[#0240E1] bg-opacity-10 shadow-md shadow-zinc-600">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <mask id="mask0_2949_3868" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-              <rect width="24" height="24" fill="#D9D9D9"/>
-              </mask>
-              <g mask="url(#mask0_2949_3868)">
-              <path d="M4 19V17H6V10C6 8.61667 6.41667 7.3875 7.25 6.3125C8.08333 5.2375 9.16667 4.53333 10.5 4.2V3.5C10.5 3.08333 10.6458 2.72917 10.9375 2.4375C11.2292 2.14583 11.5833 2 12 2C12.4167 2 12.7708 2.14583 13.0625 2.4375C13.3542 2.72917 13.5 3.08333 13.5 3.5V4.2C14.8333 4.53333 15.9167 5.2375 16.75 6.3125C17.5833 7.3875 18 8.61667 18 10V17H20V19H4ZM12 22C11.45 22 10.9792 21.8042 10.5875 21.4125C10.1958 21.0208 10 20.55 10 20H14C14 20.55 13.8042 21.0208 13.4125 21.4125C13.0208 21.8042 12.55 22 12 22Z" fill="#0240E1"/>
-              </g>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <mask
+                  id="mask0_2949_3868"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="24"
+                  height="24"
+                >
+                  <rect width="24" height="24" fill="#D9D9D9" />
+                </mask>
+                <g mask="url(#mask0_2949_3868)">
+                  <path
+                    d="M4 19V17H6V10C6 8.61667 6.41667 7.3875 7.25 6.3125C8.08333 5.2375 9.16667 4.53333 10.5 4.2V3.5C10.5 3.08333 10.6458 2.72917 10.9375 2.4375C11.2292 2.14583 11.5833 2 12 2C12.4167 2 12.7708 2.14583 13.0625 2.4375C13.3542 2.72917 13.5 3.08333 13.5 3.5V4.2C14.8333 4.53333 15.9167 5.2375 16.75 6.3125C17.5833 7.3875 18 8.61667 18 10V17H20V19H4ZM12 22C11.45 22 10.9792 21.8042 10.5875 21.4125C10.1958 21.0208 10 20.55 10 20H14C14 20.55 13.8042 21.0208 13.4125 21.4125C13.0208 21.8042 12.55 22 12 22Z"
+                    fill="#0240E1"
+                  />
+                </g>
               </svg>
-            <p className=" md:block hidden text-base font-semibold text-[#0240E1]">NOTIFICAÇÕES</p>
+              <p className=" md:block hidden text-base font-semibold text-[#0240E1]">
+                NOTIFICAÇÕES
+              </p>
             </div>
           </button>
         </div>
@@ -500,28 +527,67 @@ export function Emprestimos() {
 
                 <button
                   onClick={alternarEmprestimos}
-                  className={`flex py-1 px-3 justify-center items-center gap-2 rounded-md bg-opacity-10 mt-2 border-2 ${exibirEmprestimosPendentes ? "bg-[#0240E1] border-[#0240E1]" : "bg-red-500 border-red-500"}`}
+                  className={`flex py-1 px-3 justify-center items-center gap-2 rounded-md bg-opacity-10 mt-2 border-2 ${
+                    exibirEmprestimosPendentes
+                      ? "bg-[#0240E1] border-[#0240E1]"
+                      : "bg-red-500 border-red-500"
+                  }`}
                 >
-                  
-                  <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    width="16"
+                    height="10"
+                    viewBox="0 0 16 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <g clip-path="url(#clip0_2953_3884)">
-                    <path d="M0.666504 5.46699C3.5465 -0.933008 12.1865 -0.933008 15.0665 5.46699" stroke={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M7.86631 8.6667C7.55114 8.6667 7.23905 8.60462 6.94787 8.48401C6.65669 8.3634 6.39211 8.18662 6.16925 7.96376C5.94639 7.74089 5.76961 7.47632 5.649 7.18514C5.52839 6.89396 5.46631 6.58187 5.46631 6.2667C5.46631 5.95153 5.52839 5.63944 5.649 5.34826C5.76961 5.05708 5.94639 4.7925 6.16925 4.56964C6.39211 4.34678 6.65669 4.17 6.94787 4.04939C7.23905 3.92878 7.55114 3.8667 7.86631 3.8667C8.50283 3.8667 9.11328 4.11956 9.56336 4.56964C10.0135 5.01973 10.2663 5.63018 10.2663 6.2667C10.2663 6.90322 10.0135 7.51367 9.56336 7.96376C9.11328 8.41384 8.50283 8.6667 7.86631 8.6667Z" fill={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`} stroke={`${exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"}`}  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path
+                        d="M0.666504 5.46699C3.5465 -0.933008 12.1865 -0.933008 15.0665 5.46699"
+                        stroke={`${
+                          exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"
+                        }`}
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M7.86631 8.6667C7.55114 8.6667 7.23905 8.60462 6.94787 8.48401C6.65669 8.3634 6.39211 8.18662 6.16925 7.96376C5.94639 7.74089 5.76961 7.47632 5.649 7.18514C5.52839 6.89396 5.46631 6.58187 5.46631 6.2667C5.46631 5.95153 5.52839 5.63944 5.649 5.34826C5.76961 5.05708 5.94639 4.7925 6.16925 4.56964C6.39211 4.34678 6.65669 4.17 6.94787 4.04939C7.23905 3.92878 7.55114 3.8667 7.86631 3.8667C8.50283 3.8667 9.11328 4.11956 9.56336 4.56964C10.0135 5.01973 10.2663 5.63018 10.2663 6.2667C10.2663 6.90322 10.0135 7.51367 9.56336 7.96376C9.11328 8.41384 8.50283 8.6667 7.86631 8.6667Z"
+                        fill={`${
+                          exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"
+                        }`}
+                        stroke={`${
+                          exibirEmprestimosPendentes ? "#0240E1" : "#EF4444"
+                        }`}
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
                     </g>
                     <defs>
-                    <clipPath id="clip0_2953_3884">
-                    <rect width="16" height="9.33333" fill="white"/>
-                    </clipPath>
+                      <clipPath id="clip0_2953_3884">
+                        <rect width="16" height="9.33333" fill="white" />
+                      </clipPath>
                     </defs>
                   </svg>
 
-
-                  <p className={`items-center ${exibirEmprestimosPendentes ? "text-[#0240E1]" : "text-[#EF4444]"} text-[15px] font-semibold`}>
+                  <p
+                    className={`items-center ${
+                      exibirEmprestimosPendentes
+                        ? "text-[#0240E1]"
+                        : "text-[#EF4444]"
+                    } text-[15px] font-semibold`}
+                  >
                     {" "}
                     {exibirEmprestimosPendentes ? "CONCLUÍDOS" : "PENDENTES"}
                   </p>
                 </button>
               </div>
+              <Pesquisa
+                pesquisa={pesquisa}
+                placeholder="Pesquisar"
+                setIsSearching={setIsSearching}
+                setPesquisa={setPesquisa}
+              />
             </div>
 
             {/* tabela com emprestimo pendente */}
@@ -533,20 +599,18 @@ export function Emprestimos() {
               <EmprestimosPendentes
                 new_emprestimos={emprestimosPendentes}
                 setRefreshCounter={setRefreshCounter}
+                termoPesquisa={pesquisa}
               />
             </div>
             {/* fim tabela de emprestimo pendente */}
 
             {/* tabela com emprestimo concluido */}
             {!exibirEmprestimosPendentes && (
-              <div
-                className={
-                  "overflow-y-auto max-h-[248px] tablet:max-h-60"
-                }
-              >
+              <div className={"overflow-y-auto max-h-[248px] tablet:max-h-60"}>
                 <EmprestimosConcluidos
                   new_emprestimos={emprestimosConcluidos}
                   salas={salas}
+                  termoPesquisa={pesquisa}
                 />
                 {/* fim tabela com emprestimo concluido */}
               </div>
