@@ -23,7 +23,7 @@ import { AxiosError } from "axios";
 import { IChave, ISala, IUsuario } from "../pages/chaves";
 // import { NomeSolicitanteCell } from "./NomeCellSolicitante";
 import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
-// import { useEffect } from "react";
+import { useEffect } from "react";
 
 interface EmprestimosPendentesProps {
   new_emprestimos: Iemprestimo[];
@@ -38,6 +38,9 @@ interface EmprestimosPendentesProps {
   pesquisa?: string;
   refreshCounter?: number;
   termoPesquisa?: string;
+  setQtdAtrasados: React.Dispatch<React.SetStateAction<number>>;
+  filtrarAtrasados: boolean;
+
 }
 
 export interface IusuarioResponsavel {
@@ -50,6 +53,8 @@ export function EmprestimosPendentes({
   new_emprestimos,
   setRefreshCounter,
   termoPesquisa,
+  setQtdAtrasados,
+  filtrarAtrasados
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -208,6 +213,10 @@ export function EmprestimosPendentes({
       }
 
       return 0;
+    })
+    .filter((emp) => {
+      if (!filtrarAtrasados) return true;
+      return emprestimoPendenteAlerta(emp);
     });
 
   // console.log(emprestimosFiltradosPendentes);
@@ -351,6 +360,15 @@ export function EmprestimosPendentes({
     setIsConfirmarDevolucaoModalOpen(false);
     setEmprestimoParaDevolver(null);
   }
+
+  useEffect(() => {
+    const totalAtrasados = new_emprestimos.filter((emp) =>
+      emprestimoPendenteAlerta(emp)
+    ).length;
+
+    setQtdAtrasados(totalAtrasados);
+  }, [new_emprestimos, setQtdAtrasados]);
+
 
   return (
     <div className="flex flex-col gap-2">
@@ -665,10 +683,10 @@ export function EmprestimosPendentes({
               )
               .map((emprestimo, index) => (
                 <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-blue-100"
-                  } border-b`}
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-white" : "bg-blue-100"
+                } border-b`}
                 >
                   <td className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
                     <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
@@ -676,7 +694,7 @@ export function EmprestimosPendentes({
                         emprestimo.chave,
                         chavesData,
                         salasData
-                      )} */}
+                        )} */}
                       {buscar(emprestimo.chave)}
                     </p>
                   </td>

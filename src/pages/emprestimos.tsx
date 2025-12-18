@@ -72,6 +72,9 @@ export function Emprestimos() {
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
+  const [mostrarSomenteAtrasados, setMostrarSomenteAtrasados] = useState(false);
+
+
   async function criarEmprestimo() {
     const observacaoAtual = observacao || "";
     const observacaoParaEnvio =
@@ -201,6 +204,8 @@ export function Emprestimos() {
     refetch();
     // console.log("atualizou o context")
   }, []);
+
+  const [qtdAtrasados, setQtdAtrasados] = useState(0);
 
   const chavesRef = useRef<HTMLElementTagNameMap["td"]>(null);
   const solicitanteRef = useRef<HTMLElementTagNameMap["td"]>(null);
@@ -582,12 +587,30 @@ export function Emprestimos() {
                   </p>
                 </button>
               </div>
+
+              <div className="flex items-center gap-3">
+              
+              {exibirEmprestimosPendentes && (
+              <div className="flex items-center gap-1 text-sm text-[#646999] font-semibold">
+                <input
+                type="checkbox"
+                checked={mostrarSomenteAtrasados}
+                onChange={(e) => setMostrarSomenteAtrasados(e.target.checked)}
+                />
+                  Atrasados +24h
+                <div className=" flex items-center px-2 py-1 rounded-full bg-[#EF4444] text-xs text-white">
+                  {qtdAtrasados}
+                </div>
+              </div>
+              )}
               <Pesquisa
                 pesquisa={pesquisa}
                 placeholder="Pesquisar"
                 setIsSearching={setIsSearching}
                 setPesquisa={setPesquisa}
-              />
+                />
+              </div>
+              
             </div>
 
             {/* tabela com emprestimo pendente */}
@@ -600,6 +623,8 @@ export function Emprestimos() {
                 new_emprestimos={emprestimosPendentes}
                 setRefreshCounter={setRefreshCounter}
                 termoPesquisa={pesquisa}
+                setQtdAtrasados={setQtdAtrasados}
+                filtrarAtrasados={mostrarSomenteAtrasados}
               />
             </div>
             {/* fim tabela de emprestimo pendente */}
