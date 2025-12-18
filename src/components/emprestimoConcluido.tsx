@@ -289,7 +289,7 @@ export function EmprestimosConcluidos({
   const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
   const totalPaginasConcluidos = Math.max(
     1,
-    Math.ceil(new_emprestimos.length / itensPorPaginaConcluidos)
+    Math.ceil(emprestimosFiltradosConcluidos.length / itensPorPaginaConcluidos)
   );
 
   function avancarPaginaConcluidos() {

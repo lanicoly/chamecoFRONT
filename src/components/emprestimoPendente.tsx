@@ -221,7 +221,7 @@ export function EmprestimosPendentes({
   const itensPorPaginaPendente = 5;
   const totalPaginasPendentes = Math.max(
     1,
-    Math.ceil(new_emprestimos.length / itensPorPaginaPendente)
+    Math.ceil(emprestimosFiltradosPendentes.length / itensPorPaginaPendente)
   );
 
   function avancarPaginaPendente() {
