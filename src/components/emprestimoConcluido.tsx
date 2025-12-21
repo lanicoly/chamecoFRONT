@@ -3,7 +3,7 @@ import { Iemprestimo } from "../pages/emprestimos";
 import { IoptionChaves } from "./inputs/FilterableInputChaves";
 import { IsDetalhesModal } from "./popups/detalhes/IsDetalhesModal";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
-import { Info } from "lucide-react";
+import { Info, ArrowUpZA, ArrowDownAZ, ArrowUpDown } from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
@@ -83,22 +83,21 @@ export function EmprestimosConcluidos({
     "recentes" | "antigos"
   >("recentes");
 
+  const getSalaNome = (e: Iemprestimo) =>
+    buscarNomeSalaPorIdChave(e.chave, chavesData, salas) || "";
+
+  const getSolicitanteNome = (e: Iemprestimo) =>
+    nomeSolicitante(e.usuario_solicitante, nomesSolicitantesMap) || "";
+
+  const getResponsavelNome = (e: Iemprestimo) =>
+    buscarNomeUsuarioPorId(e.usuario_responsavel, responsaveis) || "";
+
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
-      const salaNome = buscarNomeSalaPorIdChave(emp.chave, chavesData, salas);
-      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
-        emp.chave,
-        chavesData,
-        salas
-      )}`;
-      const responsavelNome = buscarNomeUsuarioPorId(
-        emp.usuario_responsavel,
-        responsaveis
-      );
-      const solicitanteNome = nomeSolicitante(
-        emp.usuario_solicitante,
-        nomesSolicitantesMap
-      );
+      const salaNome = getSalaNome(emp);
+      const chaveNome = getSalaNome(emp);
+      const responsavelNome = getResponsavelNome(emp);
+      const solicitanteNome = getSolicitanteNome(emp);
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
         : { data: "", hora: "" };
@@ -284,7 +283,6 @@ export function EmprestimosConcluidos({
   );
 
   //paginação para emprestimos concluidos
-  const itensAtuaisConcluidos = emprestimosFiltradosConcluidos.slice();
   const itensPorPaginaConcluidos = 5;
   const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
   const totalPaginasConcluidos = Math.max(
@@ -346,6 +344,80 @@ export function EmprestimosConcluidos({
 
   const buscar = makeBuscadorSalaPorChave(chavesData, salas);
 
+  type CampoOrdenacao = "sala" | "solicitante" | "responsavel";
+
+  const [ordem, setOrdem] = useState<"desativado" | "asc" | "desc">(
+    "desativado"
+  );
+  const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao | null>(
+    null
+  );
+
+  const alterarOrdem = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao === campo) {
+      if (ordem === "desativado") {
+        setOrdem("asc");
+      } else if (ordem === "asc") {
+        setOrdem("desc");
+      } else {
+        setOrdem("desativado");
+        setCampoOrdenacao(null);
+      }
+      return;
+    }
+    setCampoOrdenacao(campo);
+    setOrdem("asc");
+  };
+
+  const ordenarLista = (lista: Iemprestimo[]) => {
+    if (ordem === "desativado" || !campoOrdenacao) return lista;
+
+    return [...lista].sort((a, b) => {
+      let valorA = "";
+      let valorB = "";
+
+      switch (campoOrdenacao) {
+        case "sala":
+          valorA = getSalaNome(a);
+          valorB = getSalaNome(b);
+          break;
+
+        case "solicitante":
+          valorA = getSolicitanteNome(a);
+          valorB = getSolicitanteNome(b);
+          break;
+
+        case "responsavel":
+          valorA = getResponsavelNome(a);
+          valorB = getResponsavelNome(b);
+          break;
+      }
+
+      const resultado = valorA
+        .toLowerCase()
+        .localeCompare(valorB.toLowerCase());
+
+      return ordem === "asc" ? resultado : -resultado;
+    });
+  };
+
+  const iconeOrdenacao = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao !== campo) {
+      return <ArrowUpDown size={19} />;
+    }
+
+    if (ordem === "asc") return <ArrowDownAZ size={19} />;
+    if (ordem === "desc") return <ArrowUpZA size={19} />;
+    return <ArrowUpDown size={19} />;
+  };
+
+  const emprestimosOrdenados = ordenarLista(emprestimosFiltradosConcluidos);
+
+  const itensAtuaisConcluidos = emprestimosOrdenados.slice(
+    (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
+    paginaAtualConcluidos * itensPorPaginaConcluidos
+  );
+
   return (
     <>
       <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
@@ -361,6 +433,9 @@ export function EmprestimosConcluidos({
                       alt="Filtro"
                       className="w-4 h-4"
                     />
+                  </button>
+                  <button onClick={() => alterarOrdem("sala")}>
+                    {iconeOrdenacao("sala")}
                   </button>
                 </div>
 
@@ -440,6 +515,9 @@ export function EmprestimosConcluidos({
                       className="w-4 h-4"
                     />
                   </button>
+                  <button onClick={() => alterarOrdem("solicitante")}>
+                    {iconeOrdenacao("solicitante")}
+                  </button>
                 </div>
 
                 <FiltroModal
@@ -478,6 +556,9 @@ export function EmprestimosConcluidos({
                       alt="Filtro"
                       className="w-4 h-4"
                     />
+                  </button>
+                  <button onClick={() => alterarOrdem("responsavel")}>
+                    {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
 
@@ -631,7 +712,7 @@ export function EmprestimosConcluidos({
                 >
                   <input
                     type="text"
-                    placeholder="Filtrar por hora de retirada"
+                    placeholder="00:00"
                     className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
                     value={filtroConcluido.horaRetirada}
                     onChange={(e) =>
@@ -785,93 +866,88 @@ export function EmprestimosConcluidos({
         </thead>
         <tbody>
           {itensAtuaisConcluidos.length > 0 ? (
-            itensAtuaisConcluidos
-              .slice(
-                (paginaAtualConcluidos - 1) * itensPorPaginaConcluidos,
-                paginaAtualConcluidos * itensPorPaginaConcluidos
-              )
-              .map((emprestimo, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-blue-100"
-                  } border-b`}
-                >
-                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
-                    {buscar(emprestimo.chave)}
-                  </td>
-                  {/* <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
+            itensAtuaisConcluidos.map((emprestimo, index) => (
+              <tr
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-white" : "bg-blue-100"
+                } border-b`}
+              >
+                <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
+                  {buscar(emprestimo.chave)}
+                </td>
+                {/* <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[13%]">
                     {`Chave ${buscar(emprestimo.chave)}`}
                   </td> */}
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
-                    {emprestimo.usuario_solicitante != null
-                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
-                        "Carregando..."
-                      : "Solicitante não encontrado"}
-                  </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
-                    {buscarNomeUsuarioPorId(
-                      emprestimo.usuario_responsavel,
-                      responsaveis
-                    ) || "Responsavel não encontrado"}
-                  </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo
-                      ? formatarDataHora(emprestimo.horario_emprestimo).data
-                      : ""}
-                  </td>
-                  <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo
-                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
-                      : ""}
-                  </td>
-                  <td
-                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center ${
-                      index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
-                    }`}
-                  >
-                    {emprestimo.horario_devolucao &&
-                      formatarDataHora(emprestimo.horario_devolucao).data}
-                  </td>
-                  <td
-                    className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${
-                      index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
-                    }`}
-                  >
-                    {emprestimo.horario_devolucao &&
-                      formatarDataHora(emprestimo.horario_devolucao).hora}
-                  </td>
+                <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
+                  {emprestimo.usuario_solicitante != null
+                    ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
+                      "Carregando..."
+                    : "Solicitante não encontrado"}
+                </td>
+                <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] break-words flex-1 text-center">
+                  {buscarNomeUsuarioPorId(
+                    emprestimo.usuario_responsavel,
+                    responsaveis
+                  ) || "Responsavel não encontrado"}
+                </td>
+                <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center">
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).data
+                    : ""}
+                </td>
+                <td className=" p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center">
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                    : ""}
+                </td>
+                <td
+                  className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[12%] break-words flex-1 text-center ${
+                    index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
+                  }`}
+                >
+                  {emprestimo.horario_devolucao &&
+                    formatarDataHora(emprestimo.horario_devolucao).data}
+                </td>
+                <td
+                  className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${
+                    index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
+                  }`}
+                >
+                  {emprestimo.horario_devolucao &&
+                    formatarDataHora(emprestimo.horario_devolucao).hora}
+                </td>
 
-                  <td className="pl-2 bg-white">
-                    <button
-                      onClick={() => openDetalhesModal(emprestimo)}
-                      className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
-                    >
-                      <Info
-                        className={`size-5 ${
-                          emprestimoConcluidoAlerta(emprestimo)
-                            ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
-                            : "text-[#646999]"
-                        }`}
-                      />
-                    </button>
-                  </td>
-                  {/* Adicionando pop up de detalhes do empréstimo */}
-                  {isDetalhesModalOpen && (
-                    // emprestimo.id === emprestimoSelecionado?.id &&
-                    <IsDetalhesModal
-                      observacao={observacao}
-                      setObservacao={setObservacao}
-                      emprestimoSelecionado={emprestimoSelecionado}
-                      closeDetalhesModal={closeDetalhesModal}
-                      openDeleteModal={openDeleteModal}
-                      closeDeleteModal={closeDeleteModal}
-                      isDeleteModalOpen={isDeleteModalOpen}
+                <td className="pl-2 bg-white">
+                  <button
+                    onClick={() => openDetalhesModal(emprestimo)}
+                    className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
+                  >
+                    <Info
+                      className={`size-5 ${
+                        emprestimoConcluidoAlerta(emprestimo)
+                          ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                          : "text-[#646999]"
+                      }`}
                     />
-                  )}
-                  {/* Fim adicionando pop up de detalhes do emprestimo */}
-                </tr>
-              ))
+                  </button>
+                </td>
+                {/* Adicionando pop up de detalhes do empréstimo */}
+                {isDetalhesModalOpen && (
+                  // emprestimo.id === emprestimoSelecionado?.id &&
+                  <IsDetalhesModal
+                    observacao={observacao}
+                    setObservacao={setObservacao}
+                    emprestimoSelecionado={emprestimoSelecionado}
+                    closeDetalhesModal={closeDetalhesModal}
+                    openDeleteModal={openDeleteModal}
+                    closeDeleteModal={closeDeleteModal}
+                    isDeleteModalOpen={isDeleteModalOpen}
+                  />
+                )}
+                {/* Fim adicionando pop up de detalhes do emprestimo */}
+              </tr>
+            ))
           ) : (
             <tr>
               <td colSpan={7} className="p-4 text-center text-[#646999]">

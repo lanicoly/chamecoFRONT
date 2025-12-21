@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
-import { Info, Check, X, CheckCircle } from "lucide-react";
+import {
+  Info,
+  Check,
+  X,
+  CheckCircle,
+  ArrowUpZA,
+  ArrowDownAZ,
+  ArrowUpDown,
+} from "lucide-react";
 import { FiltroModal } from "../components/filtragemModal";
 import { ptBR } from "date-fns/locale";
 import { DateRange, DayPicker } from "react-day-picker";
@@ -40,7 +48,6 @@ interface EmprestimosPendentesProps {
   termoPesquisa?: string;
   setQtdAtrasados: React.Dispatch<React.SetStateAction<number>>;
   filtrarAtrasados: boolean;
-
 }
 
 export interface IusuarioResponsavel {
@@ -54,7 +61,7 @@ export function EmprestimosPendentes({
   setRefreshCounter,
   termoPesquisa,
   setQtdAtrasados,
-  filtrarAtrasados
+  filtrarAtrasados,
 }: EmprestimosPendentesProps) {
   const [emprestimoSelecionado, setEmprestimoSelecionado] =
     useState<Iemprestimo | null>(null);
@@ -91,27 +98,22 @@ export function EmprestimosPendentes({
 
   const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
+  const getSalaNome = (e: Iemprestimo) =>
+    buscarNomeSalaPorIdChave(e.chave, chavesData, salasData) || "";
+
+  const getSolicitanteNome = (e: Iemprestimo) =>
+    nomeSolicitante(e.usuario_solicitante, nomesSolicitantesMap) || "";
+
+  const getResponsavelNome = (e: Iemprestimo) =>
+    buscarNomeUsuarioPorId(e.usuario_responsavel, responsaveis) || "";
+
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
     .filter((emprestimos) => {
-      const salaNome = buscarNomeSalaPorIdChave(
-        emprestimos.chave,
-        chavesData,
-        salasData
-      );
-      const chaveNome = `Chave ${buscarNomeSalaPorIdChave(
-        emprestimos.chave,
-        chavesData,
-        salasData
-      )}`;
-      const responsavelNome = buscarNomeUsuarioPorId(
-        emprestimos.usuario_responsavel,
-        responsaveis
-      );
-      const solicitanteNome = nomeSolicitante(
-        emprestimos.usuario_solicitante,
-        nomesSolicitantesMap
-      );
+      const salaNome = getSalaNome(emprestimos);
+      const chaveNome = getSalaNome(emprestimos);
+      const responsavelNome = getResponsavelNome(emprestimos);
+      const solicitanteNome = getSolicitanteNome(emprestimos);
       const dataHoraRetirada = emprestimos.horario_emprestimo
         ? formatarDataHora(emprestimos.horario_emprestimo)
         : { data: "", hora: "" };
@@ -225,7 +227,7 @@ export function EmprestimosPendentes({
   );
 
   //paginação para emprestimos pendentes
-  const itensAtuaisPendentes = emprestimosFiltradosPendentes.slice();
+
   const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
   const itensPorPaginaPendente = 5;
   const totalPaginasPendentes = Math.max(
@@ -369,6 +371,80 @@ export function EmprestimosPendentes({
     setQtdAtrasados(totalAtrasados);
   }, [new_emprestimos, setQtdAtrasados]);
 
+  type CampoOrdenacao = "sala" | "solicitante" | "responsavel";
+
+  const [ordem, setOrdem] = useState<"desativado" | "asc" | "desc">(
+    "desativado"
+  );
+  const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao | null>(
+    null
+  );
+
+  const alterarOrdem = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao === campo) {
+      if (ordem === "desativado") {
+        setOrdem("asc");
+      } else if (ordem === "asc") {
+        setOrdem("desc");
+      } else {
+        setOrdem("desativado");
+        setCampoOrdenacao(null);
+      }
+      return;
+    }
+    setCampoOrdenacao(campo);
+    setOrdem("asc");
+  };
+
+  const ordenarLista = (lista: Iemprestimo[]) => {
+    if (ordem === "desativado" || !campoOrdenacao) return lista;
+
+    return [...lista].sort((a, b) => {
+      let valorA = "";
+      let valorB = "";
+
+      switch (campoOrdenacao) {
+        case "sala":
+          valorA = getSalaNome(a);
+          valorB = getSalaNome(b);
+          break;
+
+        case "solicitante":
+          valorA = getSolicitanteNome(a);
+          valorB = getSolicitanteNome(b);
+          break;
+
+        case "responsavel":
+          valorA = getResponsavelNome(a);
+          valorB = getResponsavelNome(b);
+          break;
+      }
+
+      const resultado = valorA
+        .toLowerCase()
+        .localeCompare(valorB.toLowerCase());
+
+      return ordem === "asc" ? resultado : -resultado;
+    });
+  };
+
+  const iconeOrdenacao = (campo: CampoOrdenacao) => {
+    if (campoOrdenacao !== campo) {
+      return <ArrowUpDown size={19}/>;
+    }
+
+    if (ordem === "asc") return <ArrowDownAZ size={19}/>;
+    if (ordem === "desc") return <ArrowUpZA size={19} />;
+
+    return <ArrowUpDown size={19} />;
+  };
+
+  const emprestimosOrdenados = ordenarLista(emprestimosFiltradosPendentes);
+
+  const itensAtuaisPendentes = emprestimosOrdenados.slice(
+    (paginaAtualPendente - 1) * itensPorPaginaPendente,
+    paginaAtualPendente * itensPorPaginaPendente
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -388,6 +464,9 @@ export function EmprestimosPendentes({
                       alt="Filtro"
                       className="w-4 h-4"
                     />
+                  </button>
+                  <button onClick={() => alterarOrdem("sala")}>
+                    {iconeOrdenacao("sala")}
                   </button>
                 </div>
 
@@ -467,6 +546,9 @@ export function EmprestimosPendentes({
                       className="w-4 h-4"
                     />
                   </button>
+                  <button onClick={() => alterarOrdem("solicitante")}>
+                    {iconeOrdenacao("solicitante")}
+                  </button>
                 </div>
 
                 <FiltroModal
@@ -505,6 +587,9 @@ export function EmprestimosPendentes({
                       alt="Filtro"
                       className="w-4 h-4"
                     />
+                  </button>
+                  <button onClick={() => alterarOrdem("responsavel")}>
+                    {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
 
@@ -676,29 +761,24 @@ export function EmprestimosPendentes({
 
         <tbody>
           {itensAtuaisPendentes.length > 0 ? (
-            itensAtuaisPendentes
-              .slice(
-                (paginaAtualPendente - 1) * itensPorPaginaPendente,
-                paginaAtualPendente * itensPorPaginaPendente
-              )
-              .map((emprestimo, index) => (
-                <tr
+            itensAtuaisPendentes.map((emprestimo, index) => (
+              <tr
                 key={index}
                 className={`${
                   index % 2 === 0 ? "bg-white" : "bg-blue-100"
                 } border-b`}
-                >
-                  <td className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
-                    <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {/* {buscarNomeSalaPorIdChave(
+              >
+                <td className="p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%]">
+                  <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
+                    {/* {buscarNomeSalaPorIdChave(
                         emprestimo.chave,
                         chavesData,
                         salasData
                         )} */}
-                      {buscar(emprestimo.chave)}
-                    </p>
-                  </td>
-                  {/* <td
+                    {buscar(emprestimo.chave)}
+                  </p>
+                </td>
+                {/* <td
                     className={`p-2 text-xs font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[15%] ${emprestimoPendenteAlerta(emprestimo)
                         ? "border-t-red-500 border-b-red-500"
                         : "border-[#B8BCE0]"
@@ -708,132 +788,130 @@ export function EmprestimosPendentes({
                       {`Chave ${buscar(emprestimo.chave)}`}
                     </p>
                   </td> */}
-                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {emprestimo.usuario_solicitante != null
-                        ? nomesSolicitantesMap[
-                            emprestimo.usuario_solicitante
-                          ] || "Carregando..."
-                        : "Solicitante não encontrado"}
+                <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                  <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
+                    {emprestimo.usuario_solicitante != null
+                      ? nomesSolicitantesMap[emprestimo.usuario_solicitante] ||
+                        "Carregando..."
+                      : "Solicitante não encontrado"}
+                  </p>
+                </td>
+                <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                  <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
+                    {buscarNomeUsuarioPorId(
+                      emprestimo.usuario_responsavel,
+                      responsaveis
+                    ) || "Responsavel não encontrado"}
+                  </p>
+                </td>
+                <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).data
+                    : ""}
+                </td>
+                <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                    : ""}
+                </td>
+                <td className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500">
+                  <div
+                    onClick={() => openConfirmarDevolucaoModal(emprestimo)}
+                    className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
+                  >
+                    <Check color="white" size={18} />
+                    <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
+                      DEVOLVER
                     </p>
-                  </td>
-                  <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                      {buscarNomeUsuarioPorId(
-                        emprestimo.usuario_responsavel,
-                        responsaveis
-                      ) || "Responsavel não encontrado"}
-                    </p>
-                  </td>
-                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo
-                      ? formatarDataHora(emprestimo.horario_emprestimo).data
-                      : ""}
-                  </td>
-                  <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[18%] break-words flex-1 text-center">
-                    {emprestimo.horario_emprestimo
-                      ? formatarDataHora(emprestimo.horario_emprestimo).hora
-                      : ""}
-                  </td>
-                  <td className="border-2 border-solid bg-[#0240E1] border-[#B8BCE0]  p-0.5 font-semibold break-words shadow-md shadow-zinc-500">
-                    <div
-                      onClick={() => openConfirmarDevolucaoModal(emprestimo)}
-                      className=" flex justify-center items-center mr-1 gap-2 p-1 cursor-pointer"
-                    >
-                      <Check color="white" size={18} />
-                      <p className=" text-xs text-[#FFFF] text-center font-semibold leading-normal truncate">
-                        DEVOLVER
-                      </p>
-                    </div>
-                  </td>
-                  <td className="pl-2 bg-white">
-                    <button
-                      onClick={() => openDetalhesModal(emprestimo)}
-                      className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
-                    >
-                      <Info
-                        className={`size-5 ${
-                          emprestimoPendenteAlerta(emprestimo)
-                            ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
-                            : "text-[#646999]"
-                        }`}
-                      />
-                    </button>
-                  </td>
-
-                  {isConfirmarDevolucaoModalOpen && emprestimoParaDevolver && (
-                    <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          finalizarEmprestimo(emprestimoParaDevolver.id);
-                        }}
-                        className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
-                      >
-                        <div className="flex justify-center mx-auto w-full max-w-[90%]">
-                          <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
-                            CONFIRMAR DEVOLUÇÃO
-                          </p>
-                          <button
-                            onClick={closeConfirmarDevolucaoModal}
-                            type="button"
-                            className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
-                          >
-                            <X className=" text-[#192160]" />
-                          </button>
-                        </div>
-                        <CheckCircle className="size-16 text-[#0240E1]" />
-
-                        <p className="text-center font-medium px-2 text-[#192160]">
-                          Deseja devolver a chave da{" "}
-                          <strong className="font-semibold text-[#DC0505]">
-                            {buscar(emprestimoParaDevolver.chave)}
-                          </strong>{" "}
-                          retirada por{" "}
-                          <strong className="font-semibold text-[#DC0505]">
-                            {emprestimoParaDevolver.usuario_solicitante != null
-                              ? nomesSolicitantesMap[
-                                  emprestimoParaDevolver.usuario_solicitante
-                                ] || "Carregando..."
-                              : "Solicitante não encontrado"}
-                          </strong>?
-                          {" "}
-                          Essa ação é definitiva.
-                        </p>
-                        <div className="flex justify-center items-center mt-[10px] w-full gap-3">
-                          <button
-                            onClick={closeDeleteModal}
-                            type="button"
-                            className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
-                          >
-                            CANCELAR
-                          </button>
-                          <button
-                            type="submit"
-                            className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center bg-[#0240E1]  text-[#FFF]"
-                          >
-                            CONFIRMAR
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-                  {/* Adicionando pop up de detalhes do empréstimo */}
-                  {isDetalhesModalOpen && (
-                    // emprestimo.id === emprestimoSelecionado?.id &&
-                    <IsDetalhesModal
-                      observacao={observacao}
-                      setObservacao={setObservacao}
-                      emprestimoSelecionado={emprestimoSelecionado}
-                      closeDetalhesModal={closeDetalhesModal}
-                      openDeleteModal={openDeleteModal}
-                      closeDeleteModal={closeDeleteModal}
-                      isDeleteModalOpen={isDeleteModalOpen}
+                  </div>
+                </td>
+                <td className="pl-2 bg-white">
+                  <button
+                    onClick={() => openDetalhesModal(emprestimo)}
+                    className="flex gap-1 justify-start items-center font-medium text-[#646999] underline text-xs"
+                  >
+                    <Info
+                      className={`size-5 ${
+                        emprestimoPendenteAlerta(emprestimo)
+                          ? " border-red-500 text-[#ffffff] bg-red-500 rounded-full"
+                          : "text-[#646999]"
+                      }`}
                     />
-                  )}
-                </tr>
-              ))
+                  </button>
+                </td>
+
+                {isConfirmarDevolucaoModalOpen && emprestimoParaDevolver && (
+                  <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        finalizarEmprestimo(emprestimoParaDevolver.id);
+                      }}
+                      className="container flex flex-col gap-2 w-full p-[10px] h-auto rounded-[15px] bg-white mx-5 max-w-[400px] justify-center items-center"
+                    >
+                      <div className="flex justify-center mx-auto w-full max-w-[90%]">
+                        <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] h-max">
+                          CONFIRMAR DEVOLUÇÃO
+                        </p>
+                        <button
+                          onClick={closeConfirmarDevolucaoModal}
+                          type="button"
+                          className="px-2 py-1 rounded w-[5px] flex-shrink-0 "
+                        >
+                          <X className=" text-[#192160]" />
+                        </button>
+                      </div>
+                      <CheckCircle className="size-16 text-[#0240E1]" />
+
+                      <p className="text-center font-medium px-2 text-[#192160]">
+                        Deseja devolver a chave da{" "}
+                        <strong className="font-semibold text-[#DC0505]">
+                          {buscar(emprestimoParaDevolver.chave)}
+                        </strong>{" "}
+                        retirada por{" "}
+                        <strong className="font-semibold text-[#DC0505]">
+                          {emprestimoParaDevolver.usuario_solicitante != null
+                            ? nomesSolicitantesMap[
+                                emprestimoParaDevolver.usuario_solicitante
+                              ] || "Carregando..."
+                            : "Solicitante não encontrado"}
+                        </strong>
+                        ? Essa ação é definitiva.
+                      </p>
+                      <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+                        <button
+                          onClick={closeDeleteModal}
+                          type="button"
+                          className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+                        >
+                          CANCELAR
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center bg-[#0240E1]  text-[#FFF]"
+                        >
+                          CONFIRMAR
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* Adicionando pop up de detalhes do empréstimo */}
+                {isDetalhesModalOpen && (
+                  // emprestimo.id === emprestimoSelecionado?.id &&
+                  <IsDetalhesModal
+                    observacao={observacao}
+                    setObservacao={setObservacao}
+                    emprestimoSelecionado={emprestimoSelecionado}
+                    closeDetalhesModal={closeDetalhesModal}
+                    openDeleteModal={openDeleteModal}
+                    closeDeleteModal={closeDeleteModal}
+                    isDeleteModalOpen={isDeleteModalOpen}
+                  />
+                )}
+              </tr>
+            ))
           ) : (
             <tr>
               <td colSpan={7} className="p-4 text-center text-[#646999]">
