@@ -626,36 +626,18 @@ export function EmprestimosPendentes({
                   textoInformativo="Digite o responsável"
                   titulo="Filtrar por responsável"
                 >
-                  <div className="flex flex-col gap-4 w-full">
-                    <input
-                      type="time"
-                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
-                      value={filtroPendente.horaRetiradaInicio}
-                      onChange={(e) =>
-                        setFiltroPendente({
-                          ...filtroPendente,
-                          horaRetiradaInicio: e.target.value,
-                        })
-                      }
-                    />
-                    <div className="justify-center items-center">
-                      <p className="text-[#192160] text-sm font-medium mb-1">
-                        Horário final
-                      </p>
-
-                      <input
-                        type="time"
-                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
-                        value={filtroPendente.horaRetiradaFim}
-                        onChange={(e) =>
-                          setFiltroPendente({
-                            ...filtroPendente,
-                            horaRetiradaFim: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Filtrar por responsável"
+                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
+                    value={filtroPendente.responsavel}
+                    onChange={(e) =>
+                      setFiltroPendente({
+                        ...filtroPendente,
+                        responsavel: e.target.value,
+                      })
+                    }
+                  />
                 </FiltroModal>
               </div>
             </th>
@@ -794,18 +776,23 @@ export function EmprestimosPendentes({
                         })
                       }
                     />
+                    <div className="justify-center items-center">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Horário final
+                      </p>
 
-                    <input
-                      type="time"
-                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
-                      value={filtroPendente.horaRetiradaFim}
-                      onChange={(e) =>
-                        setFiltroPendente({
-                          ...filtroPendente,
-                          horaRetiradaFim: e.target.value,
-                        })
-                      }
-                    />
+                      <input
+                        type="time"
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                        value={filtroPendente.horaRetiradaFim}
+                        onChange={(e) =>
+                          setFiltroPendente({
+                            ...filtroPendente,
+                            horaRetiradaFim: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                 </FiltroModal>
               </div>
