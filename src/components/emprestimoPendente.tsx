@@ -81,7 +81,8 @@ export function EmprestimosPendentes({
     solicitante: "",
     responsavel: "",
     dataRetirada: "",
-    horaRetirada: "",
+    horaRetiradaInicio: "",
+    horaRetiradaFim: "",
   });
 
   const [ordenarPorDataRetirada, setOrdenarPorDataRetirada] = useState<
@@ -107,6 +108,11 @@ export function EmprestimosPendentes({
   const getResponsavelNome = (e: Iemprestimo) =>
     buscarNomeUsuarioPorId(e.usuario_responsavel, responsaveis) || "";
 
+  const horaParaMinutos = (hora: string) => {
+    const [h, m] = hora.split(":").map(Number);
+    return h * 60 + m;
+  };
+
   //filtrando emprestimos pendentes
   const emprestimosFiltradosPendentes = new_emprestimos
     .filter((emprestimos) => {
@@ -117,6 +123,26 @@ export function EmprestimosPendentes({
       const dataHoraRetirada = emprestimos.horario_emprestimo
         ? formatarDataHora(emprestimos.horario_emprestimo)
         : { data: "", hora: "" };
+
+      const filtroHoraRetirada = (() => {
+        const { hora } = dataHoraRetirada;
+        const { horaRetiradaInicio, horaRetiradaFim } = filtroPendente;
+
+        if (!horaRetiradaInicio && !horaRetiradaFim) return true;
+        if (!hora) return false;
+
+        const h = horaParaMinutos(hora);
+        const inicio = horaRetiradaInicio
+          ? horaParaMinutos(horaRetiradaInicio)
+          : null;
+        const fim = horaRetiradaFim ? horaParaMinutos(horaRetiradaFim) : null;
+
+        if (inicio !== null && fim !== null) return h >= inicio && h <= fim;
+        if (inicio !== null) return h >= inicio;
+        if (fim !== null) return h <= fim;
+
+        return true;
+      })();
 
       return (
         (filtroPendente.sala === "" ||
@@ -133,10 +159,7 @@ export function EmprestimosPendentes({
           responsavelNome
             .toLowerCase()
             .includes(filtroPendente.responsavel.toLowerCase())) &&
-        (filtroPendente.horaRetirada === "" ||
-          dataHoraRetirada.hora
-            ?.toLowerCase()
-            .includes(filtroPendente.horaRetirada.toLowerCase()))
+        filtroHoraRetirada
       );
     })
     .filter((emp) => {
@@ -430,10 +453,10 @@ export function EmprestimosPendentes({
 
   const iconeOrdenacao = (campo: CampoOrdenacao) => {
     if (campoOrdenacao !== campo) {
-      return <ArrowUpDown size={19}/>;
+      return <ArrowUpDown size={19} />;
     }
 
-    if (ordem === "asc") return <ArrowDownAZ size={19}/>;
+    if (ordem === "asc") return <ArrowDownAZ size={19} />;
     if (ordem === "desc") return <ArrowUpZA size={19} />;
 
     return <ArrowUpDown size={19} />;
@@ -603,18 +626,36 @@ export function EmprestimosPendentes({
                   textoInformativo="Digite o responsável"
                   titulo="Filtrar por responsável"
                 >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por responsável"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroPendente.responsavel}
-                    onChange={(e) =>
-                      setFiltroPendente({
-                        ...filtroPendente,
-                        responsavel: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex flex-col gap-4 w-full">
+                    <input
+                      type="time"
+                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                      value={filtroPendente.horaRetiradaInicio}
+                      onChange={(e) =>
+                        setFiltroPendente({
+                          ...filtroPendente,
+                          horaRetiradaInicio: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="justify-center items-center">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Horário final
+                      </p>
+
+                      <input
+                        type="time"
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                        value={filtroPendente.horaRetiradaFim}
+                        onChange={(e) =>
+                          setFiltroPendente({
+                            ...filtroPendente,
+                            horaRetiradaFim: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
                 </FiltroModal>
               </div>
             </th>
@@ -741,18 +782,31 @@ export function EmprestimosPendentes({
                   textoInformativo="Digite a hora de retirada"
                   titulo="Filtrar por hora de retirada"
                 >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por hora de retirada"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroPendente.horaRetirada}
-                    onChange={(e) =>
-                      setFiltroPendente({
-                        ...filtroPendente,
-                        horaRetirada: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex flex-col gap-4 w-full">
+                    <input
+                      type="time"
+                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                      value={filtroPendente.horaRetiradaInicio}
+                      onChange={(e) =>
+                        setFiltroPendente({
+                          ...filtroPendente,
+                          horaRetiradaInicio: e.target.value,
+                        })
+                      }
+                    />
+
+                    <input
+                      type="time"
+                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                      value={filtroPendente.horaRetiradaFim}
+                      onChange={(e) =>
+                        setFiltroPendente({
+                          ...filtroPendente,
+                          horaRetiradaFim: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </FiltroModal>
               </div>
             </th>

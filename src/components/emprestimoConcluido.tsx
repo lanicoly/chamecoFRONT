@@ -61,9 +61,11 @@ export function EmprestimosConcluidos({
     solicitante: "",
     responsavel: "",
     dataRetirada: "",
-    horaRetirada: "",
+    horaRetiradaInicio: "",
+    horaRetiradaFim: "",
     dataDevolucao: "",
-    horaDevolucao: "",
+    horaDevolucaoInicio: "",
+    horaDevolucaoFim: "",
   });
 
   function nomeSolicitante(
@@ -92,6 +94,11 @@ export function EmprestimosConcluidos({
   const getResponsavelNome = (e: Iemprestimo) =>
     buscarNomeUsuarioPorId(e.usuario_responsavel, responsaveis) || "";
 
+  const horaParaMinutos = (hora: string) => {
+    const [h, m] = hora.split(":").map(Number);
+    return h * 60 + m;
+  };
+
   const emprestimosFiltradosConcluidos = new_emprestimos
     .filter((emp) => {
       const salaNome = getSalaNome(emp);
@@ -105,6 +112,46 @@ export function EmprestimosConcluidos({
       const dataHoraEmprestimoDevolucao = emp.horario_devolucao
         ? formatarDataHora(emp.horario_devolucao)
         : { data: "", hora: "" };
+
+      const filtroHoraRetirada = (() => {
+        const { hora } = dataHoraRetirada;
+        const { horaRetiradaInicio, horaRetiradaFim } = filtroConcluido;
+
+        if (!horaRetiradaInicio && !horaRetiradaFim) return true;
+        if (!hora) return false;
+
+        const h = horaParaMinutos(hora);
+        const inicio = horaRetiradaInicio
+          ? horaParaMinutos(horaRetiradaInicio)
+          : null;
+        const fim = horaRetiradaFim ? horaParaMinutos(horaRetiradaFim) : null;
+
+        if (inicio !== null && fim !== null) return h >= inicio && h <= fim;
+        if (inicio !== null) return h >= inicio;
+        if (fim !== null) return h <= fim;
+
+        return true;
+      })();
+
+      const filtroHoraDevolucao = (() => {
+        const { hora } = dataHoraEmprestimoDevolucao;
+        const { horaDevolucaoInicio, horaDevolucaoFim } = filtroConcluido;
+
+        if (!horaDevolucaoInicio && !horaDevolucaoFim) return true;
+        if (!hora) return false;
+
+        const h = horaParaMinutos(hora);
+        const inicio = horaDevolucaoInicio
+          ? horaParaMinutos(horaDevolucaoInicio)
+          : null;
+        const fim = horaDevolucaoFim ? horaParaMinutos(horaDevolucaoFim) : null;
+
+        if (inicio !== null && fim !== null) return h >= inicio && h <= fim;
+        if (inicio !== null) return h >= inicio;
+        if (fim !== null) return h <= fim;
+
+        return true;
+      })();
 
       return (
         (filtroConcluido.sala === "" ||
@@ -123,14 +170,8 @@ export function EmprestimosConcluidos({
           responsavelNome
             .toLowerCase()
             .includes(filtroConcluido.responsavel.toLowerCase())) &&
-        (filtroConcluido.horaRetirada === "" ||
-          dataHoraRetirada.hora
-            ?.toLowerCase()
-            .includes(filtroConcluido.horaRetirada.toLowerCase())) &&
-        (filtroConcluido.horaDevolucao === "" ||
-          dataHoraEmprestimoDevolucao.hora
-            ?.toLowerCase()
-            .includes(filtroConcluido.horaDevolucao.toLowerCase()))
+        filtroHoraRetirada &&
+        filtroHoraDevolucao
       );
     })
     .filter((emp) => {
@@ -707,21 +748,39 @@ export function EmprestimosConcluidos({
                     e.preventDefault();
                     setCampoFiltroAberto(null);
                   }}
-                  textoInformativo="Digite a hora de retirada"
+                  textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de retirada"
                 >
-                  <input
-                    type="text"
-                    placeholder="00:00"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroConcluido.horaRetirada}
-                    onChange={(e) =>
-                      setFiltroConcluido({
-                        ...filtroConcluido,
-                        horaRetirada: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex flex-col gap-4 w-full">
+                    <input
+                      type="time"
+                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                      value={filtroConcluido.horaRetiradaInicio}
+                      onChange={(e) =>
+                        setFiltroConcluido({
+                          ...filtroConcluido,
+                          horaRetiradaInicio: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="justify-center items-center">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Horário final
+                      </p>
+
+                      <input
+                        type="time"
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                        value={filtroConcluido.horaRetiradaFim}
+                        onChange={(e) =>
+                          setFiltroConcluido({
+                            ...filtroConcluido,
+                            horaRetiradaFim: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
                 </FiltroModal>
               </div>
             </th>
@@ -844,21 +903,39 @@ export function EmprestimosConcluidos({
                     e.preventDefault();
                     setCampoFiltroAberto(null);
                   }}
-                  textoInformativo="Digite a hora de devolução"
+                  textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de devolução"
                 >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por hora de devolução"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroConcluido.horaDevolucao}
-                    onChange={(e) =>
-                      setFiltroConcluido({
-                        ...filtroConcluido,
-                        horaDevolucao: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex flex-col gap-4 w-full">
+                    <input
+                      type="time"
+                      className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                      value={filtroConcluido.horaDevolucaoInicio}
+                      onChange={(e) =>
+                        setFiltroConcluido({
+                          ...filtroConcluido,
+                          horaDevolucaoInicio: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="justify-center items-center">
+                      <p className="text-[#192160] text-sm font-medium mb-1">
+                        Horário final
+                      </p>
+
+                      <input
+                        type="time"
+                        className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
+                        value={filtroConcluido.horaRetiradaFim}
+                        onChange={(e) =>
+                          setFiltroConcluido({
+                            ...filtroConcluido,
+                            horaRetiradaFim: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
                 </FiltroModal>
               </div>
             </th>
