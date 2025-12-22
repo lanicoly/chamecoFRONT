@@ -761,7 +761,7 @@ export function EmprestimosPendentes({
                     e.preventDefault();
                     setCampoFiltroAberto(null);
                   }}
-                  textoInformativo="Digite a hora de retirada"
+                  textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de retirada"
                 >
                   <div className="flex flex-col gap-4 w-full">
