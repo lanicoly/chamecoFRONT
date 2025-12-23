@@ -459,6 +459,27 @@ export function EmprestimosConcluidos({
     paginaAtualConcluidos * itensPorPaginaConcluidos
   );
 
+  function limparFiltros(campo: Array<keyof typeof filtroConcluido>) {
+    setFiltroConcluido((campos) => {
+      const novoFiltro = { ...campos };
+
+      campo.forEach((campo) => {
+        novoFiltro[campo] = "";
+      });
+
+      return novoFiltro;
+    });
+
+    setCampoFiltroAberto(null);
+  }
+
+  function limparFiltroData() {
+    setFiltroDataEmprestimoRetiradaConcluidos(undefined);
+    setFiltroDataDevolucao(undefined);
+    setOrdenarRetiradaConcluidos("recentes");
+    setCampoFiltroAberto(null);
+  }
+
   return (
     <>
       <table className="w-full table-fixed border-separate border-spacing-y-2 bg-white">
@@ -489,6 +510,7 @@ export function EmprestimosConcluidos({
                   }}
                   textoInformativo="Digite a sala"
                   titulo="Filtrar por sala"
+                  onClear={() => limparFiltros(["sala"])}
                 >
                   <input
                     type="text"
@@ -570,6 +592,7 @@ export function EmprestimosConcluidos({
                   }}
                   textoInformativo="Digite o solicitante"
                   titulo="Filtrar por solicitante"
+                  onClear={() => limparFiltros(["solicitante"])}
                 >
                   <input
                     type="text"
@@ -612,6 +635,7 @@ export function EmprestimosConcluidos({
                   }}
                   textoInformativo="Digite o responsável"
                   titulo="Filtrar por responsável"
+                  onClear={() => limparFiltros(["responsavel"])}
                 >
                   <input
                     type="text"
@@ -674,6 +698,7 @@ export function EmprestimosConcluidos({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de retirada"
+                  onClear={() => limparFiltroData()}
                 >
                   <DayPicker
                     animate
@@ -750,6 +775,9 @@ export function EmprestimosConcluidos({
                   }}
                   textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de retirada"
+                  onClear={() =>
+                    limparFiltros(["horaRetiradaInicio", "horaRetiradaFim"])
+                  }
                 >
                   <div className="flex flex-col gap-4 w-full">
                     <input
@@ -830,6 +858,7 @@ export function EmprestimosConcluidos({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de devolução"
+                  onClear={() => limparFiltroData()}
                 >
                   <DayPicker
                     animate
@@ -905,6 +934,9 @@ export function EmprestimosConcluidos({
                   }}
                   textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de devolução"
+                  onClear={() =>
+                    limparFiltros(["horaDevolucaoInicio", "horaDevolucaoFim"])
+                  }
                 >
                   <div className="flex flex-col gap-4 w-full">
                     <input
@@ -926,11 +958,11 @@ export function EmprestimosConcluidos({
                       <input
                         type="time"
                         className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none"
-                        value={filtroConcluido.horaRetiradaFim}
+                        value={filtroConcluido.horaDevolucaoFim}
                         onChange={(e) =>
                           setFiltroConcluido({
                             ...filtroConcluido,
-                            horaRetiradaFim: e.target.value,
+                            horaDevolucaoFim: e.target.value,
                           })
                         }
                       />

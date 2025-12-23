@@ -4,6 +4,7 @@ interface FiltroModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (e: React.FormEvent) => void;
+  onClear?: () => void;
   children: React.ReactNode;
   textoInformativo?: string;
   titulo?: string;
@@ -13,6 +14,7 @@ export function FiltroModal({
   isOpen,
   onClose,
   onSubmit,
+  onClear,
   children,
   textoInformativo,
   titulo = "FILTRAR",
@@ -48,8 +50,14 @@ export function FiltroModal({
           </div>
         </div>
 
-        {/* botão salvar */}
-        <div className="flex justify-center items-center mt-[10px] w-full">
+        <div className="flex justify-center items-center mt-[10px] w-full gap-3">
+          <button
+            type="button"
+            onClick={onClear}
+            className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
+          >
+            LIMPAR
+          </button>
           <button
             type="submit"
             className="px-3 py-2 border-[3px] rounded-xl font-semibold text-sm flex gap-[4px] justify-center items-center bg-[#16C34D] text-[#FFF]"

@@ -469,6 +469,26 @@ export function EmprestimosPendentes({
     paginaAtualPendente * itensPorPaginaPendente
   );
 
+  function limparFiltros(campo: Array<keyof typeof filtroPendente>) {
+    setFiltroPendente((campos) => {
+      const novoFiltro = { ...campos };
+
+      campo.forEach((campo) => {
+        novoFiltro[campo] = "";
+      });
+
+      return novoFiltro;
+    });
+
+    setCampoFiltroAberto(null);
+  }
+
+  function limparFiltroDataRetirada() {
+    setFiltroDataEmprestimoRetirada(undefined);
+    setOrdenarPorDataRetirada("recentes");
+    setCampoFiltroAberto(null);
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <table className=" w-full border-separate border-spacing-y-2 bg-white overflow-y-auto max-h-[620px] pb-4">
@@ -502,6 +522,7 @@ export function EmprestimosPendentes({
                   }}
                   textoInformativo="Digite o nome da sala"
                   titulo="Filtrar por sala"
+                  onClear={() => limparFiltros(["sala"])}
                 >
                   <input
                     type="text"
@@ -583,6 +604,7 @@ export function EmprestimosPendentes({
                   }}
                   textoInformativo="Digite o solicitante"
                   titulo="Filtrar por solicitante"
+                  onClear={() => limparFiltros(["solicitante"])}
                 >
                   <input
                     type="text"
@@ -625,6 +647,7 @@ export function EmprestimosPendentes({
                   }}
                   textoInformativo="Digite o responsável"
                   titulo="Filtrar por responsável"
+                  onClear={() => limparFiltros(["responsavel"])}
                 >
                   <input
                     type="text"
@@ -687,6 +710,7 @@ export function EmprestimosPendentes({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de retirada"
+                  onClear={() => limparFiltroDataRetirada()}
                 >
                   <DayPicker
                     animate
@@ -763,6 +787,9 @@ export function EmprestimosPendentes({
                   }}
                   textoInformativo="Horário inicial"
                   titulo="Filtrar por hora de retirada"
+                  onClear={() =>
+                    limparFiltros(["horaRetiradaInicio", "horaRetiradaFim"])
+                  }
                 >
                   <div className="flex flex-col gap-4 w-full">
                     <input
