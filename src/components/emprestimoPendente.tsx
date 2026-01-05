@@ -462,6 +462,8 @@ export function EmprestimosPendentes({
     return <ArrowUpDown size={19} />;
   };
 
+  const [ordenacaoDataRetirada, setOrdenacaoDataRetirada] = useState<string | null>(null);
+
   const emprestimosOrdenados = ordenarLista(emprestimosFiltradosPendentes);
 
   const itensAtuaisPendentes = emprestimosOrdenados.slice(
@@ -502,13 +504,15 @@ export function EmprestimosPendentes({
                 <div className="flex items-center gap-1">
                   Nome da sala
                   <button onClick={() => setCampoFiltroAberto("sala")}>
+                    <div className={`rounded-full ${filtroPendente.sala ? "bg-red-200 p-1" : "bg-none"}`}>
                     <img
                       src="src/assets/filter_list.svg"
                       alt="Filtro"
                       className="w-4 h-4"
-                    />
+                      />
+                    </div>
                   </button>
-                  <button onClick={() => alterarOrdem("sala")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "sala" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("sala")}>
                     {iconeOrdenacao("sala")}
                   </button>
                 </div>
@@ -584,13 +588,16 @@ export function EmprestimosPendentes({
                 <div className="flex items-center gap-1">
                   Solicitante
                   <button onClick={() => setCampoFiltroAberto("solicitante")}>
+                    <div className={`rounded-full ${filtroPendente.solicitante ? "bg-red-200 p-1" : "bg-none"}`}>
+
                     <img
                       src="src/assets/filter_list.svg"
                       alt="Filtro"
                       className="w-4 h-4"
-                    />
+                      />
+                    </div>
                   </button>
-                  <button onClick={() => alterarOrdem("solicitante")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "solicitante" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("solicitante")}>
                     {iconeOrdenacao("solicitante")}
                   </button>
                 </div>
@@ -627,13 +634,15 @@ export function EmprestimosPendentes({
                 <div className="flex items-center gap-1">
                   Responsável
                   <button onClick={() => setCampoFiltroAberto("responsavel")}>
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                    />
+                    <div className={`rounded-full ${filtroPendente.responsavel ? "bg-red-200 p-1" : "bg-none"}`}>
+                      <img
+                        src="src/assets/filter_list.svg"
+                        alt="Filtro"
+                        className="w-4 h-4"
+                        />
+                    </div>
                   </button>
-                  <button onClick={() => alterarOrdem("responsavel")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "responsavel" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("responsavel")}>
                     {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
@@ -700,7 +709,9 @@ export function EmprestimosPendentes({
                 </svg>
                 Data retirada
                 <button onClick={() => setCampoFiltroAberto("dataRetirada")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroDataEmprestimoRetirada || ordenacaoDataRetirada != null  ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "dataRetirada"}
@@ -710,7 +721,7 @@ export function EmprestimosPendentes({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de retirada"
-                  onClear={() => limparFiltroDataRetirada()}
+                  onClear={() => {limparFiltroDataRetirada(); setOrdenacaoDataRetirada(null)}}
                 >
                   <DayPicker
                     animate
@@ -724,14 +735,14 @@ export function EmprestimosPendentes({
                   <div className="flex flex-col gap-2 items-center w-full">
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarPorDataRetirada("antigos")}
+                      onClick={() => {setOrdenarPorDataRetirada("antigos"); setOrdenacaoDataRetirada("antigos")}}
                     >
                       Mais antigos
                     </button>
 
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarPorDataRetirada("recentes")}
+                      onClick={() => {setOrdenarPorDataRetirada("recentes"); setOrdenacaoDataRetirada("recentes")}}
                     >
                       Mais recentes
                     </button>
@@ -776,7 +787,9 @@ export function EmprestimosPendentes({
                 </svg>
                 Hora da retirada
                 <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroPendente.horaRetiradaInicio || filtroPendente.horaRetiradaFim ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "horaRetirada"}

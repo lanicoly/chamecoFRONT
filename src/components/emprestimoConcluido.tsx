@@ -452,6 +452,9 @@ export function EmprestimosConcluidos({
     return <ArrowUpDown size={19} />;
   };
 
+  const [ordenacaoDataRetirada, setOrdenacaoDataRetirada] = useState<string | null>(null);
+  const [ordenacaoDataDevolucao, setOrdenacaoDataDevolucao] = useState<string | null>(null);
+
   const emprestimosOrdenados = ordenarLista(emprestimosFiltradosConcluidos);
 
   const itensAtuaisConcluidos = emprestimosOrdenados.slice(
@@ -490,13 +493,15 @@ export function EmprestimosConcluidos({
                 <div className="flex items-center gap-1">
                   Nome da sala
                   <button onClick={() => setCampoFiltroAberto("sala")}>
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                    />
+                    <div className={`rounded-full ${filtroConcluido.sala ? "bg-red-200 p-1" : "bg-none"}`}>
+                      <img
+                        src="src/assets/filter_list.svg"
+                        alt="Filtro"
+                        className="w-4 h-4"
+                        />
+                      </div>
                   </button>
-                  <button onClick={() => alterarOrdem("sala")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "sala" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("sala")}>
                     {iconeOrdenacao("sala")}
                   </button>
                 </div>
@@ -572,13 +577,15 @@ export function EmprestimosConcluidos({
                 <div className="flex items-center gap-1">
                   Solicitante
                   <button onClick={() => setCampoFiltroAberto("solicitante")}>
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                    />
+                    <div className={`rounded-full ${filtroConcluido.solicitante ? "bg-red-200 p-1" : "bg-none"}`}>
+                      <img
+                        src="src/assets/filter_list.svg"
+                        alt="Filtro"
+                        className="w-4 h-4"
+                        />
+                      </div>
                   </button>
-                  <button onClick={() => alterarOrdem("solicitante")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "solicitante" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("solicitante")}>
                     {iconeOrdenacao("solicitante")}
                   </button>
                 </div>
@@ -615,13 +622,15 @@ export function EmprestimosConcluidos({
                 <div className="flex items-center gap-1">
                   Responsável
                   <button onClick={() => setCampoFiltroAberto("responsavel")}>
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                    />
+                    <div className={`rounded-full ${filtroConcluido.responsavel ? "bg-red-200 p-1" : "bg-none"}`}>
+                      <img
+                        src="src/assets/filter_list.svg"
+                        alt="Filtro"
+                        className="w-4 h-4"
+                        />
+                      </div>
                   </button>
-                  <button onClick={() => alterarOrdem("responsavel")}>
+                  <button className={`rounded-full ${(campoOrdenacao == "responsavel" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("responsavel")}>
                     {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
@@ -688,7 +697,9 @@ export function EmprestimosConcluidos({
                 </svg>
                 Retirada
                 <button onClick={() => setCampoFiltroAberto("dataRetirada")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroDataEmprestimoRetiradaConcluidos || ordenacaoDataRetirada!= null  ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "dataRetirada"}
@@ -698,7 +709,7 @@ export function EmprestimosConcluidos({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de retirada"
-                  onClear={() => limparFiltroData()}
+                  onClear={() => {limparFiltroData(); setOrdenacaoDataRetirada(null)}}
                 >
                   <DayPicker
                     animate
@@ -712,14 +723,14 @@ export function EmprestimosConcluidos({
                   <div className="flex flex-col gap-2 items-center w-full">
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarRetiradaConcluidos("antigos")}
+                      onClick={() => {setOrdenarRetiradaConcluidos("antigos"); setOrdenacaoDataRetirada("antigos")}}
                     >
                       Mais antigos
                     </button>
 
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarRetiradaConcluidos("recentes")}
+                      onClick={() => {setOrdenarRetiradaConcluidos("recentes"); setOrdenacaoDataRetirada("recentes");}}
                     >
                       Mais recentes
                     </button>
@@ -764,7 +775,9 @@ export function EmprestimosConcluidos({
                 </svg>
                 Hora retirada
                 <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroConcluido.horaRetiradaInicio || filtroConcluido.horaRetiradaFim ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "horaRetirada"}
@@ -848,7 +861,9 @@ export function EmprestimosConcluidos({
                 </svg>
                 Devolução
                 <button onClick={() => setCampoFiltroAberto("dataDevolucao")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroDataDevolucao || ordenacaoDataDevolucao!= null ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "dataDevolucao"}
@@ -858,7 +873,7 @@ export function EmprestimosConcluidos({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de devolução"
-                  onClear={() => limparFiltroData()}
+                  onClear={() => {limparFiltroData(); setOrdenacaoDataDevolucao(null)}}
                 >
                   <DayPicker
                     animate
@@ -871,14 +886,14 @@ export function EmprestimosConcluidos({
                   <div className="flex flex-col gap-2 items-center w-full">
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarConcluidosPorData("antigos")}
+                      onClick={() => {setOrdenarConcluidosPorData("antigos"); setOrdenacaoDataDevolucao("antigos")}}
                     >
                       Mais antigos
                     </button>
 
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => setOrdenarConcluidosPorData("recentes")}
+                      onClick={() => {setOrdenarConcluidosPorData("recentes"); setOrdenacaoDataDevolucao("recentes")}}
                     >
                       Mais recentes
                     </button>
@@ -923,7 +938,9 @@ export function EmprestimosConcluidos({
                 </svg>
                 Hora devolução
                 <button onClick={() => setCampoFiltroAberto("horaDevolucao")}>
-                  <img src="src/assets/filter_list.svg" alt="" />
+                  <div className={`rounded-full ${filtroConcluido.horaDevolucaoInicio || filtroConcluido.horaDevolucaoFim ? "bg-red-200 p-1" : "bg-none"}`}>
+                    <img src="src/assets/filter_list.svg" alt="" />
+                  </div>
                 </button>
                 <FiltroModal
                   isOpen={campoFiltroAberto === "horaDevolucao"}
