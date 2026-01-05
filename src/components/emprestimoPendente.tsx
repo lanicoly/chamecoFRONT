@@ -503,44 +503,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Nome da sala
-                  <button onClick={() => setCampoFiltroAberto("sala")}>
-                    <div className={`rounded-full ${filtroPendente.sala ? "bg-red-200 p-1" : "bg-none"}`}>
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                      />
-                    </div>
-                  </button>
                   <button className={`rounded-full ${(campoOrdenacao == "sala" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("sala")}>
                     {iconeOrdenacao("sala")}
                   </button>
                 </div>
-
-                <FiltroModal
-                  isOpen={campoFiltroAberto === "sala"}
-                  onClose={() => setCampoFiltroAberto(null)}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setCampoFiltroAberto(null);
-                  }}
-                  textoInformativo="Digite o nome da sala"
-                  titulo="Filtrar por sala"
-                  onClear={() => limparFiltros(["sala"])}
-                >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por sala"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroPendente.sala}
-                    onChange={(e) =>
-                      setFiltroPendente({
-                        ...filtroPendente,
-                        sala: e.target.value,
-                      })
-                    }
-                  />
-                </FiltroModal>
               </div>
             </th>
 
@@ -587,45 +553,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Solicitante
-                  <button onClick={() => setCampoFiltroAberto("solicitante")}>
-                    <div className={`rounded-full ${filtroPendente.solicitante ? "bg-red-200 p-1" : "bg-none"}`}>
-
-                    <img
-                      src="src/assets/filter_list.svg"
-                      alt="Filtro"
-                      className="w-4 h-4"
-                      />
-                    </div>
-                  </button>
                   <button className={`rounded-full ${(campoOrdenacao == "solicitante" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("solicitante")}>
                     {iconeOrdenacao("solicitante")}
                   </button>
                 </div>
-
-                <FiltroModal
-                  isOpen={campoFiltroAberto === "solicitante"}
-                  onClose={() => setCampoFiltroAberto(null)}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setCampoFiltroAberto(null);
-                  }}
-                  textoInformativo="Digite o solicitante"
-                  titulo="Filtrar por solicitante"
-                  onClear={() => limparFiltros(["solicitante"])}
-                >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por solicitante"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroPendente.solicitante}
-                    onChange={(e) =>
-                      setFiltroPendente({
-                        ...filtroPendente,
-                        solicitante: e.target.value,
-                      })
-                    }
-                  />
-                </FiltroModal>
               </div>
             </th>
 
@@ -633,44 +564,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Responsável
-                  <button onClick={() => setCampoFiltroAberto("responsavel")}>
-                    <div className={`rounded-full ${filtroPendente.responsavel ? "bg-red-200 p-1" : "bg-none"}`}>
-                      <img
-                        src="src/assets/filter_list.svg"
-                        alt="Filtro"
-                        className="w-4 h-4"
-                        />
-                    </div>
-                  </button>
                   <button className={`rounded-full ${(campoOrdenacao == "responsavel" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("responsavel")}>
                     {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
-
-                <FiltroModal
-                  isOpen={campoFiltroAberto === "responsavel"}
-                  onClose={() => setCampoFiltroAberto(null)}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setCampoFiltroAberto(null);
-                  }}
-                  textoInformativo="Digite o responsável"
-                  titulo="Filtrar por responsável"
-                  onClear={() => limparFiltros(["responsavel"])}
-                >
-                  <input
-                    type="text"
-                    placeholder="Filtrar por responsável"
-                    className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-sm font-medium "
-                    value={filtroPendente.responsavel}
-                    onChange={(e) =>
-                      setFiltroPendente({
-                        ...filtroPendente,
-                        responsavel: e.target.value,
-                      })
-                    }
-                  />
-                </FiltroModal>
               </div>
             </th>
 
