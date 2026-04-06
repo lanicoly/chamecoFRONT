@@ -84,6 +84,7 @@ interface IUseSalasProps {
 
 // cache em memória por chave de consulta
 const salasCache = new Map<string, ISala[]>();
+export const clearSalasCache = () => salasCache.clear();
 
 // util: debouncer simples (300ms por padrão)
 function useDebounced<T>(value: T, delay = 300) {
@@ -138,7 +139,7 @@ const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
           blocoId !== undefined ? `&bloco_id=${blocoId}` : ""
         }`;
 
-        let all: ISala[] = [];
+        const all: ISala[] = [];
 
         while (next) {
           // se "next" vier absoluto, o axios com baseURL ainda aceita; se não aceitar, remova a base:

@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
 import { useMemo } from "react";
-import useGenericGetSalas from "../hooks/salas/useGenericGetSalas";
+import useGenericGetSalas, { clearSalasCache } from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { IUsuario } from "./chaves";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
@@ -178,6 +178,7 @@ export function Salas() {
         const response = await api.post("/chameco/api/v1/salas/", novaSala);
 
         if (response) {
+          clearSalasCache();
           const salaCriada: Sala = {
             ...response.data,
             bloco: Number(response.data.bloco),
@@ -191,6 +192,7 @@ export function Salas() {
         }
 
         setMensagemSucesso("Sala adicionada com sucesso!");
+        console.log("Sala criada:", response.data);
       } catch (error: unknown) {
         const axiosError = error as AxiosError<{ message?: string }>;
 
@@ -223,6 +225,7 @@ export function Salas() {
       await api.delete(`/chameco/api/v1/salas/${id}/`, {
         data: { nome, bloco },
       });
+      clearSalasCache();
     } catch (error: unknown) {
       console.error("Erro ao excluir sala:", error);
     }
@@ -272,6 +275,8 @@ export function Salas() {
       );
 
       if (response.status === 200) {
+        clearSalasCache();
+        console.log("Sala editada:", response.data);
         return response.data;
       }
     } catch (error: unknown) {

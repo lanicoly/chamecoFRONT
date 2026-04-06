@@ -64,7 +64,7 @@ export function Blocos() {
 
         console.error(
           "Erro ao criar bloco:",
-          errorResponse.response?.data || errorResponse.message
+          errorResponse.response?.data || errorResponse.message,
         );
 
         setMensagemErro(mensagem);
@@ -106,9 +106,9 @@ export function Blocos() {
   const [isSearching, setIsSearching] = useState(false);
   const blocosFiltrados = isSearching
     ? blocos.filter(
-      (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase())
-      // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-    )
+        (blocos) => blocos.nome.toLowerCase().includes(pesquisa.toLowerCase()),
+        // blocos.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+      )
     : blocos;
   const itensAtuais = blocosFiltrados.slice(indexInicio, indexFim);
 
@@ -164,7 +164,7 @@ export function Blocos() {
         `/chameco/api/v1/blocos/${blocoSelecionado.id}/`,
         {
           nome: blocoSelecionado.nome,
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -348,17 +348,28 @@ export function Blocos() {
         <div className="flex flex-col items-center w-full overflow-y-auto mt-[20px]">
           {/* Adicionando blocos de A-J */}
           <div className="flex flex-wrap justify-center gap-[75px] h-[270px] gap-y-[10px]">
-            {itensAtuais.length === 0 ? (<Spinner />) : ""}
-            {itensAtuais.map((blocos) => (
-              <button
-                onClick={() => openBlocoPopUp(blocos)}
-                className="text-[#646999] text-[12px] font-semibold"
-                key={blocos.id}
-              >
-                <LayoutDashboard className="w-[70px] h-[70px]  text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
-                {blocos.nome}
-              </button>
-            ))}
+            {loading ? (
+              <Spinner />
+            ) : (
+              <>
+                {itensAtuais.length === 0 ? (
+                  <p className="text-center p-4 text-gray-500">
+                    Nenhum bloco encontrado.
+                  </p>
+                ) : (
+                  itensAtuais.map((blocos) => (
+                    <button
+                      onClick={() => openBlocoPopUp(blocos)}
+                      className="text-[#646999] text-[12px] font-semibold"
+                      key={blocos.id}
+                    >
+                      <LayoutDashboard className="w-[70px] h-[70px] text-[#646999] p-[16px] rounded-[15px] bg-[#D9D9D9] mb-2 hover:bg-[#d5d8f1]" />
+                      {blocos.nome}
+                    </button>
+                  ))
+                )}
+              </>
+            )}
 
             {/* Adicionando pop up dos blocos */}
             {isBlocoPopUpOpen && blocoSelecionado && (
@@ -383,7 +394,12 @@ export function Blocos() {
                   <div className="flex justify-center items-center gap-4 self-stretch ">
                     <button
                       className="flex w-[37%] h-[35px] text-[12px] justify-center items-center gap-[4px] font-medium border-[3px] rounded-lg border-[#B8BCE0] bg-[#0078a7] text-[#FFF] hover:bg-[#4c8399]"
-                      onClick={() => handleBlockSelect(blocoSelecionado, blocoSelecionado.nome)}
+                      onClick={() =>
+                        handleBlockSelect(
+                          blocoSelecionado,
+                          blocoSelecionado.nome,
+                        )
+                      }
                     >
                       <svg
                         width="25"
