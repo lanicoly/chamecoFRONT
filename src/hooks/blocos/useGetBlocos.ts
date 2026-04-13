@@ -31,6 +31,7 @@ const useGetBlocos = () => {
         do {
           const url = `/chameco/api/v1/blocos/?limit=50&page=${page}`;
           const response = await api.get<IApiResponseBlocos>(url);
+          console.log("Blocos", url)
 
           const results = response.data.results.map((bloco) => ({
             id: bloco.id,
@@ -50,6 +51,7 @@ const useGetBlocos = () => {
         } while (next);
 
         setBlocos(allBlocos);
+        
       } catch (err) {
         console.error("Erro ao listar blocos", err);
         setError(true);

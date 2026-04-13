@@ -8,19 +8,22 @@ export function buscarNomeSalaPorIdChave(idChave: number | null, listaChaves: an
     return sala ? sala.nome : 'Carregando sala...';
 }
 
-/** Cria buscador rápido com índices pré-computados */
 export function makeBuscadorSalaPorChave(
     listaChaves: IChave[],
     listaSalas: ISala[]
 ) {
-    const chaveById = Object.fromEntries(listaChaves.map(c => [c.id, c]));
-    const salaById = Object.fromEntries(listaSalas.map(s => [s.id, s]));
+    const chaveById = Object.fromEntries(listaChaves.map(c => [String(c.id), c]));
+    const salaById = Object.fromEntries(listaSalas.map(s => [String(s.id), s]));
 
-    return function buscarNomeSalaPorIdChave(idChave: number | null) {
-        if (idChave == null) return "Carregando chave...";
-        const chave = chaveById[idChave];
+    return function buscar(idChave: number | string | null) {
+        if (idChave === null || idChave === undefined) return "Sem chave";
+
+        const idStr = String(idChave);
+        const chave = chaveById[idStr];
+
         if (!chave) return "Chave não encontrada";
-        return salaById[chave.sala]?.nome ?? "Sala não encontrada";
-    }
 
+        const sala = salaById[String(chave.sala)];
+        return sala ? sala.nome : "Sala não encontrada";
+    }
 }

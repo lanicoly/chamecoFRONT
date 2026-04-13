@@ -34,13 +34,22 @@ export const ChavesProvider = ({ children }: { children: React.ReactNode }) => {
         const response = await api.get(nextUrl);
         const data = response.data;
 
-        allChaves = [...allChaves, ...(data.results || [])];
-        nextUrl = data.next ? data.next.replace(api.defaults.baseURL || "", "") : null; 
+        const results = data.results || [];
+        allChaves = [...allChaves, ...results];
+        if (data.next) {
+          const url = new URL(data.next);
+          nextUrl = url.pathname + url.search;
+          
+        } else {
+          nextUrl = null;
+        }
       }
 
       setChaves(allChaves);
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Erro no fetchAllPages:", err);
       setError(err as Error);
+      
     } finally {
       setLoading(false);
     }

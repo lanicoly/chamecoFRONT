@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Iemprestimo } from "../pages/emprestimos";
 import {
   Info,
@@ -238,11 +238,12 @@ export function EmprestimosPendentes({
       }
 
       return 0;
-    })
+    }) 
     .filter((emp) => {
       if (!filtrarAtrasados) return true;
       return emprestimoPendenteAlerta(emp);
     });
+    
 
   // console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
@@ -369,7 +370,7 @@ export function EmprestimosPendentes({
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
-  const buscar = makeBuscadorSalaPorChave(chavesData, salasData);
+  const buscar = useMemo(() => makeBuscadorSalaPorChave(chavesData, salasData), [chavesData, salasData]);
 
   const [emprestimoParaDevolver, setEmprestimoParaDevolver] =
     useState<Iemprestimo | null>(null);
@@ -491,6 +492,7 @@ export function EmprestimosPendentes({
     setCampoFiltroAberto(null);
   }
 
+  
   return (
     <div className="flex flex-col gap-2">
       <table className=" w-full border-separate border-spacing-y-2 bg-white overflow-y-auto max-h-[620px] pb-4">

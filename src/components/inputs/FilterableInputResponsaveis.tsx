@@ -19,15 +19,21 @@ const buscarResponsavel = (id: number | undefined, responsaveis: IUsuario[]) => 
 
 }
 
-export function FilterableInputResponsaveis({items, onSelectItem, reset}: IdropdownResponsavelProps) {
+export function FilterableInputResponsaveis({items = [], onSelectItem, reset}: IdropdownResponsavelProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
 
-  const filterdItems = useMemo<IUsuario[]>(() => {
-    const lowerSearch = searchTerm.toLowerCase();
-    return items.filter((item) => item.nome && buscarResponsavel(item.id, items).toLowerCase().includes(lowerSearch));
+  const filterdItems = useMemo(() => {
+    const listaGarantida = items || []; 
+    const lowerSearch = searchTerm.toLowerCase().trim();
+
+    return listaGarantida.filter((item) => {
+      const nomeValido = item?.nome?.toLowerCase() || "";
+      const idValido = String(item?.id || "");
+      return nomeValido.includes(lowerSearch) || idValido.includes(lowerSearch);
+    });
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

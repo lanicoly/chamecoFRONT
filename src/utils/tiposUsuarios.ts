@@ -11,6 +11,7 @@ export const redirectUserTo = (tipoUsuario: string): string => {
     case tiposUsuarios[5].toLowerCase():
       return "/menu";
 
+    case tiposUsuarios[7].toLowerCase():
     case tiposUsuarios[17].toLowerCase():
       return "/emprestimos";
 

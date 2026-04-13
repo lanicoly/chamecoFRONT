@@ -12,6 +12,7 @@ import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
 import { totalPaginas, userFilter } from "../utils/filters/users/userFilter";
 import { IUsuario } from "./chaves";
 import api from "../services/api";
+import { AxiosError } from "axios";
 
 interface Isalas {
   id: number,
@@ -52,9 +53,11 @@ export function Usuarios() {
   const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
   // console.log("lista de users: ", filtrarUsuario)
 
+  const [usuarios, setUsuarios] = useState<IUsuario[]>(filtrarUsuario);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [tipo, setTipo] = useState("");
+  const [superusuario, setSuperusuario] = useState("");
 
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -162,6 +165,35 @@ export function Usuarios() {
     setUserSelecionado(null);
   }
 
+  async function criarUsuarioResponsavel(dados: { nome: string, superusuario: number | "" }) {
+    const novoUsuario = {
+      nome: dados.nome,
+      superusuario: Number(dados.superusuario)
+    }
+
+    if (nome === null && superusuario === null){
+      alert("Preencha os campos para criar um usuário");
+      return;
+    } else {
+      try {
+        const response = await api.post('/chameco/api/v1/responsaveis/', novoUsuario);
+        if (response){
+          setUsuarios((prev) => [...prev, response.data])
+          setNome("");
+          setSuperusuario("");
+          closeUserModal();
+        }
+      } catch (error) {
+        const errorResponse = error as AxiosError<{ message?: string }>;
+
+        console.error(
+          "Erro ao criar usuário:",
+          errorResponse.response?.data || errorResponse.message,
+        );
+      }
+    }
+  }
+
 
   return (
     <div className="flex items-center justify-center bg-tijolos h-screen bg-no-repeat bg-cover">
@@ -193,10 +225,10 @@ export function Usuarios() {
               <SelectTipoUsuario filtro={tipoUsuario} setFiltro={setTipoUsuario} />
             </div>
 
-            <BotaoAdicionar text="ADICIONAR USUÁRIO" onClick={openUserModal} />
+            <BotaoAdicionar text="ADICIONAR USUÁRIO" onClick={openUserModal}  />
 
             {isUserModalOpen && (
-              <AdicionarUsuarioForm closeUserModal={closeUserModal} />
+              <AdicionarUsuarioForm closeUserModal={closeUserModal} onSave={criarUsuarioResponsavel} />
             )}
           </div>
 
@@ -258,6 +290,7 @@ export function Usuarios() {
             </div>
 
             <TabelaDeUsuarios
+              usuarios={usuarios}
               filtrarUsuario={filtrarUsuario}
               userSelecionado={userSelecionado}
               statusSelecao={statusSelecao}

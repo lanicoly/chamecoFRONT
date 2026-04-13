@@ -1,13 +1,15 @@
 // import axios from "axios";
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+// import { id } from "date-fns/locale";
 
 const superUsuariosIds = [1554, 1553, 633, 634]
 
-const useGetResponsaveis = () => {
+const useGetResponsaveis = (id: number) => {
   const [responsaveis, setResponsaveis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     const fetchResponsaveis = async () => {
@@ -31,15 +33,14 @@ const useGetResponsaveis = () => {
 
       if (token) params.set("token", token);
 
-      const url = `/chameco/api/v1/responsaveis/?${params.toString()}`;
+      const url = `/chameco/api/v1/responsaveis/?${id}/`;
 
       try {
         // console.log(url)
         const response = await api.get(url);
 
-        if (!response) throw new Error("Erro ao puxar os responsáveis");
-
-        setResponsaveis(response.data.results || []);
+        const data = id ? [response.data] : (response.data.results || response.data);
+        setResponsaveis(data);
 
       } catch (err) {
         console.error("Erro na requisição:", err);
@@ -51,9 +52,9 @@ const useGetResponsaveis = () => {
     };
 
     fetchResponsaveis();
-  }, []);
+  }, [ id, refresh]);
 
-  return { responsaveis, loading, error };
+  return { responsaveis, loading, error, reload: () => setRefresh(prev => prev + 1)};
 };
 
 export default useGetResponsaveis;

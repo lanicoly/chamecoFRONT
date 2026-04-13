@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
 import { useMemo } from "react";
-import useGenericGetSalas, { clearSalasCache } from "../hooks/salas/useGenericGetSalas";
+import useGenericGetSalas, {clearSalasCache} from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { IUsuario } from "./chaves";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
@@ -825,7 +825,7 @@ export function Salas() {
 
             {/* tabela com todas as salas */}
             <div className="overflow-y-auto max-h-[248px] tablet:max-h-64 desktop:max-h-96">
-              <table className="w-full border-separate border-spacing-y-2 tablet:mb-6 bg-white">
+              <table className="w-full border-separate border-spacing-y-[6px] tablet:mb-6 bg-white">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr>
                     <th className="text-left text-[10px] sm:text-[12px] font-medium text-sky-900 min-w-1/4 max-w-24  ">

@@ -68,7 +68,7 @@ export function App() {
         <Route
           path="/emprestimos"
           element={
-            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante"]}>
+            <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante", "coordenador"]}>
               <Emprestimos />
             </PrivateRoute>
           }

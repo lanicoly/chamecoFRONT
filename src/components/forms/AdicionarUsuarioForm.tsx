@@ -1,16 +1,16 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 
-
-function AdicionarUsuarioForm({ closeUserModal }: any) {
+function AdicionarUsuarioForm({ closeUserModal, onSave }: any) {
+  const criarUsuario = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({ nome, superusuario });
+    console.log("Usuário criado", { nome, superusuario });
+  };
 
   const [nome, setNome] = useState<string>("");
-  const [tipo, setTipo] = useState<string>("");
-
-  const criarUsuario = async (e: React.FormEvent) => {
-    e.preventDefault();
-    //         console.log("Criar usuário", { nome, tipo });
-  }
+  // const [tipo, setTipo] = useState<string>("");
+  const [superusuario, setSuperusuario] = useState<number | "">("");
 
   return (
     <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
@@ -51,9 +51,9 @@ function AdicionarUsuarioForm({ closeUserModal }: any) {
 
           <div>
             <p className="text-[#192160] text-sm font-medium mb-1">
-              Selecione o tipo do usuário
+              Informe o id do usuário
             </p>
-            <select
+            {/* <select
               name="tipo_usuario"
               id="tipo_usuario"
               className=" justify-between items-center px-2 py-[5px] border-solid border-[1px] border-slate-500 rounded-md text-[#777DAA] text-xs font-medium w-full"
@@ -67,7 +67,15 @@ function AdicionarUsuarioForm({ closeUserModal }: any) {
               <option value="guarita">Guarita</option>
               <option value="servidor">Servidor</option>
               <option value="aluno">Aluno</option>
-            </select>
+            </select>  */}
+            <input
+              className="w-full p-2 rounded-[10px] border border-[#646999] focus:outline-none text-[#777DAA] text-xs font-medium "
+              type="number"
+              placeholder="Id do usuário"
+              value={superusuario}
+              onChange={(e) => setSuperusuario(e.target.value === "" ? "" : Number(e.target.value))}
+              required
+            />
           </div>
           {/* fim seção tipo do usuário*/}
         </div>
@@ -83,7 +91,7 @@ function AdicionarUsuarioForm({ closeUserModal }: any) {
         {/* fim botão salvar criação de  usuário*/}
       </form>
     </div>
-  )
+  );
 }
 
 export default AdicionarUsuarioForm;
