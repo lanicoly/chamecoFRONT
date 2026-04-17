@@ -45,7 +45,7 @@ export function Emprestimos() {
   // const pesquisa = "";
 
   const [chaveSelecionadaId, setChaveSelecionadaId] = useState<number | null>(
-    null
+    null,
   );
   const [solicitanteSelecionadoId, setSolicitanteSelecionadoId] = useState<
     number | null
@@ -60,7 +60,7 @@ export function Emprestimos() {
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
 
   // chame sempre o MESMO hook; mude só o parâmetro
-  const { responsaveis } = useGetResponsaveis();
+  const { responsaveis, loading } = useGetResponsaveis();
 
   const { salas } = useGetSalas();
   const { usuarios } = useGetUsuarios();
@@ -73,7 +73,6 @@ export function Emprestimos() {
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   const [mostrarSomenteAtrasados, setMostrarSomenteAtrasados] = useState(false);
-
 
   async function criarEmprestimo() {
     const observacaoAtual = observacao || "";
@@ -102,7 +101,7 @@ export function Emprestimos() {
       try {
         const response = await api.post(
           "/chameco/api/v1/realizar-emprestimo/",
-          novoEmprestimo
+          novoEmprestimo,
         );
 
         if (response) {
@@ -172,7 +171,7 @@ export function Emprestimos() {
     useState(true);
   const alternarEmprestimos = () => {
     setExibirEmprestimosPendentes(
-      (exibirEmprestimoAtual) => !exibirEmprestimoAtual
+      (exibirEmprestimoAtual) => !exibirEmprestimoAtual,
     );
 
     setPesquisa("");
@@ -184,11 +183,11 @@ export function Emprestimos() {
 
   const { new_emprestimos: emprestimosPendentes } = useGetEmprestimos(
     false,
-    refreshCounter
+    refreshCounter,
   );
   const { new_emprestimos: emprestimosConcluidos } = useGetEmprestimos(
     true,
-    refreshCounter
+    refreshCounter,
   );
 
   useEffect(() => {
@@ -229,7 +228,7 @@ export function Emprestimos() {
   function handleNavigation(
     e: React.KeyboardEvent<HTMLElementTagNameMap["td"]>,
     nextRef?: React.RefObject<HTMLElementTagNameMap["td"]>,
-    actionOnEnter?: () => void
+    actionOnEnter?: () => void,
   ) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -368,7 +367,7 @@ export function Emprestimos() {
                       onKeyDown={(e) => handleNavigation(e, observacaoRef)}
                     >
                       <FilterableInputResponsaveis
-                        items={responsaveis}
+                        items={responsaveis || []}
                         onSelectItem={(idSelecionado) => {
                           setResponsavelSelecionadoId(idSelecionado);
                         }}
@@ -589,28 +588,28 @@ export function Emprestimos() {
               </div>
 
               <div className="flex items-center gap-3">
-              
-              {exibirEmprestimosPendentes && (
-              <div className="flex items-center gap-1 text-sm text-[#646999] font-semibold">
-                <input
-                type="checkbox"
-                checked={mostrarSomenteAtrasados}
-                onChange={(e) => setMostrarSomenteAtrasados(e.target.checked)}
+                {exibirEmprestimosPendentes && (
+                  <div className="flex items-center gap-1 text-sm text-[#646999] font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={mostrarSomenteAtrasados}
+                      onChange={(e) =>
+                        setMostrarSomenteAtrasados(e.target.checked)
+                      }
+                    />
+                    Atrasados +24h
+                    <div className=" flex items-center px-2 py-1 rounded-full bg-[#EF4444] text-xs text-white">
+                      {qtdAtrasados}
+                    </div>
+                  </div>
+                )}
+                <Pesquisa
+                  pesquisa={pesquisa}
+                  placeholder="Pesquisar"
+                  setIsSearching={setIsSearching}
+                  setPesquisa={setPesquisa}
                 />
-                  Atrasados +24h
-                <div className=" flex items-center px-2 py-1 rounded-full bg-[#EF4444] text-xs text-white">
-                  {qtdAtrasados}
-                </div>
               </div>
-              )}
-              <Pesquisa
-                pesquisa={pesquisa}
-                placeholder="Pesquisar"
-                setIsSearching={setIsSearching}
-                setPesquisa={setPesquisa}
-                />
-              </div>
-              
             </div>
 
             {/* tabela com emprestimo pendente */}
