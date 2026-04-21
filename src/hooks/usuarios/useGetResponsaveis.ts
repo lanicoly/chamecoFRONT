@@ -5,7 +5,7 @@ import { IUsuario } from "../../components/inputs/FilterableInputResponsaveis";
 const superUsuariosIds = [1554, 1553, 633, 634];
 
 
-const useGetResponsaveis = (id?: number) => {
+const useGetResponsaveis = (id?: number, search?: string) => {
   const [responsaveis, setResponsaveis] = useState<IUsuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -29,7 +29,7 @@ const useGetResponsaveis = (id?: number) => {
       }
       params.set("token", token);
 
-      const url = id ? `/chameco/api/v1/responsaveis/${id}/` : `/chameco/api/v1/responsaveis/`;
+      const url = id ? `/chameco/api/v1/responsaveis/${id}/?pagination=100` : `/chameco/api/v1/responsaveis/?pagination=100`;
 
       try {
         const response = await api.get(url, { 

@@ -1,7 +1,7 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect } from "react";
 
 export interface IUsuario {
-  id: number,
+  id: number;
   superusuario: number;
   nome: string;
 }
@@ -12,28 +12,42 @@ interface IdropdownResponsavelProps {
   reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
-const buscarResponsavel = (id: number | undefined, responsaveis: IUsuario[]) => {
-  const responsavel = responsaveis.find(responsavel => responsavel.id === id);
+const buscarResponsavel = (
+  id: number | undefined,
+  responsaveis: IUsuario[],
+) => {
+  const responsavel = responsaveis.find((responsavel) => responsavel.id === id);
 
   return responsavel ? `${responsavel.nome} | ${responsavel.id}` : "";
+};
 
-}
-
-export function FilterableInputResponsaveis({items = [], onSelectItem, reset}: IdropdownResponsavelProps) {
-
+export function FilterableInputResponsaveis({
+  items = [],
+  onSelectItem,
+  reset,
+}: IdropdownResponsavelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
 
   const filterdItems = useMemo(() => {
-    const listaGarantida = items || []; 
+    const listaGarantida = items || [];
     const lowerSearch = searchTerm.toLowerCase().trim();
 
-    return listaGarantida.filter((item) => {
-      const nomeValido = item?.nome?.toLowerCase() || "";
-      const idValido = String(item?.id || "");
-      return nomeValido.includes(lowerSearch) || idValido.includes(lowerSearch);
-    });
+    const resultadosFiltrados = listaGarantida
+      .filter((item) => {
+        const nomeValido = item?.nome?.toLowerCase() || "";
+        const idValido = String(item?.id || "");
+        return (
+          nomeValido.includes(lowerSearch) || idValido.includes(lowerSearch)
+        );
+      })
+      .sort((a, b) => a.id - b.id);
+
+    if (lowerSearch === "") {
+      return resultadosFiltrados.slice(0, 5);
+    }
+    return resultadosFiltrados;
   }, [items, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,7 +58,7 @@ export function FilterableInputResponsaveis({items = [], onSelectItem, reset}: I
     setSearchTerm(displayValue);
     setIsOpen(false);
     onSelectItem(option.id); // Chama o callback com o ID do item selecionado
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -54,7 +68,10 @@ export function FilterableInputResponsaveis({items = [], onSelectItem, reset}: I
   // Fecha o dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -70,31 +87,29 @@ export function FilterableInputResponsaveis({items = [], onSelectItem, reset}: I
       setSearchTerm("");
       setSelectedOption(null);
     }
+  }, [reset]);
 
-  }, [reset])
-
-  
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">
         <input
-            type="text"
-            placeholder={"Responsável"}
-            value={searchTerm || ""}
-            onChange={handleInputChange}
-            onFocus={(e) => e.target.select()}
-            className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
-          />
+          type="text"
+          placeholder={"Responsável"}
+          value={searchTerm || ""}
+          onChange={handleInputChange}
+          onFocus={(e) => e.target.select()}
+          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium"
+        />
 
         <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            fill="#64748b"
-            className="bi bi-search absolute right-3"
-            viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          fill="#64748b"
+          className="bi bi-search absolute right-3"
+          viewBox="0 0 16 16"
         >
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
         </svg>
       </div>
 
