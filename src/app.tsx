@@ -67,15 +67,14 @@ export function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
+        <Route
           path="/emprestimos"
           element={
             <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante", "coordenador"]}>
               <Emprestimos />
             </PrivateRoute>
           }
-        /> */}
-        <Route path="/emprestimos" element={<Emprestimos />} />
+        />
         <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>
