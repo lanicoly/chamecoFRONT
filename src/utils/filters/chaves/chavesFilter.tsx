@@ -13,20 +13,20 @@ interface IChave {
 
 const itensPorPagina = 5;
 
-export var totalPaginas = 1;
+export let totalPaginas = 1;
 
-export const chavesFilter = (
+export const useChavesFilter = (
   nome: string,
   tipoUsuario?: string,
   page?: number,
 ) => {
-  const [insidePage, setInsidePage] = useState(1);
+  // const [insidePage, setInsidePage] = useState(1);
   const [chaves, setChaves] = useState<IChave[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true); // Verifica se há mais dados
+  const [, setLoading] = useState<boolean>(false);
+  const [, setHasMore] = useState<boolean>(true); // Verifica se há mais dados
   // const [totalPaginas, setTotalPaginas] = useState<number>(1)
 
-  const fetchUsuarios = async (nome: string, tipo?: string, page?: number) => {
+  const fetchUsuarios = async (nome: string, page?: number) => {
     setLoading(true);
     
     try {
@@ -61,9 +61,9 @@ export const chavesFilter = (
     if (nome || tipoUsuario) {
 
       if (tipoUsuario === "todos") {
-          fetchUsuarios(nome, "", page);
+          fetchUsuarios(nome, page);
       } else {
-          fetchUsuarios(nome, tipoUsuario, page);
+          fetchUsuarios(nome, page);
       }
     }
   }, [nome, tipoUsuario, page]);

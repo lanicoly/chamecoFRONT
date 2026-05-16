@@ -8,7 +8,7 @@ import { FilterableInputSolicitantes } from "../components/inputs/FilterableInpu
 import { FilterableInputChaves } from "../components/inputs/FilterableInputChaves";
 import useGetResponsaveis from "../hooks/usuarios/useGetResponsaveis";
 import useGetSalas from "../hooks/salas/useGenericGetSalas";
-import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
+// import useGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
 import useGetEmprestimos from "../hooks/emprestimos/useGetEmprestimos";
 import api from "../services/api";
 import { PopUpdeSucesso } from "../components/popups/PopUpdeSucesso";
@@ -60,14 +60,14 @@ export function Emprestimos() {
   const [isPopUpErrorOpen, setIsPopUpErrorOpen] = useState(false);
 
   // chame sempre o MESMO hook; mude só o parâmetro
-  const { responsaveis, loading } = useGetResponsaveis();
+  const { responsaveis  } = useGetResponsaveis();
 
   const { salas } = useGetSalas();
-  const { usuarios } = useGetUsuarios();
-  const { chaves, refetch } = useChaves();
+  // const { usuarios } = useGetUsuarios();
+  const {refetch} = useChaves();
 
   const [pesquisa, setPesquisa] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [, setIsSearching] = useState(false);
 
   const [mensagemErro, setMensagemErro] = useState("");
   const [mensagemSucesso, setMensagemSucesso] = useState("");
@@ -202,7 +202,7 @@ export function Emprestimos() {
     // para garantir que sempre terei as chaves nessa tela
     refetch();
     // console.log("atualizou o context")
-  }, []);
+  }, [refetch]);
 
   const [qtdAtrasados, setQtdAtrasados] = useState(0);
 

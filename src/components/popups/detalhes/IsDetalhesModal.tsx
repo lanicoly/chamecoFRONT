@@ -247,7 +247,7 @@ export function IsDetalhesModal ( {
                         </p>
                     </div>
 
-                    {emprestimoAlerta(emprestimoSelecionado) && (
+                    {emprestimoSelecionado &&emprestimoAlerta(emprestimoSelecionado) && (
                         <div className="flex w-full h-auto px-[10px] py-2 flex-col rounded-lg bg-[#B8BCE0]">
                         <p className="text-[#192160] font-medium p-1">
                         Esse empréstimo ultrapassou <strong className="text-red-600 font-semibold">24h</strong> em aberto!

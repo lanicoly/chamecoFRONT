@@ -29,12 +29,12 @@ export const ChavesProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      let nextUrl = `/chameco/api/v1/chaves/?pagination=100`;
+      let nextUrl: string | null = `/chameco/api/v1/chaves/?pagination=100`;
       while (nextUrl) {
-        const response = await api.get(nextUrl);
+        const response: any = await api.get(nextUrl);
         const data = response.data;
 
-        const results = data.results || [];
+        const results: IChave[] = data.results || [];
         allChaves = [...allChaves, ...results];
         if (data.next) {
           const url = new URL(data.next);

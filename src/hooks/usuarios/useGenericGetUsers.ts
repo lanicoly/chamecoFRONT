@@ -14,8 +14,8 @@ const useGenericGetUsers = (nome = "",) => {
   const [page, setPage] = useState(1);
   const [usuarios, setUsuarios] = useState<IUsuario[]>([])
   const [temMais, setTemMais] = useState(true); // permanece interno como no seu código
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [loading] = useState(false);
+  const [error ] = useState(false);
 
 
   useEffect(() => {

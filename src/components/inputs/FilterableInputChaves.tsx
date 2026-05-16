@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { IChave } from '../../pages/chaves';
-import { chavesFilter } from '../../utils/filters/chaves/chavesFilter';
+import { useChavesFilter } from '../../utils/filters/chaves/chavesFilter';
 
 
 export interface IoptionChaves {
@@ -20,19 +20,22 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [_selectedOption, setSelectedOption] = useState<number | null>(null);
-  const chaves: IChave[] = chavesFilter(searchTerm, "todos", 1)
+  const [, setSelectedOption] = useState<number | null>(null);
+  const chaves = useChavesFilter(searchTerm, "todos", 1);
 
 
   const filterdItems = useMemo<IChave[]>(() => {
-    return chaves?.filter((chave: IChave) => chave.disponivel && chave.nome_sala.toLowerCase().includes(searchTerm.toLowerCase()));
+    const listaChaves = chaves ?? [];
+    return listaChaves?.filter((chave: IChave) => chave.disponivel && 
+    (chave.nome_sala?.toLowerCase() ?? "").includes(searchTerm.toLowerCase())
+  );
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (chave: IChave) => {
     setSelectedOption(chave.id);
-    setSearchTerm(chave.nome_sala);
+    setSearchTerm(chave.nome_sala ?? "");
     setIsOpen(false);
     onSelectItem(chave.id); // Chama o callback com o ID da chave selecionada
   }

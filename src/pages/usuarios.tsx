@@ -9,7 +9,7 @@ import SelectTipoUsuario from "../components/inputs/tipo_usuario/SelectTipoUsuar
 import { PopUpEditarUsuario } from "../components/popups/usuario/PopUpEditarUsuario";
 import { PopUpDeleteUsuario } from "../components/popups/usuario/PopUpDeleteUsuario";
 import { TabelaDeUsuarios } from "../components/tables/TabelaDeUsuarios";
-import { totalPaginas, userFilter } from "../utils/filters/users/userFilter";
+import { totalPaginas, useUserFilter } from "../utils/filters/users/userFilter";
 import { IUsuario } from "./chaves";
 import api from "../services/api";
 import { AxiosError } from "axios";
@@ -41,19 +41,19 @@ export function Usuarios() {
   } = useGenericGetUsers();
 
 
-  const itensPorPagina = 5;
-  const paginaAtual = 1;
-  const indexInicio = (paginaAtual - 1) * itensPorPagina;
-  const indexFim = indexInicio + itensPorPagina;
+  // const itensPorPagina = 5;
+  // const paginaAtual = 1;
+  // const indexInicio = (paginaAtual - 1) * itensPorPagina;
+  // const indexFim = indexInicio + itensPorPagina;
 
   const [pesquisa, setPesquisa] = useState("");
   const [tipoUsuario, setTipoUsuario] = useState("todos");
-  const [_isSearching, setIsSearching] = useState(false);
+  const [, setIsSearching] = useState(false);
 
-  const filtrarUsuario = userFilter(pesquisa, tipoUsuario, page);
+  const filtrarUsuario = useUserFilter(pesquisa, tipoUsuario, page);
   // console.log("lista de users: ", filtrarUsuario)
 
-  const [usuarios, setUsuarios] = useState<IUsuario[]>(filtrarUsuario);
+  const [usuarios, setUsuarios] = useState<IUsuario[]>(filtrarUsuario || []);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [tipo, setTipo] = useState("");
@@ -76,7 +76,7 @@ export function Usuarios() {
   }
 
   function openEditModal() {
-    const usuario: IUsuario | undefined = filtrarUsuario.find((user) => user.id === userSelecionado);
+    const usuario: IUsuario | undefined = filtrarUsuario?.find((user) => user.id === userSelecionado);
     if (usuario) {
       setNome(usuario?.nome);
       // setEmail(usuario?.setor);
@@ -129,7 +129,7 @@ export function Usuarios() {
     e.preventDefault();
 
     if (userSelecionado !== null) {
-      const usuarioParaEditar = filtrarUsuario.find(u => u.id === userSelecionado);
+      const usuarioParaEditar = filtrarUsuario?.find(u => u.id === userSelecionado);
 
       if (usuarioParaEditar) {
         // if (id_cortex) usuarioParaEditar.id_cortex = id_cortex; 
@@ -291,7 +291,7 @@ export function Usuarios() {
 
             <TabelaDeUsuarios
               usuarios={usuarios}
-              filtrarUsuario={filtrarUsuario}
+              filtrarUsuario={filtrarUsuario || []}
               userSelecionado={userSelecionado}
               statusSelecao={statusSelecao}
             />

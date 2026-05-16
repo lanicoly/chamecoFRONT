@@ -4,17 +4,17 @@ import api from "../../../services/api";
 
 const itensPorPagina = 5;
 
-export var totalPaginas = 1;
+export let totalPaginas = 1;
 
-export const userFilter = (
+export const useUserFilter = (
   pesquisa: string,
   tipoUsuario?: string,
   page?: number,
 ) => {
-  const [insidePage, setInsidePage] = useState(1);
+  // const [insidePage, setInsidePage] = useState(1);
   const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true); // Verifica se há mais dados
+  const [, setLoading] = useState<boolean>(false);
+  const [, setHasMore] = useState<boolean>(true); // Verifica se há mais dados
   // const [totalPaginas, setTotalPaginas] = useState<number>(1)
 
   const fetchUsuarios = async (pesquisa: string, tipo?: string, page?: number) => {
@@ -65,7 +65,8 @@ export const userFilter = (
     return usuarios?.filter((usuario) => {
       const nomeMatch = usuario.nome.toLowerCase().includes(pesquisa.toLowerCase());
       //   const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
-      const filtroMatch = tipoUsuario === "todos" || usuario.tipo.toLowerCase() === tipoUsuario.toLowerCase();
+      const tipoAtual = tipoUsuario ?? "todos";
+      const filtroMatch = tipoAtual === "todos" || (usuario.tipo?.toLowerCase() === tipoAtual.toLowerCase());
 
       if (!pesquisa) {
         return filtroMatch;

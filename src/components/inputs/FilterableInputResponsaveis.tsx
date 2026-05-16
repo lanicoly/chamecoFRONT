@@ -1,25 +1,25 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 
-export interface IUsuario {
+export interface IUsuarioResponsavel {
   id: number;
   superusuario: number;
   nome: string;
 }
 
 interface IdropdownResponsavelProps {
-  items: IUsuario[];
+  items: IUsuarioResponsavel[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
   reset?: boolean; // Adicionei esta propriedade para o callback
 }
 
-const buscarResponsavel = (
-  id: number | undefined,
-  responsaveis: IUsuario[],
-) => {
-  const responsavel = responsaveis.find((responsavel) => responsavel.id === id);
+// const buscarResponsavel = (
+//   id: number | undefined,
+//   responsaveis: IUsuario[],
+// ) => {
+//   const responsavel = responsaveis.find((responsavel) => responsavel.id === id);
 
-  return responsavel ? `${responsavel.nome} | ${responsavel.id}` : "";
-};
+//   return responsavel ? `${responsavel.nome} | ${responsavel.id}` : "";
+// };
 
 export function FilterableInputResponsaveis({
   items = [],
@@ -28,7 +28,7 @@ export function FilterableInputResponsaveis({
 }: IdropdownResponsavelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
+  const [, setSelectedOption] = useState<IUsuarioResponsavel | null>(null);
 
   const filterdItems = useMemo(() => {
     const listaGarantida = items || [];
@@ -52,7 +52,7 @@ export function FilterableInputResponsaveis({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (option: IUsuario) => {
+  const handleSelect = (option: IUsuarioResponsavel) => {
     setSelectedOption(option);
     const displayValue = `${option.nome} | ${option.id}`;
     setSearchTerm(displayValue);

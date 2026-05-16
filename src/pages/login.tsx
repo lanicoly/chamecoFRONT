@@ -1,12 +1,12 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import api from "../services/api";
 import { Footer } from "../components/footer";
 import Spinner from "../components/spinner";
 import { limparCPF } from "../utils/limparCPF";
 import { redirectUserTo } from "../utils/tiposUsuarios";
-import { applyCpfMask } from "../utils/applyCpfMask";
+// import { applyCpfMask } from "../utils/applyCpfMask";
 import { PopUpError } from "../components/popups/PopUpError";
 
 export function Login() {

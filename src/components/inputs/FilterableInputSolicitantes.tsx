@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { userFilter } from '../../utils/filters/users/userFilter';
-import { IUsuario } from './FilterableInputResponsaveis';
+import { useUserFilter } from '../../utils/filters/users/userFilter';
+import { IUsuario } from '../../pages/chaves';
 import { buscarSolicitante } from '../../utils/buscarSolicitante';
 
 export interface IoptionSolicitantes {
@@ -14,16 +14,17 @@ interface IdropdownSolicitantesDTO {
   reset: boolean
 }
 
-export function FilterableInputSolicitantes({items, onSelectItem, reset}: IdropdownSolicitantesDTO) {
+export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSolicitantesDTO) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [_selectedOption, setSelectedOption] = useState<IUsuario | null>(null);
-  const usuarios: IUsuario[] = userFilter(searchTerm, "todos", 1);
+  const [, setSelectedOption] = useState<IUsuario | null>(null);
+  const usuarios = useUserFilter(searchTerm, "todos", 1);
 
   const filterdItems = useMemo(() => {
+    const listaUsuarios = usuarios ?? [];
     const lowerSearch = searchTerm.toLowerCase();
-    return usuarios.filter((usuario) => usuario.nome && buscarSolicitante(usuario.id, usuarios).toLowerCase().includes(lowerSearch));
+    return listaUsuarios.filter((usuario) => usuario.nome && buscarSolicitante(usuario.id, listaUsuarios).toLowerCase().includes(lowerSearch));
   }, [usuarios, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

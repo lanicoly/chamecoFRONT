@@ -10,7 +10,7 @@ import { PassadorPagina } from "../components/passadorPagina";
 import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
-import { useMemo } from "react";
+// import { useMemo } from "react";
 import useGenericGetSalas, {clearSalasCache} from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { IUsuario } from "./chaves";

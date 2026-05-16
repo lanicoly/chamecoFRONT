@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
-import { IUsuario } from "../../components/inputs/FilterableInputResponsaveis";
+import { IUsuarioResponsavel } from "../../components/inputs/FilterableInputResponsaveis";
 
 const superUsuariosIds = [1554, 1553, 633, 634];
 
 
-const useGetResponsaveis = (id?: number, search?: string) => {
-  const [responsaveis, setResponsaveis] = useState<IUsuario[]>([]);
+const useGetResponsaveis = (id?: number ) => {
+  const [responsaveis, setResponsaveis] = useState<IUsuarioResponsavel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refresh, setRefresh] = useState(0);

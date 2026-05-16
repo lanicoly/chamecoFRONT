@@ -21,9 +21,10 @@ export function makeBuscadorSalaPorChave(
         const idStr = String(idChave);
         const chave = chaveById[idStr];
 
-        if (!chave) return "Chave não encontrada";
+        if (!chave) return "Carregando chave..."; 
 
         const sala = salaById[String(chave.sala)];
-        return sala ? sala.nome : "Sala não encontrada";
+
+        return sala ? sala.nome : "Carregando sala...";
     }
 }

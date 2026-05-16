@@ -145,7 +145,7 @@ const useGenericGetSalas = ({ nome = "", blocoId }: IUseSalasProps = {}) => {
       }
     };
 
-    const timeout = setTimeout(fetchSalas, 300);
+    const timeout = setTimeout(fetchSalas, 400);
     return () => {
       clearTimeout(timeout);
       ac.abort();

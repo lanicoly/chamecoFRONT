@@ -18,7 +18,7 @@ import { useMemo } from "react";
 
 export interface IUsuario {
   autorizado_emprestimo: boolean;
-  salas: ISala[];
+  salas?: ISala[];
   id: number;
   id_cortex: number;
   nome: string;
@@ -29,7 +29,7 @@ export interface IUsuario {
 export interface IChave {
   id: number;
   sala: number | null;
-  nome_sala: string;
+  nome_sala?: string;
   disponivel: boolean;
   usuarios: IUsuario[];
   descricao?: string | null;
@@ -55,7 +55,7 @@ interface IChavesContentProps {
   loading: boolean;
   error: boolean;
   refetch: any;
-  salasCompletas: ISala[];
+  salasCompletas?: ISala[];
 }
 
 export function Chaves() {
@@ -64,6 +64,7 @@ export function Chaves() {
   const { chaves, loading, error, refetch } = useGenericGetChaves();
 
   // Se o token existe, renderiza o componente principal que usa os hooks
+
   return (
     <ChavesContent
       chaves={chaves}
@@ -73,28 +74,27 @@ export function Chaves() {
     />
   );
 }
-
 function ChavesContent({
   chaves,
-  loading,
   error,
+  loading,
   refetch,
-}: // salasCompletas,
-  IChavesContentProps) {
+}: IChavesContentProps) {
   const navigate = useNavigate();
 
   const userType = localStorage.getItem("userType");
-  const loadingChaves = loading;
+
   const errorChaves = error;
   const refetchChaves = refetch;
-  const { salas, loading: loadingSalas, error: errorSalas } = useGetSalas();
+  const { salas, error: errorSalas } = useGetSalas();
   const [chavesList, setChavesList] = useState<IChave[]>([]);
   const [chaveSelecionada, setChaveSelecionada] = useState<IChave | null>(null);
   const [salaSelecionadaId, setSalaSelecionadaId] = useState<number | null>(
-    null
+    null,
   );
   const [disponivel, setDisponivel] = useState<boolean>(true);
   const [descricao, setDescricao] = useState<string>("");
+  const loadingChaves = loading;
 
   const [isChavesModalOpen, setIsChavesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -117,11 +117,14 @@ function ChavesContent({
 
   const blocosMap = useMemo(
     () =>
-      bloco.reduce((map, bloco) => {
-        map[bloco.id] = bloco.nome;
-        return map;
-      }, {} as Record<number, string>),
-    [bloco]
+      bloco.reduce(
+        (map, bloco) => {
+          map[bloco.id] = bloco.nome;
+          return map;
+        },
+        {} as Record<number, string>,
+      ),
+    [bloco],
   );
 
   const salasMap: Record<number, ISalaMap> = salas.reduce(
@@ -134,7 +137,7 @@ function ChavesContent({
       };
       return salasPorId;
     },
-    {} as Record<number, ISalaMap>
+    {} as Record<number, ISalaMap>,
   );
 
   //   console.log("Salas", salas);
@@ -173,7 +176,7 @@ function ChavesContent({
     const currentToken = localStorage.getItem("authToken");
     if (!currentToken) {
       setErrorMessage(
-        "Sessão expirada ou token inválido. Faça login novamente."
+        "Sessão expirada ou token inválido. Faça login novamente.",
       );
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
@@ -239,7 +242,7 @@ function ChavesContent({
     }
     if (!currentToken) {
       setErrorMessage(
-        "Sessão expirada ou token inválido. Faça login novamente."
+        "Sessão expirada ou token inválido. Faça login novamente.",
       );
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
@@ -268,7 +271,7 @@ function ChavesContent({
         chaveAtualizadaPayload,
         {
           params: { token: currentToken },
-        }
+        },
       );
       setIsSuccesModalOpen(true);
       resetFormsAndCloseModals();
@@ -303,7 +306,7 @@ function ChavesContent({
     }
     if (!currentToken) {
       setErrorMessage(
-        "Sessão expirada ou token inválido. Faça login novamente."
+        "Sessão expirada ou token inválido. Faça login novamente.",
       );
       setIsPopUpErrorOpen(true);
       handleCloseFeedbackModals();
@@ -355,7 +358,7 @@ function ChavesContent({
   const chavesFiltradas = chavesList.filter((chave) => {
     if (!isSearching) return true;
     const sala: ISala | undefined = salas?.find(
-      (s: ISala) => s.id === chave.sala
+      (s: ISala) => s.id === chave.sala,
     );
     const termoPesquisa = pesquisa.toLowerCase();
     // const usuariosNomes =
@@ -373,7 +376,7 @@ function ChavesContent({
 
   const totalPaginas = Math.max(
     1,
-    Math.ceil(chavesFiltradas.length / itensPorPagina)
+    Math.ceil(chavesFiltradas.length / itensPorPagina),
   );
   const indexInicio = (paginaAtual - 1) * itensPorPagina;
   const indexFim = indexInicio + itensPorPagina;
@@ -498,8 +501,9 @@ function ChavesContent({
                   itensPaginados.map((chave) => (
                     <tr
                       key={chave.id}
-                      className={`hover:bg-[#d5d8f1] px-2 ${chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
-                        }`}
+                      className={`hover:bg-[#d5d8f1] px-2 ${
+                        chaveSelecionada?.id === chave.id ? "bg-gray-200" : ""
+                      }`}
                     >
                       {/* SALA - USA nome_sala DIRETO DA API */}
                       <td className="align-middle p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[17%] tablet:max-w-[200px] laptop:max-w-[400px] break-words">
@@ -542,8 +546,9 @@ function ChavesContent({
 
                       {/* STATUS */}
                       <td
-                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
-                          }`}
+                        className={`align-middle text-center p-2 text-sm text-white font-semibold border-2 border-solid border-[#B8BCE0] w-[14%] tablet:max-w-[200px] laptop:max-w-[400px] break-words ${
+                          chave.disponivel ? "bg-[#22b350]" : "bg-red-700"
+                        }`}
                       >
                         {chave.disponivel ? "Disponível" : "Indisponível"}
                       </td>
@@ -605,9 +610,11 @@ function ChavesContent({
                 ) : (
                   <tr>
                     <td colSpan={5} className="text-center p-4 text-gray-500">
-                      {loadingChaves
-                        ? (<Spinner />)
-                        : "Nenhuma chave encontrada."}
+                      {loadingChaves ? (
+                        <Spinner />
+                      ) : (
+                        "Nenhuma chave encontrada."
+                      )}
                     </td>
                   </tr>
                 )}
@@ -662,7 +669,7 @@ function ChavesContent({
                 value={salaSelecionadaId === null ? "" : salaSelecionadaId}
                 onChange={(e) =>
                   setSalaSelecionadaId(
-                    e.target.value ? Number(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null,
                   )
                 }
                 required
@@ -694,7 +701,6 @@ function ChavesContent({
               />
             </div>
 
-            
             <div className="flex justify-center items-center mt-2 w-full">
               <button
                 type="submit"
@@ -741,7 +747,7 @@ function ChavesContent({
                   value={salaSelecionadaId === null ? "" : salaSelecionadaId}
                   onChange={(e) =>
                     setSalaSelecionadaId(
-                      e.target.value ? Number(e.target.value) : null
+                      e.target.value ? Number(e.target.value) : null,
                     )
                   }
                   required
@@ -773,7 +779,6 @@ function ChavesContent({
               </div>
             )}
 
-            
             {/* botão de salvar usuários autorizados */}
             <div className="flex justify-center items-center mt-2 w-full">
               <button
@@ -838,7 +843,6 @@ function ChavesContent({
         </div>
       )}
 
-      
       {/* Modal Ver Descrição */}
       {isDescricaoModalOpen && (
         <div className="fixed flex items-center justify-center inset-0 bg-black bg-opacity-50 z-20">
@@ -857,7 +861,7 @@ function ChavesContent({
             </div>
             <div className=" rounded-md bg-[#B8BCE0] p-2">
               {descricaoSelecionada &&
-                descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
+              descricaoSelecionada !== "Nenhuma descrição fornecida." ? (
                 <p className="text-sm text-[#192160] py-1 whitespace-pre-wrap break-words">
                   {descricaoSelecionada}
                 </p>

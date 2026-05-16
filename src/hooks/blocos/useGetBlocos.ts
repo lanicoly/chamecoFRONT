@@ -39,7 +39,7 @@ const useGetBlocos = () => {
           }));
 
           // evita duplicados
-          const novosIds = results.map((r) => r.id);
+          // const novosIds = results.map((r) => r.id);
           const existentesIds = allBlocos.map((b) => b.id);
           const filteredResults = results.filter(
             (r) => !existentesIds.includes(r.id)

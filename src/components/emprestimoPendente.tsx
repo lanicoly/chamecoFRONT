@@ -72,8 +72,8 @@ export function EmprestimosPendentes({
   // const { usuarios } = useGetUsuarios();
   const { salas: salasData } = useGetSalas();
   // const { chaves: chavesData } = useGetChaves();
-  const { chaves: chavesData, refetch } = useChaves();
-  const { responsaveis } = useGetResponsaveis();
+  const { chaves: chavesData, loading: loadingChaves, refetch } = useChaves();
+  const { responsaveis, loading: loadingResponsaveis } = useGetResponsaveis();
 
   const [filtroPendente, setFiltroPendente] = useState({
     sala: "",
@@ -92,7 +92,7 @@ export function EmprestimosPendentes({
 
   function nomeSolicitante(
     idSolicitante: number | null | undefined,
-    solicitantesMap: Record<number, string>
+    solicitantesMap: Record<number, string>,
   ): string {
     return idSolicitante != null ? solicitantesMap[idSolicitante] || "" : "";
   }
@@ -176,19 +176,19 @@ export function EmprestimosPendentes({
       const dataRetiradaSemHora = new Date(
         dataDevolucao.getFullYear(),
         dataDevolucao.getMonth(),
-        dataDevolucao.getDate()
+        dataDevolucao.getDate(),
       );
 
       const from = new Date(
         filtroDataEmprestimoRetirada.from.getFullYear(),
         filtroDataEmprestimoRetirada.from.getMonth(),
-        filtroDataEmprestimoRetirada.from.getDate()
+        filtroDataEmprestimoRetirada.from.getDate(),
       );
 
       const to = new Date(
         filtroDataEmprestimoRetirada.to.getFullYear(),
         filtroDataEmprestimoRetirada.to.getMonth(),
-        filtroDataEmprestimoRetirada.to.getDate()
+        filtroDataEmprestimoRetirada.to.getDate(),
       );
 
       return dataRetiradaSemHora >= from && dataRetiradaSemHora <= to;
@@ -199,15 +199,15 @@ export function EmprestimosPendentes({
       const salaNome = buscarNomeSalaPorIdChave(
         emp.chave,
         chavesData,
-        salasData
+        salasData,
       );
       const responsavelNome = buscarNomeUsuarioPorId(
         emp.usuario_responsavel,
-        responsaveis
+        responsaveis,
       );
       const solicitanteNome = nomeSolicitante(
         emp.usuario_solicitante,
-        nomesSolicitantesMap
+        nomesSolicitantesMap,
       );
       const dataHoraRetirada = emp.horario_emprestimo
         ? formatarDataHora(emp.horario_emprestimo)
@@ -238,16 +238,15 @@ export function EmprestimosPendentes({
       }
 
       return 0;
-    }) 
+    })
     .filter((emp) => {
       if (!filtrarAtrasados) return true;
       return emprestimoPendenteAlerta(emp);
     });
-    
 
   // console.log(emprestimosFiltradosPendentes);
   const [campoFiltroAberto, setCampoFiltroAberto] = useState<string | null>(
-    null
+    null,
   );
 
   //paginação para emprestimos pendentes
@@ -256,7 +255,7 @@ export function EmprestimosPendentes({
   const itensPorPaginaPendente = 5;
   const totalPaginasPendentes = Math.max(
     1,
-    Math.ceil(emprestimosFiltradosPendentes.length / itensPorPaginaPendente)
+    Math.ceil(emprestimosFiltradosPendentes.length / itensPorPaginaPendente),
   );
 
   function avancarPaginaPendente() {
@@ -370,7 +369,10 @@ export function EmprestimosPendentes({
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
-  const buscar = useMemo(() => makeBuscadorSalaPorChave(chavesData, salasData), [chavesData, salasData]);
+  const buscar = useMemo(
+    () => makeBuscadorSalaPorChave(chavesData, salasData),
+    [chavesData, salasData],
+  );
 
   const [emprestimoParaDevolver, setEmprestimoParaDevolver] =
     useState<Iemprestimo | null>(null);
@@ -389,7 +391,7 @@ export function EmprestimosPendentes({
 
   useEffect(() => {
     const totalAtrasados = new_emprestimos.filter((emp) =>
-      emprestimoPendenteAlerta(emp)
+      emprestimoPendenteAlerta(emp),
     ).length;
 
     setQtdAtrasados(totalAtrasados);
@@ -398,10 +400,10 @@ export function EmprestimosPendentes({
   type CampoOrdenacao = "sala" | "solicitante" | "responsavel";
 
   const [ordem, setOrdem] = useState<"desativado" | "asc" | "desc">(
-    "desativado"
+    "desativado",
   );
   const [campoOrdenacao, setCampoOrdenacao] = useState<CampoOrdenacao | null>(
-    null
+    null,
   );
 
   const alterarOrdem = (campo: CampoOrdenacao) => {
@@ -463,13 +465,15 @@ export function EmprestimosPendentes({
     return <ArrowUpDown size={19} />;
   };
 
-  const [ordenacaoDataRetirada, setOrdenacaoDataRetirada] = useState<string | null>(null);
+  const [ordenacaoDataRetirada, setOrdenacaoDataRetirada] = useState<
+    string | null
+  >(null);
 
   const emprestimosOrdenados = ordenarLista(emprestimosFiltradosPendentes);
 
   const itensAtuaisPendentes = emprestimosOrdenados.slice(
     (paginaAtualPendente - 1) * itensPorPaginaPendente,
-    paginaAtualPendente * itensPorPaginaPendente
+    paginaAtualPendente * itensPorPaginaPendente,
   );
 
   function limparFiltros(campo: Array<keyof typeof filtroPendente>) {
@@ -492,7 +496,6 @@ export function EmprestimosPendentes({
     setCampoFiltroAberto(null);
   }
 
-  
   return (
     <div className="flex flex-col gap-2">
       <table className=" w-full border-separate border-spacing-y-2 bg-white overflow-y-auto max-h-[620px] pb-4">
@@ -505,7 +508,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Nome da sala
-                  <button className={`rounded-full ${(campoOrdenacao == "sala" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("sala")}>
+                  <button
+                    className={`rounded-full ${campoOrdenacao == "sala" && ordem != "desativado" ? "bg-red-200 p-1" : "bg-none"}`}
+                    onClick={() => alterarOrdem("sala")}
+                  >
                     {iconeOrdenacao("sala")}
                   </button>
                 </div>
@@ -555,7 +561,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Solicitante
-                  <button className={`rounded-full ${(campoOrdenacao == "solicitante" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("solicitante")}>
+                  <button
+                    className={`rounded-full ${campoOrdenacao == "solicitante" && ordem != "desativado" ? "bg-red-200 p-1" : "bg-none"}`}
+                    onClick={() => alterarOrdem("solicitante")}
+                  >
                     {iconeOrdenacao("solicitante")}
                   </button>
                 </div>
@@ -566,7 +575,10 @@ export function EmprestimosPendentes({
               <div className="flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1">
                   Responsável
-                  <button className={`rounded-full ${(campoOrdenacao == "responsavel" && ordem != "desativado") ? "bg-red-200 p-1" : "bg-none"}`} onClick={() => alterarOrdem("responsavel")}>
+                  <button
+                    className={`rounded-full ${campoOrdenacao == "responsavel" && ordem != "desativado" ? "bg-red-200 p-1" : "bg-none"}`}
+                    onClick={() => alterarOrdem("responsavel")}
+                  >
                     {iconeOrdenacao("responsavel")}
                   </button>
                 </div>
@@ -608,7 +620,9 @@ export function EmprestimosPendentes({
                 </svg>
                 Data retirada
                 <button onClick={() => setCampoFiltroAberto("dataRetirada")}>
-                  <div className={`rounded-full ${filtroDataEmprestimoRetirada || ordenacaoDataRetirada != null  ? "bg-red-200 p-1" : "bg-none"}`}>
+                  <div
+                    className={`rounded-full ${filtroDataEmprestimoRetirada || ordenacaoDataRetirada != null ? "bg-red-200 p-1" : "bg-none"}`}
+                  >
                     <img src="src/assets/filter_list.svg" alt="" />
                   </div>
                 </button>
@@ -620,7 +634,10 @@ export function EmprestimosPendentes({
                     setCampoFiltroAberto(null);
                   }}
                   titulo="Filtrar por data de retirada"
-                  onClear={() => {limparFiltroDataRetirada(); setOrdenacaoDataRetirada(null)}}
+                  onClear={() => {
+                    limparFiltroDataRetirada();
+                    setOrdenacaoDataRetirada(null);
+                  }}
                 >
                   <DayPicker
                     animate
@@ -634,14 +651,20 @@ export function EmprestimosPendentes({
                   <div className="flex flex-col gap-2 items-center w-full">
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => {setOrdenarPorDataRetirada("antigos"); setOrdenacaoDataRetirada("antigos")}}
+                      onClick={() => {
+                        setOrdenarPorDataRetirada("antigos");
+                        setOrdenacaoDataRetirada("antigos");
+                      }}
                     >
                       Mais antigos
                     </button>
 
                     <button
                       className="px-2 py-1 bg-gray-100 rounded w-full border-2 border-[#646999] focus:outline-none text-[#646999] font-semibold hover:bg-[#646999] hover:text-gray-100"
-                      onClick={() => {setOrdenarPorDataRetirada("recentes"); setOrdenacaoDataRetirada("recentes")}}
+                      onClick={() => {
+                        setOrdenarPorDataRetirada("recentes");
+                        setOrdenacaoDataRetirada("recentes");
+                      }}
                     >
                       Mais recentes
                     </button>
@@ -686,7 +709,9 @@ export function EmprestimosPendentes({
                 </svg>
                 Hora da retirada
                 <button onClick={() => setCampoFiltroAberto("horaRetirada")}>
-                  <div className={`rounded-full ${filtroPendente.horaRetiradaInicio || filtroPendente.horaRetiradaFim ? "bg-red-200 p-1" : "bg-none"}`}>
+                  <div
+                    className={`rounded-full ${filtroPendente.horaRetiradaInicio || filtroPendente.horaRetiradaFim ? "bg-red-200 p-1" : "bg-none"}`}
+                  >
                     <img src="src/assets/filter_list.svg" alt="" />
                   </div>
                 </button>
@@ -755,7 +780,12 @@ export function EmprestimosPendentes({
                         chavesData,
                         salasData
                         )} */}
-                    {buscar(emprestimo.chave)}
+                    {emprestimo.chave != null
+                      ? buscar(emprestimo.chave) ||
+                        (loadingChaves
+                          ? "Carregando..."
+                          : "Sala não encontrada")
+                      : "Chave não especificada"}
                   </p>
                 </td>
                 {/* <td
@@ -778,10 +808,15 @@ export function EmprestimosPendentes({
                 </td>
                 <td className="p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">
                   <p className="text-[#646999] text-center  text-sm font-semibold leading-normal">
-                    {buscarNomeUsuarioPorId(
-                      emprestimo.usuario_responsavel,
-                      responsaveis
-                    ) || "Responsavel não encontrado"}
+                    {emprestimo.usuario_responsavel != null
+                      ? buscarNomeUsuarioPorId(
+                          emprestimo.usuario_responsavel,
+                          responsaveis,
+                        ) ||
+                        (loadingResponsaveis
+                          ? "Carregando..."
+                          : "Responsável não encontrado")
+                      : "Responsável não especificado"}
                   </p>
                 </td>
                 <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[15%] break-words flex-1 text-center">

@@ -2,6 +2,7 @@ import { IUsuario } from "../../pages/chaves"
 import Spinner from "../spinner"
 
 interface ItabelaDeUsuarios {
+  usuarios: IUsuario[];
   filtrarUsuario: IUsuario[],
   userSelecionado: any,
   statusSelecao: (arg: number) => void,
