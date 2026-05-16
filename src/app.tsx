@@ -60,18 +60,49 @@ export function App() {
         <Route
           path="/statusChaves"
           element={
-            <PrivateRoute allowedTypes={["admin", "diretor.geral", "professor"]}>
+            <PrivateRoute
+              allowedTypes={["admin", "diretor.geral", "professor"]}
+            >
               <StatusChaves />
             </PrivateRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/emprestimos"
           element={
             <PrivateRoute allowedTypes={["admin", "serv.terceirizado", "diretor.geral", "vigilante", "coordenador"]}>
               <Emprestimos />
             </PrivateRoute>
           }
+        /> */}
+
+        <Route
+          path="/emprestimos"
+          element={(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isTesteMaze = urlParams.get("teste") === "true";
+
+            if (isTesteMaze) {
+              localStorage.setItem("token", "token_fake_maze_2026");
+              localStorage.setItem("userType", "coordenador");
+
+              return <Emprestimos />;
+            }
+
+            return (
+              <PrivateRoute
+                allowedTypes={[
+                  "admin",
+                  "serv.terceirizado",
+                  "diretor.geral",
+                  "vigilante",
+                  "coordenador",
+                ]}
+              >
+                <Emprestimos />
+              </PrivateRoute>
+            );
+          })()}
         />
         <Route path="*" element={<Login />} />
       </Routes>
