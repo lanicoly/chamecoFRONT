@@ -75,35 +75,7 @@ export function App() {
             </PrivateRoute>
           }
         /> */}
-
-        <Route
-          path="/emprestimos"
-          element={(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const isTesteMaze = urlParams.get("teste") === "true";
-
-            if (isTesteMaze) {
-              localStorage.setItem("token", "token_fake_maze_2026");
-              localStorage.setItem("userType", "coordenador");
-
-              return <Emprestimos />;
-            }
-
-            return (
-              <PrivateRoute
-                allowedTypes={[
-                  "admin",
-                  "serv.terceirizado",
-                  "diretor.geral",
-                  "vigilante",
-                  "coordenador",
-                ]}
-              >
-                <Emprestimos />
-              </PrivateRoute>
-            );
-          })()}
-        />
+        <Route path="/emprestimos" element={<Emprestimos />} />
         <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>
