@@ -25,9 +25,11 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
 
 
   const filterdItems = useMemo<IChave[]>(() => {
-    const listaChaves = chaves ?? [];
-    return listaChaves?.filter((chave: IChave) => chave.disponivel && 
-    (chave.nome_sala?.toLowerCase() ?? "").includes(searchTerm.toLowerCase())
+    const listaChaves = chaves ?? []; 
+
+    const normalizar = (texto: string) => texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return listaChaves.filter((chave: IChave) => chave.disponivel && 
+    normalizar(chave.nome_sala ?? "").includes(normalizar(searchTerm))
   );
   }, [chaves, searchTerm]);
 
@@ -72,7 +74,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
       <div className="flex justify-between items-center relative">
         <input
             type="text"
-            placeholder="Chave"
+            placeholder="Nome da sala"
             value={searchTerm || ""}
             onChange={handleInputChange}
             onFocus={(e) => e.target.select()}

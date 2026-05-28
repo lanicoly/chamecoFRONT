@@ -10,7 +10,7 @@ import { DateRange, DayPicker } from "react-day-picker";
 import { PassadorPagina } from "./passadorPagina";
 import {
   buscarNomeSalaPorIdChave,
-  makeBuscadorSalaPorChave,
+  // makeBuscadorSalaPorChave,
 } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 import { formatarDataHora } from "../utils/formatarDarahora";
@@ -18,6 +18,7 @@ import { formatarDataHora } from "../utils/formatarDarahora";
 import { useChaves } from "../context/ChavesContext";
 import { ISala, IUsuario } from "../pages/chaves";
 import { useGetSolicitantes } from "../hooks/usuarios/useGetSolicitantes";
+import { useMemo } from "react";
 
 interface EmprestimosConcluidosProps {
   salas: ISala[];
@@ -85,9 +86,21 @@ export function EmprestimosConcluidos({
     "recentes" | "antigos"
   >("recentes");
 
-  const getSalaNome = (e: Iemprestimo) =>
-    buscarNomeSalaPorIdChave(e.chave, chavesData, salas) || "";
+  const chavesMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (chavesData) {
+      chavesData.forEach((c) => {
+        if (c.id != null) {
+          map[c.id] = c.nome_sala || c.descricao || `Chave ${c.id}`;
+        }
+      });
+    }
+    return map;
+  }, [chavesData]);
 
+  const getSalaNome = (e: Iemprestimo) => {
+    return e.chave != null ? chavesMap[e.chave] || "" : "";
+  };
   const getSolicitanteNome = (e: Iemprestimo) =>
     nomeSolicitante(e.usuario_solicitante, nomesSolicitantesMap) || "";
 
@@ -324,7 +337,7 @@ export function EmprestimosConcluidos({
   );
 
   //paginação para emprestimos concluidos
-  const itensPorPaginaConcluidos = 5;
+  const itensPorPaginaConcluidos = 7;
   const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
   const totalPaginasConcluidos = Math.max(
     1,
@@ -383,7 +396,7 @@ export function EmprestimosConcluidos({
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
-  const buscar = makeBuscadorSalaPorChave(chavesData, salas);
+  // const buscar = makeBuscadorSalaPorChave(chavesData, salas);
 
   type CampoOrdenacao = "sala" | "solicitante" | "responsavel";
 
@@ -938,7 +951,7 @@ export function EmprestimosConcluidos({
               >
                 <td className="p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] break-words w-[18%]">
                   {emprestimo.chave != null
-                    ? buscar(emprestimo.chave) ||
+                    ? chavesMap[emprestimo.chave] ||
                       (loadingChaves ? "Carregando..." : "Sala não encontrada")
                     : "Chave não especificada"}
                 </td>
@@ -977,16 +990,18 @@ export function EmprestimosConcluidos({
                     index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
                   }`}
                 >
-                  {emprestimo.horario_devolucao &&
-                    formatarDataHora(emprestimo.horario_devolucao).data}
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).data
+                    : ""}
                 </td>
                 <td
                   className={`p-2 text-sm text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] w-[13%] break-words flex-1 text-center ${
                     index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
                   }`}
                 >
-                  {emprestimo.horario_devolucao &&
-                    formatarDataHora(emprestimo.horario_devolucao).hora}
+                  {emprestimo.horario_emprestimo
+                    ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                    : ""}
                 </td>
 
                 <td className="pl-2 bg-white">

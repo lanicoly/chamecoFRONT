@@ -27,6 +27,7 @@ export default {
         'tablet': '640px',  
         'laptop': '1024px', 
         'desktop': '1280px',
+        'screen-4k': '2560px',
       },
     },
   plugins: [],

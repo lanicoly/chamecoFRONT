@@ -1,5 +1,3 @@
-
-//Tive que fazer essa função para poder formatar a data e a hora que estavam vindo do banco.
 export function formatarDataHora(dataFormatada: string) {
     const data = new Date(dataFormatada);
     const dataBr = data.toLocaleDateString("pt-BR");

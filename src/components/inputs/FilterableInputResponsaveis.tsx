@@ -32,19 +32,25 @@ export function FilterableInputResponsaveis({
 
   const filterdItems = useMemo(() => {
     const listaGarantida = items || [];
-    const lowerSearch = searchTerm.toLowerCase().trim();
+    const normalizar = (texto: string) =>
+      texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    const termoNormalizado = normalizar(searchTerm);
 
     const resultadosFiltrados = listaGarantida
       .filter((item) => {
-        const nomeValido = item?.nome?.toLowerCase() || "";
+        const nomeValido = normalizar(item?.nome || "");
         const idValido = String(item?.id || "");
         return (
-          nomeValido.includes(lowerSearch) || idValido.includes(lowerSearch)
+          nomeValido.includes(termoNormalizado) ||
+          idValido.includes(termoNormalizado)
         );
       })
       .sort((a, b) => a.id - b.id);
 
-    if (lowerSearch === "") {
+    if (termoNormalizado === "") {
       return resultadosFiltrados.slice(0, 5);
     }
     return resultadosFiltrados;

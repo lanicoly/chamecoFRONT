@@ -21,7 +21,7 @@ function AdicionarUsuarioForm({ closeUserModal, onSave }: any) {
         {/*cabeçalho modal add user*/}
         <div className="flex justify-center mx-auto w-full max-w-[90%]">
           <p className="text-[#192160] text-center text-[20px] font-semibold  ml-[10px] w-[85%] ">
-            ADICIONAR USUÁRIO
+            ADICIONAR USUÁRIO RESPONSÁVEL
           </p>
           <button
             onClick={closeUserModal}

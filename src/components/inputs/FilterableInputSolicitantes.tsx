@@ -23,8 +23,16 @@ export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSoli
 
   const filterdItems = useMemo(() => {
     const listaUsuarios = usuarios ?? [];
-    const lowerSearch = searchTerm.toLowerCase();
-    return listaUsuarios.filter((usuario) => usuario.nome && buscarSolicitante(usuario.id, listaUsuarios).toLowerCase().includes(lowerSearch));
+    const normalizar = (texto: string) => 
+    texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const termoNormalizado = normalizar(searchTerm);
+
+    return listaUsuarios.filter((usuario) => {
+    if (!usuario.nome) return false;
+    const resultadoBusca = buscarSolicitante(usuario.id, listaUsuarios) || "";
+    const resultadoNormalizado = normalizar(resultadoBusca);
+    return resultadoNormalizado.includes(termoNormalizado);
+  });
   }, [usuarios, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

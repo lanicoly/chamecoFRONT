@@ -11,7 +11,9 @@ import { useEffect } from "react";
 import { Pesquisa } from "../components/pesquisa";
 // import { Blocos } from "../pages/blocos";
 // import { useMemo } from "react";
-import useGenericGetSalas, {clearSalasCache} from "../hooks/salas/useGenericGetSalas";
+import useGenericGetSalas, {
+  clearSalasCache,
+} from "../hooks/salas/useGenericGetSalas";
 import useGetBlocos from "../hooks/blocos/useGetBlocos";
 import { IUsuario } from "./chaves";
 import useGenericGetUsuarios from "../hooks/usuarios/useGenericGetUsers";
@@ -27,7 +29,10 @@ export interface Sala {
 }
 
 export function Salas() {
-  const { blocoId, nomeBloco: blocoNome } = useParams<{ blocoId: string, nomeBloco: string }>();
+  const { blocoId, nomeBloco: blocoNome } = useParams<{
+    blocoId: string;
+    nomeBloco: string;
+  }>();
 
   const blocoIdNumber = blocoId ? Number(blocoId) : undefined;
 
@@ -45,14 +50,13 @@ export function Salas() {
 
   function nomeBloco(
     idBloco: number | null | undefined,
-    map: Map<number, string>
+    map: Map<number, string>,
   ) {
     if (idBloco == null) return "BLOCO DESCONHECIDO";
     return map.get(idBloco) ?? "CARREGANDO...";
   }
 
   const nomeDoBloco = nomeBloco(blocoIdNumber, blocosMap);
-
 
   const { salas, loading } = useGenericGetSalas({ blocoId: blocoIdNumber });
   const [usuariosAutorizadosIds, setUsuariosAutorizadosIds] = useState<
@@ -98,19 +102,19 @@ export function Salas() {
 
   const salasFiltradas = isSearching
     ? salasDoBloco.filter((sala) => {
-      const usuariosNomes =
-        sala.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
+        const usuariosNomes =
+          sala.usuarios?.map((u) => u.nome.toLowerCase()).join(" ") || "";
 
-      return (
-        sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        usuariosNomes.includes(pesquisa.toLowerCase())
-      );
-    })
+        return (
+          sala.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+          usuariosNomes.includes(pesquisa.toLowerCase())
+        );
+      })
     : salasDoBloco;
 
   const totalPaginas = Math.max(
     1,
-    Math.ceil(salasFiltradas.length / itensPorPagina)
+    Math.ceil(salasFiltradas.length / itensPorPagina),
   );
   const itensAtuais = salasFiltradas.slice(indexInicio, indexFim);
 
@@ -135,6 +139,7 @@ export function Salas() {
     setIsEditModalOpen(false);
     setNome("");
     setUsuariosAutorizadosIds([]);
+    setUsuarioFilter("");
   }
 
   const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
@@ -201,7 +206,7 @@ export function Salas() {
 
         console.error(
           "Erro ao criar sala:",
-          axiosError.response?.data || axiosError.message
+          axiosError.response?.data || axiosError.message,
         );
 
         setMensagemErro(mensagem);
@@ -240,7 +245,7 @@ export function Salas() {
     }
 
     const salaSelecionadaObj = salasDoBloco.find(
-      (sala) => sala.id === salaSelecionada
+      (sala) => sala.id === salaSelecionada,
     );
 
     if (!salaSelecionadaObj) {
@@ -251,13 +256,13 @@ export function Salas() {
     const { id, nome, bloco } = salaSelecionadaObj;
 
     setListaSalas((prevSalas) =>
-      prevSalas.filter((sala) => sala.id !== salaSelecionada)
+      prevSalas.filter((sala) => sala.id !== salaSelecionada),
     );
 
     setSalaSelecionada(null);
 
     excluirSalaAPI(id, nome, Number(bloco)).catch((error) =>
-      console.error("Erro ao excluir sala:", error)
+      console.error("Erro ao excluir sala:", error),
     );
     closeDeleteModal();
   }
@@ -271,7 +276,7 @@ export function Salas() {
           nome: salaSelecionada.nome,
           bloco: salaSelecionada.bloco,
           usuarios_autorizados: usuariosAutorizadosIds,
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -289,7 +294,7 @@ export function Salas() {
 
     if (salaSelecionada !== null) {
       const salaEditada = salasDoBloco.find(
-        (sala) => sala.id === salaSelecionada
+        (sala) => sala.id === salaSelecionada,
       );
 
       if (salaEditada) {
@@ -311,8 +316,8 @@ export function Salas() {
 
               setListaSalas((prev) =>
                 prev.map((s) =>
-                  s.id === salaConvertida.id ? salaConvertida : s
-                )
+                  s.id === salaConvertida.id ? salaConvertida : s,
+                ),
               );
             }
           })
@@ -321,8 +326,10 @@ export function Salas() {
           });
       }
 
+      // Limpa os estados ao fechar
       setSalaSelecionada(null);
       setNome("");
+      setUsuariosAutorizadosIds([]); // Reseta as tags para o próximo uso
       closeEditModal();
     }
   }
@@ -479,7 +486,7 @@ export function Salas() {
                     <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
                       {usuariosAutorizadosIds.map((id) => {
                         const user: IUsuario | undefined = allUsuarios.find(
-                          (u) => u.id === id
+                          (u) => u.id === id,
                         );
                         return (
                           <div
@@ -491,7 +498,7 @@ export function Salas() {
                               type="button"
                               onClick={() =>
                                 setUsuariosAutorizadosIds((prev) =>
-                                  prev.filter((uid) => uid !== id)
+                                  prev.filter((uid) => uid !== id),
                                 )
                               }
                               className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none"
@@ -535,7 +542,7 @@ export function Salas() {
                                 !usuariosAutorizadosIds.includes(user.id) &&
                                 user.nome
                                   .toLowerCase()
-                                  .includes(usuarioFilter.toLowerCase())
+                                  .includes(usuarioFilter.toLowerCase()),
                             )
                             .map((user) => (
                               <div
@@ -557,12 +564,12 @@ export function Salas() {
                               !usuariosAutorizadosIds.includes(user.id) &&
                               user.nome
                                 .toLowerCase()
-                                .includes(usuarioFilter.toLowerCase())
+                                .includes(usuarioFilter.toLowerCase()),
                           ).length === 0 && (
-                              <div className="p-2 text-[#777DAA] text-xs">
-                                Nenhum usuário encontrado
-                              </div>
-                            )}
+                            <div className="p-2 text-[#777DAA] text-xs">
+                              Nenhum usuário encontrado
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -643,31 +650,30 @@ export function Salas() {
                       ref={dropdownRef}
                     >
                       <label className="text-[#192160] text-sm font-medium mb-1 block">
-                        Usuários Autorizados*
+                        Usuários Autorizados
                       </label>
                       <div className="relative">
-                        <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px]">
-                          {/* serve para retornar os usuários autorizados desta chave */}
+                        <div className="flex flex-wrap gap-1 p-2 rounded-[10px] border border-[#646999] focus-within:outline-none min-h-[40px] max-h-[100px] overflow-y-auto content-start">
                           {usuariosAutorizadosIds.map((id) => {
                             const user: IUsuario | undefined =
-                              allUsuarios?.find((u) => u.id === id);
-
-                            if (!user) return null; // evita erro se não encontrar o usuário
+                              allUsuarios?.find((u) => u.id === id) ||
+                              salaAtual?.usuarios.find((u) => u.id === id);
+                            if (!user) return null;
 
                             return (
                               <div
                                 key={id}
-                                className="flex flex-row items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs"
+                                className="flex flex-row items-center bg-[#f0f0f0] rounded-md px-2 py-1 text-[#777DAA] text-xs max-w-full"
                               >
-                                {user?.nome}
+                                <span className="truncate">{user.nome}</span>
                                 <button
                                   type="button"
                                   onClick={() =>
                                     setUsuariosAutorizadosIds((prev) =>
-                                      prev.filter((uid) => uid !== id)
+                                      prev.filter((uid) => uid !== id),
                                     )
                                   }
-                                  className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none"
+                                  className="ml-1 text-[#777DAA] hover:text-[#192160] focus:outline-none flex-shrink-0"
                                 >
                                   <svg
                                     width="14"
@@ -685,10 +691,9 @@ export function Salas() {
                               </div>
                             );
                           })}
-
                           <input
                             type="search"
-                            className="flex-grow min-w-[50px] outline-none text-[#777DAA] text-xs"
+                            className="flex-grow w-full min-w-[120px] outline-none text-[#777DAA] text-xs py-1"
                             placeholder={
                               usuariosAutorizadosIds.length > 0
                                 ? ""
@@ -700,6 +705,7 @@ export function Salas() {
                           />
                         </div>
 
+                        {/* O Dropdown de busca (lista suspensa) continua funcionando aqui embaixo normalmente */}
                         {showUserDropdown && (
                           <div className="absolute z-10 w-full mt-1 bg-white border border-[#646999] rounded-[10px] shadow-lg max-h-32 overflow-y-auto">
                             {allUsuarios
@@ -708,7 +714,7 @@ export function Salas() {
                                   !usuariosAutorizadosIds.includes(user.id) &&
                                   user.nome
                                     .toLowerCase()
-                                    .includes(usuarioFilter.toLowerCase())
+                                    .includes(usuarioFilter.toLowerCase()),
                               )
                               .map((user: IUsuario) => (
                                 <div
@@ -725,18 +731,6 @@ export function Salas() {
                                   {user.nome}
                                 </div>
                               ))}
-
-                            {allUsuarios?.filter(
-                              (user: IUsuario) =>
-                                !usuariosAutorizadosIds.includes(user.id) &&
-                                user.nome
-                                  .toLowerCase()
-                                  .includes(usuarioFilter.toLowerCase())
-                            ).length === 0 && (
-                                <div className="p-2 text-[#777DAA] text-xs">
-                                  Nenhum usuário encontrado
-                                </div>
-                              )}
                           </div>
                         )}
                       </div>
@@ -841,8 +835,9 @@ export function Salas() {
                     itensAtuais.map((sala) => (
                       <tr
                         key={sala.id}
-                        className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${salaSelecionada === sala.id ? "bg-gray-200" : ""
-                          }`}
+                        className={`hover:bg-[#d5d8f1] cursor-pointer px-2 ${
+                          salaSelecionada === sala.id ? "bg-gray-200" : ""
+                        }`}
                         onClick={() => statusSala(sala.id)}
                       >
                         <td className="align-top p-2 text-xs text-[#646999] font-semibold border-2 border-solid border-[#B8BCE0] max-w-[96px] tablet:max-w-[200px] laptop:max-w-[400px] break-words ">
@@ -928,16 +923,13 @@ export function Salas() {
                         )}
                       </tr>
                     ))
-                  ) :
+                  ) : (
                     <tr>
                       <td colSpan={5} className="text-center p-4 text-gray-500">
-                        {loading
-                          ? (<Spinner />)
-                          : "Nenhuma sala encontrada."}
+                        {loading ? <Spinner /> : "Nenhuma sala encontrada."}
                       </td>
                     </tr>
-
-                  }
+                  )}
                 </tbody>
               </table>
             </div>

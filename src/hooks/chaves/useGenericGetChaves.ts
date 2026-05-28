@@ -16,6 +16,7 @@ export interface IUsuario {
 export interface IChave {
   id: number;
   sala: number | null;
+  nome_sala?: string;
   disponivel: boolean;
   usuarios: IUsuario[];
   descricao?: string | null;

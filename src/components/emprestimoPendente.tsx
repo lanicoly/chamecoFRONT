@@ -20,7 +20,7 @@ import useGetSalas from "../hooks/salas/useGenericGetSalas";
 import { formatarDataHora } from "../utils/formatarDarahora";
 import {
   buscarNomeSalaPorIdChave,
-  makeBuscadorSalaPorChave,
+  // makeBuscadorSalaPorChave,
 } from "../utils/buscarNomeSalaPorIdChave";
 import { buscarNomeUsuarioPorId } from "../utils/buscarNomeUsuarioPorId";
 // import { useNomeSolicitante } from "../utils/useNomeSolicitante";
@@ -99,8 +99,21 @@ export function EmprestimosPendentes({
 
   const nomesSolicitantesMap = useGetSolicitantes(new_emprestimos);
 
-  const getSalaNome = (e: Iemprestimo) =>
-    buscarNomeSalaPorIdChave(e.chave, chavesData, salasData) || "";
+  const chavesMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (chavesData) {
+      chavesData.forEach((c) => {
+        if (c.id != null) {
+          map[c.id] = c.nome_sala || c.descricao || `Chave ${c.id}`;
+        }
+      });
+    }
+    return map;
+  }, [chavesData]);
+
+  const getSalaNome = (e: Iemprestimo) => {
+    return e.chave != null ? chavesMap[e.chave] || "" : "";
+  };
 
   const getSolicitanteNome = (e: Iemprestimo) =>
     nomeSolicitante(e.usuario_solicitante, nomesSolicitantesMap) || "";
@@ -252,7 +265,7 @@ export function EmprestimosPendentes({
   //paginação para emprestimos pendentes
 
   const [paginaAtualPendente, setPaginaAtualPendente] = useState(1);
-  const itensPorPaginaPendente = 5;
+  const itensPorPaginaPendente = 7;
   const totalPaginasPendentes = Math.max(
     1,
     Math.ceil(emprestimosFiltradosPendentes.length / itensPorPaginaPendente),
@@ -369,10 +382,10 @@ export function EmprestimosPendentes({
     return diferencaHoras > 24 * 60 * 60 * 1000;
   }
 
-  const buscar = useMemo(
-    () => makeBuscadorSalaPorChave(chavesData, salasData),
-    [chavesData, salasData],
-  );
+  // const buscar = useMemo(
+  //   () => makeBuscadorSalaPorChave(chavesData, salasData),
+  //   [chavesData, salasData],
+  // );
 
   const [emprestimoParaDevolver, setEmprestimoParaDevolver] =
     useState<Iemprestimo | null>(null);
@@ -781,7 +794,7 @@ export function EmprestimosPendentes({
                         salasData
                         )} */}
                     {emprestimo.chave != null
-                      ? buscar(emprestimo.chave) ||
+                      ? chavesMap[emprestimo.chave] ||
                         (loadingChaves
                           ? "Carregando..."
                           : "Sala não encontrada")
@@ -881,7 +894,7 @@ export function EmprestimosPendentes({
                       <p className="text-center font-medium px-2 text-[#192160]">
                         Deseja devolver a chave da{" "}
                         <strong className="font-semibold text-[#DC0505]">
-                          {buscar(emprestimoParaDevolver.chave)}
+                          {getSalaNome(emprestimoParaDevolver)}
                         </strong>{" "}
                         retirada por{" "}
                         <strong className="font-semibold text-[#DC0505]">
@@ -895,7 +908,7 @@ export function EmprestimosPendentes({
                       </p>
                       <div className="flex justify-center items-center mt-[10px] w-full gap-3">
                         <button
-                          onClick={closeDeleteModal}
+                          onClick={closeConfirmarDevolucaoModal}
                           type="button"
                           className="px-4 py-2 border-[3px] rounded-xl font-semibold  text-sm flex gap-[4px] justify-center items-center  bg-slate-500 text-[#FFF]"
                         >
