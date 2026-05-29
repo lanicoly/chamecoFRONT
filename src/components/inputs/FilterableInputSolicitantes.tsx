@@ -1,7 +1,7 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
-import { useUserFilter } from '../../utils/filters/users/userFilter';
-import { IUsuario } from '../../pages/chaves';
-import { buscarSolicitante } from '../../utils/buscarSolicitante';
+import { useMemo, useState, useRef, useEffect } from "react";
+import { useUserFilter } from "../../utils/filters/users/userFilter";
+import { IUsuario } from "../../pages/chaves";
+// import { buscarSolicitante } from '../../utils/buscarSolicitante';
 
 export interface IoptionSolicitantes {
   id: number;
@@ -11,11 +11,13 @@ export interface IoptionSolicitantes {
 interface IdropdownSolicitantesDTO {
   items?: IUsuario[];
   onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
-  reset: boolean
+  reset: boolean;
 }
 
-export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSolicitantesDTO) {
-
+export function FilterableInputSolicitantes({
+  onSelectItem,
+  reset,
+}: IdropdownSolicitantesDTO) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [, setSelectedOption] = useState<IUsuario | null>(null);
@@ -23,16 +25,32 @@ export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSoli
 
   const filterdItems = useMemo(() => {
     const listaUsuarios = usuarios ?? [];
-    const normalizar = (texto: string) => 
-    texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const normalizar = (texto: string) =>
+      texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
     const termoNormalizado = normalizar(searchTerm);
 
-    return listaUsuarios.filter((usuario) => {
-    if (!usuario.nome) return false;
-    const resultadoBusca = buscarSolicitante(usuario.id, listaUsuarios) || "";
-    const resultadoNormalizado = normalizar(resultadoBusca);
-    return resultadoNormalizado.includes(termoNormalizado);
-  });
+    const resultadosFiltrados = listaUsuarios
+      .filter((usuario) => {
+        const nomeValido = normalizar(usuario?.nome || "");
+        const idValido = String(usuario?.id || "");
+
+        return (
+          nomeValido.includes(termoNormalizado) ||
+          idValido.includes(termoNormalizado)
+        );
+      })
+      .sort((a, b) => a.id - b.id);
+
+    if (termoNormalizado === "") {
+      return resultadosFiltrados.slice(0, 5);
+    }
+
+    return resultadosFiltrados;
   }, [usuarios, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,7 +61,7 @@ export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSoli
     setSearchTerm(displayValue);
     setIsOpen(false);
     onSelectItem(option.id); // Chama o callback com o ID do item selecionado
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -53,7 +71,10 @@ export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSoli
   // Fecha o dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -69,29 +90,28 @@ export function FilterableInputSolicitantes({onSelectItem, reset}: IdropdownSoli
       setSearchTerm("");
       setSelectedOption(null);
     }
-  },[reset]);
+  }, [reset]);
 
-  
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">
         <input
-            type="text"
-            placeholder="Solicitante"
-            value={searchTerm || ""}
-            onChange={handleInputChange}
-            onFocus={(e) => e.target.select()}
-            className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
-          />
+          type="text"
+          placeholder="Solicitante"
+          value={searchTerm || ""}
+          onChange={handleInputChange}
+          onFocus={(e) => e.target.select()}
+          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium"
+        />
         <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            fill="#64748b"
-            className="bi bi-search absolute right-3"
-            viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          fill="#64748b"
+          className="bi bi-search absolute right-3"
+          viewBox="0 0 16 16"
         >
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
         </svg>
       </div>
 

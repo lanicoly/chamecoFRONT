@@ -1,7 +1,6 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
-import { IChave } from '../../pages/chaves';
-import { useChavesFilter } from '../../utils/filters/chaves/chavesFilter';
-
+import { useMemo, useState, useRef, useEffect } from "react";
+import { IChave } from "../../pages/chaves";
+import { useChavesFilter } from "../../utils/filters/chaves/chavesFilter";
 
 export interface IoptionChaves {
   id: number;
@@ -11,26 +10,36 @@ export interface IoptionChaves {
 }
 
 interface IdropdownResponsavelProps {
-  onSelectItem: (id: number) => void, // Adicionei esta propriedade para o callback
-  reset: boolean
+  onSelectItem: (id: number) => void; // Adicionei esta propriedade para o callback
+  reset: boolean;
 }
 
-
-export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsavelProps) {
-
+export function FilterableInputChaves({
+  onSelectItem,
+  reset,
+}: IdropdownResponsavelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [, setSelectedOption] = useState<number | null>(null);
   const chaves = useChavesFilter(searchTerm, "todos", 1);
 
-
   const filterdItems = useMemo<IChave[]>(() => {
-    const listaChaves = chaves ?? []; 
+    const listaChaves = chaves ?? [];
 
-    const normalizar = (texto: string) => texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return listaChaves.filter((chave: IChave) => chave.disponivel && 
-    normalizar(chave.nome_sala ?? "").includes(normalizar(searchTerm))
-  );
+    const normalizar = (texto: string) =>
+      texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    const termoNormalizado = normalizar(searchTerm);
+
+    return listaChaves?.filter((chave: IChave) => {
+      if (!chave.disponivel) return false;
+
+      const nomeSalaNormalizado = normalizar(chave.nome_sala ?? "");
+      return nomeSalaNormalizado.includes(termoNormalizado);
+    });
   }, [chaves, searchTerm]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -40,7 +49,7 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
     setSearchTerm(chave.nome_sala ?? "");
     setIsOpen(false);
     onSelectItem(chave.id); // Chama o callback com o ID da chave selecionada
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -50,7 +59,10 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
   // Fecha o dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -59,36 +71,35 @@ export function FilterableInputChaves({ onSelectItem, reset}: IdropdownResponsav
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-
   }, []);
 
   useEffect(() => {
     if (reset) {
-      setSearchTerm('');
+      setSearchTerm("");
       setSelectedOption(null);
     }
-  }, [reset])
-  
+  }, [reset]);
+
   return (
     <div ref={dropdownRef} className="relative">
       <div className="flex justify-between items-center relative">
         <input
-            type="text"
-            placeholder="Nome da sala"
-            value={searchTerm || ""}
-            onChange={handleInputChange}
-            onFocus={(e) => e.target.select()}
-            className='w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium'
-          />
+          type="text"
+          placeholder="Nome da sala"
+          value={searchTerm || ""}
+          onChange={handleInputChange}
+          onFocus={(e) => e.target.select()}
+          className="w-full p-3 rounded-[10px] border-none focus:outline-none placeholder-[#646999] text-sm font-medium"
+        />
         <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            fill="#64748b"
-            className="bi bi-search absolute right-3"
-            viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          fill="#64748b"
+          className="bi bi-search absolute right-3"
+          viewBox="0 0 16 16"
         >
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
         </svg>
       </div>
 

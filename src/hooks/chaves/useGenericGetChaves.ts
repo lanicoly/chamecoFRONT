@@ -35,7 +35,7 @@ interface IUseChavesProps {
   pagination?: number;
 }
 
-const useGenericGetChaves = ({ disponivel, pagination = 10 }: IUseChavesProps = {}) => {
+const useGenericGetChaves = ({ disponivel, nome, pagination = 10 }: IUseChavesProps = {}) => {
   const [chaves, setChaves] = useState<IChave[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -50,6 +50,10 @@ const useGenericGetChaves = ({ disponivel, pagination = 10 }: IUseChavesProps = 
       let nextUrl: string | null = `/chameco/api/v1/chaves/?pagination=${pagination}`;
       if (disponivel !== undefined) {
         nextUrl += `&disponivel=${disponivel}`;
+      }
+
+      if (nome) {
+        nextUrl += `&nome=${encodeURIComponent(nome)}`;
       }
 
       while (nextUrl) {
@@ -78,7 +82,7 @@ const useGenericGetChaves = ({ disponivel, pagination = 10 }: IUseChavesProps = 
     } finally {
       setLoading(false);
     }
-  }, [disponivel, pagination]);
+  }, [disponivel, nome, pagination]);
 
   useEffect(() => {
     fetchChaves();

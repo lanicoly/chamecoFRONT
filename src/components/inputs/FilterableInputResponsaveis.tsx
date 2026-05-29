@@ -32,17 +32,20 @@ export function FilterableInputResponsaveis({
 
   const filterdItems = useMemo(() => {
     const listaGarantida = items || [];
+
     const normalizar = (texto: string) =>
       texto
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+
     const termoNormalizado = normalizar(searchTerm);
 
     const resultadosFiltrados = listaGarantida
       .filter((item) => {
         const nomeValido = normalizar(item?.nome || "");
         const idValido = String(item?.id || "");
+
         return (
           nomeValido.includes(termoNormalizado) ||
           idValido.includes(termoNormalizado)

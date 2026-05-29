@@ -337,7 +337,7 @@ export function EmprestimosConcluidos({
   );
 
   //paginação para emprestimos concluidos
-  const itensPorPaginaConcluidos = 7;
+  const itensPorPaginaConcluidos = 6;
   const [paginaAtualConcluidos, setPaginaAtualConcluidos] = useState(1);
   const totalPaginasConcluidos = Math.max(
     1,
@@ -990,8 +990,8 @@ export function EmprestimosConcluidos({
                     index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
                   }`}
                 >
-                  {emprestimo.horario_emprestimo
-                    ? formatarDataHora(emprestimo.horario_emprestimo).data
+                  {emprestimo.horario_devolucao
+                    ? formatarDataHora(emprestimo.horario_devolucao).data
                     : ""}
                 </td>
                 <td
@@ -999,8 +999,8 @@ export function EmprestimosConcluidos({
                     index % 2 !== 0 ? "bg-[#DFFFE0]" : ""
                   }`}
                 >
-                  {emprestimo.horario_emprestimo
-                    ? formatarDataHora(emprestimo.horario_emprestimo).hora
+                  {emprestimo.horario_devolucao
+                    ? formatarDataHora(emprestimo.horario_devolucao).hora
                     : ""}
                 </td>
 

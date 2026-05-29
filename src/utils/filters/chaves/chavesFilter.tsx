@@ -20,28 +20,25 @@ export const useChavesFilter = (
   tipoUsuario?: string,
   page?: number,
 ) => {
-  // const [insidePage, setInsidePage] = useState(1);
   const [chaves, setChaves] = useState<IChave[]>([]);
   const [, setLoading] = useState<boolean>(false);
-  const [, setHasMore] = useState<boolean>(true); // Verifica se há mais dados
-  // const [totalPaginas, setTotalPaginas] = useState<number>(1)
+  const [, setHasMore] = useState<boolean>(true);
 
   const fetchUsuarios = async (nome: string, page?: number) => {
     setLoading(true);
-    
+
     try {
       const response = await api.get(
-        `/chameco/api/v1/chaves/?pagination=${5}&page=${page}&sala=${nome}&disponivel=true`
+        `/chameco/api/v1/chaves/?pagination=${5}&page=${page}&sala=${nome}&disponivel=true`,
       );
       const { results, count } = response.data;
 
       if (results.length < 5) {
-        setHasMore(false); // Se o número de resultados for menor que 5, significa que não há mais dados
+        setHasMore(false);
       }
 
-      setChaves(results)
-      totalPaginas = (Math.max(1, Math.ceil(count/itensPorPagina)));
-      // console.log("Aqui as chaves:", results)
+      setChaves(results);
+      totalPaginas = Math.max(1, Math.ceil(count / itensPorPagina));
     } catch (error) {
       console.error("Erro na requisição:", error);
     } finally {
@@ -51,35 +48,37 @@ export const useChavesFilter = (
 
   useEffect(() => {
     if (nome || tipoUsuario) {
-      setChaves([]); // Resetando os usuários sempre que houver nova pesquisa ou filtro
-      setHasMore(true); // Reinicia a verificação de mais registros
+      setChaves([]);
+      setHasMore(true);
     }
   }, [nome, tipoUsuario]);
 
-
   useEffect(() => {
     if (nome || tipoUsuario) {
-
-      if (tipoUsuario === "todos") {
-          fetchUsuarios(nome, page);
-      } else {
-          fetchUsuarios(nome, page);
-      }
+      fetchUsuarios(nome, page);
     }
   }, [nome, tipoUsuario, page]);
 
+  const normalizar = (texto: string) =>
+    texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
   if (chaves) {
+    const termoNormalizado = normalizar(nome);
+
     return chaves?.filter((chave) => {
-      const nomeMatch = chave.nome_sala.toLowerCase().includes(nome.toLowerCase());
-    //   const setorMatch = usuario.setor.toLowerCase().includes(pesquisa.toLowerCase());
+      const nomeMatch = normalizar(chave.nome_sala || "").includes(
+        termoNormalizado,
+      );
       const filtroMatch = tipoUsuario === "todos";
 
       if (!nome) {
         return filtroMatch;
       }
 
-      return (nomeMatch) && filtroMatch;
-    })
+      return nomeMatch && filtroMatch;
+    });
   }
 };
